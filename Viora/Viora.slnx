@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Viora.Api/Viora.Api.csproj" />
+  <Project Path="Viora.Application/Viora.Application.csproj" />
+  <Project Path="Viora.Domain/Viora.Domain.csproj" />
+  <Project Path="Viora.Infrastructure/Viora.Infrastructure.csproj" />
+</Solution>
