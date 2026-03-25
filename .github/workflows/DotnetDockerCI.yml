@@ -17,4 +17,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build using Docker Compose
-        run: docker compose build
+        run: docker compose -f Viora/docker-compose.yml build 
