@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using Viora.Application.Abstraction.Cipher;
+using Viora.Application.Abstractions.Cipher;
 
 namespace Viora.Infrastructure.Cipher;
 

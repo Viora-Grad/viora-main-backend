@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Viora.Domain.Abstraction;
+namespace Viora.Domain.Abstractions;
 
 public interface IDomainEvent : INotification
 {

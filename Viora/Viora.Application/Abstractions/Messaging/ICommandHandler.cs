@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Viora.Domain.Abstraction;
+using Viora.Domain.Abstractions;
 
-namespace Viora.Application.Abstraction.Messaging;
+namespace Viora.Application.Abstractions.Messaging;
 
 public interface ICommandHandler<TCommand> : IRequestHandler<TCommand, Result>
     where TCommand : ICommand

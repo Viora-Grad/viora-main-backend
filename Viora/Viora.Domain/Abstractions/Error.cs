@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Abstraction;
+﻿namespace Viora.Domain.Abstractions;
 
 public record Error(string Name, string Description, ErrorCategory Category)
 {

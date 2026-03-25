@@ -1,0 +1,6 @@
+services:
+  viora.api:
+    image: ${DOCKER_REGISTRY-}vioraapi
+    build:
+      context: .
+      dockerfile: Viora.Api/Dockerfile

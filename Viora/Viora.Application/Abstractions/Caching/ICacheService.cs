@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Abstraction.Cashing;
+﻿namespace Viora.Application.Abstractions.Caching;
 
 public interface ICacheService
 {

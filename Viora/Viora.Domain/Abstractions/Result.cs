@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Abstraction;
+﻿namespace Viora.Domain.Abstractions;
 
 public class Result
 {

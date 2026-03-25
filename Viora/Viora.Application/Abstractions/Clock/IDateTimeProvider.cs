@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Abstraction.Clock;
+﻿namespace Viora.Application.Abstractions.Clock;
 
 public interface IDateTimeProvider
 {

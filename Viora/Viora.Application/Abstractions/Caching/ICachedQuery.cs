@@ -1,6 +1,6 @@
-﻿using Viora.Application.Abstraction.Messaging;
+﻿using Viora.Application.Abstractions.Messaging;
 
-namespace Viora.Application.Abstraction.Cashing;
+namespace Viora.Application.Abstractions.Caching;
 
 public interface ICachedQuery<TResponse> : IQuery<TResponse>, ICachedQuery;
 

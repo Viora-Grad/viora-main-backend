@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Abstraction.Cipher;
+﻿namespace Viora.Application.Abstractions.Cipher;
 
 public interface ICipher
 {
