@@ -63,6 +63,3 @@ Current CI job:
 ## Project Structure
 
 ## Notes
-
-- Current API bootstrap is minimal (`Controllers` + `OpenAPI` + `HTTPS redirection`).
-- Add environment-specific configuration in `Viora.Api/appsettings.*.json` as needed.
