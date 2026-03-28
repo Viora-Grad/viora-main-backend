@@ -7,13 +7,14 @@ namespace Viora.Domain.Users;
 // abstract class for different inheritence 
 public abstract class User : Entity
 {
-    protected User(Guid id, FirstName firstName, LastName lastName, Email email, Contact contact, UserType userType)
+    protected User(Guid id, FirstName firstName, LastName lastName, Email email, Contact contact, HashedPassword hashedPassword, UserType userType)
         : base(id)
     {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         Contact = contact;
+        HashedPassword = hashedPassword;
         UserType = userType;
     }
     protected User() { } // for ef core
