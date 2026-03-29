@@ -8,21 +8,19 @@ namespace Viora.Domain.Users;
 public abstract class User : Entity
 {
     private readonly HashSet<Contact> _contact = [];
-    protected User(Guid id, FirstName firstName, LastName lastName, Email email, IEnumerable<Contact> contact, HashedPassword hashedPassword, UserType userType)
+    protected User(Guid id, FirstName firstName, LastName lastName, Email email, UserType userType)
         : base(id)
     {
         FirstName = firstName;
         LastName = lastName;
         Email = email;
-        _contact = [.. contact];
-        HashedPassword = hashedPassword;
         UserType = userType;
     }
     protected User() { } // for ef core
     public FirstName FirstName { get; private set; } = null!;
     public LastName LastName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
-    public HashedPassword HashedPassword { get; private set; } = null!;
+    public HashedPassword HashedPassword { get; private set; } = HashedPassword.Empty;
     public UserType UserType { get; private set; }
     public IReadOnlyList<Contact> Contact => _contact.ToList().AsReadOnly();
 
@@ -35,12 +33,23 @@ public abstract class User : Entity
     {
         _contact.Remove(contact);
     }
-    public Result ChangePassword(HashedPassword newHashedPassword)
+    public Result UpdateName(FirstName firstName, LastName lastName)
     {
-        if (newHashedPassword is null)
+        // might trigger domain events for name change
+        if (firstName is null || lastName is null)
+            return Result.Failure(UserErrors.EmptyField);
+        FirstName = firstName;
+        LastName = lastName;
+        return Result.Success();
+    }
+    public Result SetContacts(IEnumerable<Contact> contacts)
+    {
+        // might trigger domain events for contact change
+        if (contacts is null)
             return Result.Failure(UserErrors.EmptyField);
 
-        HashedPassword = newHashedPassword;
+        _contact.Clear();
+        _contact.UnionWith(contacts);
         return Result.Success();
     }
     public Result UpdateEmail(Email newEmail)
