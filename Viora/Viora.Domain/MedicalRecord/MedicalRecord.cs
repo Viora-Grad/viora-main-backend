@@ -22,7 +22,7 @@ public sealed class MedicalRecord : Entity
         Weight weight,
         HeartRate heartRate,
         BloodGlucose bloodGlucose,
-        List<Allergy> allergies)
+        IEnumerable<Allergy> allergies)
         : base(id)
     {
         CustomerId = customerId;
@@ -38,7 +38,7 @@ public sealed class MedicalRecord : Entity
         Weight weight,
         HeartRate heartRate,
         BloodGlucose bloodGlucose,
-        List<Allergy> allergies)
+        IEnumerable<Allergy> allergies)
     {
         // add any validation if needed
         return new MedicalRecord(id, customerId, bloodPressure, weight, heartRate, bloodGlucose, allergies);
@@ -56,7 +56,7 @@ public sealed class MedicalRecord : Entity
         Weight weight,
         HeartRate heartRate,
         BloodGlucose bloodGlucose,
-        List<Allergy> allergies) // should this method accept a Medical record instead of individual parameters?
+        IEnumerable<Allergy> allergies) // should this method accept a Medical record instead of individual parameters?
     {
         BloodPressure = bloodPressure;
         Weight = weight;

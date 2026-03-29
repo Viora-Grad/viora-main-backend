@@ -10,15 +10,15 @@ public sealed class Customer : User
     public Guid? MedicalRecordId { get; private set; } // can be removed since the relation is optional from the customer side
 
     private Customer() { } // for ef core
-    private Customer(Guid id, FirstName firstName, LastName lastName, Email email, Contact contact, HashedPassword hashedPassword, int age)
-        : base(id, firstName, lastName, email, contact, hashedPassword, UserType.Customer)
+    private Customer(Guid id, FirstName firstName, LastName lastName, Email email, IEnumerable<Contact> contacts, HashedPassword hashedPassword, int age)
+        : base(id, firstName, lastName, email, contacts, hashedPassword, UserType.Customer)
     {
         Age = age;
     }
-    public static Customer Create(Guid id, FirstName firstName, LastName lastName, Email email, Contact contact, HashedPassword hashedPassword, int age)
+    public static Customer Create(Guid id, FirstName firstName, LastName lastName, Email email, IEnumerable<Contact> contacts, HashedPassword hashedPassword, int age)
     {
         // add any validation if needed
-        return new Customer(id, firstName, lastName, email, contact, hashedPassword, age);
+        return new Customer(id, firstName, lastName, email, contacts, hashedPassword, age);
     }
 
 }
