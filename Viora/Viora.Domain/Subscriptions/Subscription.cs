@@ -61,4 +61,20 @@ public class Subscription : Entity
         else
             return Result.Failure<DateTime>(SubscriptionError.InvalidType);
     }
+
+    public Result Renew(DateTime periodStart, string newsubscriptionType)
+    {
+        if (this.Stauts == SubscriptionStatus.Active)
+        {
+            return Result.Failure(SubscriptionError.SubscriptionAlreadyActive);
+        }
+        var SubscriptionTypeResult = SubscriptionType.CheckSubscriptionType(newsubscriptionType);
+        if (SubscriptionTypeResult.IsFailure)
+        {
+            return Result.Failure(SubscriptionTypeResult.Error);
+        }
+        this.PeriodEnd = CalculateSubscriptionEndingPeriod(newsubscriptionType, periodStart).Value;
+        return Result.Success();
+    }
+
 }
