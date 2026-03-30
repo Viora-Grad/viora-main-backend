@@ -1,6 +1,6 @@
 ﻿using Viora.Application.Abstractions.Messaging;
 
-namespace Viora.Application.Subscriptions;
+namespace Viora.Application.Subscriptions.MakeSubscriptions;
 
 public sealed record MakeSubscriptionCommand(
     Guid PlanId,

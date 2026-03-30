@@ -4,7 +4,7 @@ using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
 using Viora.Domain.Subscriptions;
 
-namespace Viora.Application.Subscriptions;
+namespace Viora.Application.Subscriptions.MakeSubscriptions;
 
 public class MakeSubscriptionCommandHandler(
     IPlanRepository planRepository,
