@@ -3,7 +3,7 @@ using Viora.Domain.Plans.Internal;
 
 namespace Viora.Domain.Plans;
 
-internal class Plan : Entity
+public class Plan : Entity
 {
     public PlanCode Code { get; private set; }
     public PlanName Name { get; private set; }
@@ -22,4 +22,14 @@ internal class Plan : Entity
         this.ContentForm = contentForm;
     }
 
+    public static Result<Plan> Create(PlanCode code, PlanName name, PlanDescription description, int version, PlanContent content, string contentForm)
+    {
+        var contentFormResult = ContentForm.CheckContentForm(contentForm);
+        if (!contentFormResult.IsSuccess)
+        {
+            return Result.Failure<Plan>(contentFormResult.Error);
+        }
+        var plan = new Plan(Guid.NewGuid(), code, name, description, version, content, contentFormResult.Value);
+        return Result.Success(plan);
+    }
 }
