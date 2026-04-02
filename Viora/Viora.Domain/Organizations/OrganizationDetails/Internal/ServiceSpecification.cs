@@ -1,3 +1,5 @@
-﻿namespace Viora.Domain.Organizations.OrganizationDetails.Internal;
+﻿using Viora.Domain.Organizations.Shared.Enums;
 
-public record ServiceSpecification(string? Description, ProvidedServiceType Type);
+namespace Viora.Domain.Organizations.OrganizationDetails.Internal;
+
+public record ServiceSpecification(string? Description, ServiceType Type);

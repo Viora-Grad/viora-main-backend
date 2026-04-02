@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Organizations.OnBoardings.Internals;
+﻿namespace Viora.Domain.Organizations.Shared.Enums;
 
 public enum ReferralSource
 {

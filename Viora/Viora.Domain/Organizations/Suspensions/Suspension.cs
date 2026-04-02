@@ -15,7 +15,14 @@ public sealed class Suspension : Entity
     public SuspensionNote Note { get; private set; } = default!;
 
     public DateOnly SuspensionDateUtc { get; private set; }
-    public DateOnly DeletionDateUtc { get; private set; }
+    public DateOnly ScheduledDeletionDateUtc { get; private set; }
 
     private Suspension() { } // for EfCore
+
+    /// <summary>
+    /// takes the current date time to check if an org is already deleted or not,
+    /// if the deletion date is less than or equal to the current date, then it is considered deleted.
+    /// </summary>
+    /// <returns></returns>
+    public Result<bool> IsDeletedAt(DateOnly referencedate) => Result.Success(ScheduledDeletionDateUtc <= referencedate);
 }

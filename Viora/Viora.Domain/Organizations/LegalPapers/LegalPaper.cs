@@ -6,6 +6,7 @@ namespace Viora.Domain.Organizations.LegalPapers;
 public sealed class LegalPaper : Entity
 {
     public Guid AttachemntId { get; private set; }
+    public Guid? ApprovedById { get; private set; }
     public OfficalName Name { get; private set; } = default!;
     public AcceptanceStatus Status { get; private set; } = default!;
     public LegalPaperType Type { get; private set; }
