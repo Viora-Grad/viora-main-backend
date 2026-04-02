@@ -1,4 +1,5 @@
-﻿using Viora.Domain.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using Viora.Domain.Abstractions;
 
 
 namespace Viora.Infrastructure.Repositories;
@@ -15,6 +16,11 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<T>().FindAsync([id], cancellationToken);
+    }
+
+    public IQueryable<T> GetByIds(IEnumerable<Guid> ids)
+    {
+        return DbContext.Set<T>().Where(entity => ids.Contains(entity.Id));
     }
     #endregion  
 
