@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Viora.Domain\Viora.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Organizations\LegalPapers\SubmitLegalPapers\" />
+  </ItemGroup>
+
 </Project>
