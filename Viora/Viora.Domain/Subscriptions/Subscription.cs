@@ -9,16 +9,16 @@ public class Subscription : Entity
     public Guid OrganizationId { get; private set; }
     public SubscriptionStatus Stauts { get; private set; }
 
-    public DateTime PeriodStart { get; private set; }
-    public DateTime PeriodEnd { get; private set; }
+    public DateTime SubscriptionsStartTime { get; private set; }
+    public DateTime SubscriptionEndTime { get; private set; }
 
-    private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus stauts, DateTime periodStart, DateTime periodEnd) : base(Id)
+    private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus stauts, DateTime startTime, DateTime endTime) : base(Id)
     {
-        this.PlanId = planId;
-        this.OrganizationId = organizationId;
-        this.Stauts = stauts;
-        this.PeriodStart = periodStart;
-        this.PeriodEnd = periodEnd;
+        PlanId = planId;
+        OrganizationId = organizationId;
+        Stauts = stauts;
+        SubscriptionsStartTime = startTime;
+        SubscriptionEndTime = endTime;
     }
 
 
@@ -28,18 +28,15 @@ public class Subscription : Entity
         var newSubscription = new Subscription(Guid.NewGuid(), planId, organizationId, subscriptionStatus, periodStart, periodEnd);
         return Result.Success(newSubscription.Id);
     }
-    public Result Renew(DateTime periodStart, string newsubscriptionType)
+    public Result Renew(DateTime periodStart, DateTime periodEnd)
     {
         if (Stauts == SubscriptionStatus.Active)
         {
             return Result.Failure(SubscriptionError.SubscriptionAlreadyActive);
         }
-        var SubscriptionTypeResult = PlanPeriod.CheckSubscriptionType(newsubscriptionType);
-        if (SubscriptionTypeResult.IsFailure)
-        {
-            return Result.Failure(SubscriptionTypeResult.Error);
-        }
-        this.PeriodEnd = CalculateSubscriptionEndingPeriod(newsubscriptionType, periodStart).Value;
+        Stauts = SubscriptionStatus.Active;
+        SubscriptionsStartTime = periodStart;
+        SubscriptionEndTime = periodEnd;
         return Result.Success();
     }
 
