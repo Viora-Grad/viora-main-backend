@@ -3,29 +3,27 @@ using Viora.Domain.Users.Internal;
 
 namespace Viora.Domain.Users;
 
-public sealed class Owner : User
+public sealed class Owner : Entity
 {
-    public Nationality Nationality { get; private set; } = null!;
+    public Guid NationalityId { get; private set; } = Guid.Empty;
+    public Guid UserId { get; private set; } // required and Unique 
+
     public AcceptedTerms AcceptedTerms { get; private set; } = AcceptedTerms.Empty; // not sure why this is included here not in organization, but leave it for now 
     public Guid GatewayCredentialsId { get; private set; } = Guid.Empty;
 
     private Owner() { } // for ef core
-    private Owner(Guid id, FirstName firstName, LastName lastName, Email email, Nationality nationality)
-        : base(id, firstName, lastName, email, UserType.Owner)
+    private Owner(Guid id, Guid userId, Guid nationalityId, Guid gatewayCredentialsId, AcceptedTerms acceptedTerms)
+        : base(id)
     {
-        Nationality = nationality;
-    }
-    public static Owner Create(Guid id, FirstName firstName, LastName lastName, Email email, Nationality nationality)
-    {
-        return new Owner(id, firstName, lastName, email, nationality);
-    }
-    public Result SetGatewayCredentialsId(Guid gatewayCredentialsId)
-    {
-        if (gatewayCredentialsId == Guid.Empty)
-            return Result.Failure(UserErrors.EmptyField);
-
+        UserId = userId;
+        NationalityId = nationalityId;
         GatewayCredentialsId = gatewayCredentialsId;
-        return Result.Success();
+        AcceptedTerms = acceptedTerms;
+    }
+    public static Owner Create(Guid nationalityId, Guid userId, Guid gatewayCredentialsId, AcceptedTerms acceptedTerms)
+    {
+        // add any validation if needed
+        return new Owner(Guid.NewGuid(), nationalityId, userId, gatewayCredentialsId, acceptedTerms);
     }
     public Result UpdateTerms()
     {
