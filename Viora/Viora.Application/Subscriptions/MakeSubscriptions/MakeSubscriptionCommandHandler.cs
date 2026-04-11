@@ -18,15 +18,19 @@ public class MakeSubscriptionCommandHandler(
             ?? throw new NotFoundException($"the plan with id {request.PlanId} not found");
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"the organization with id {request.OrganizationId} not found");
+        var endDate = plan.PlanPeriod.CalculateEndTime(request.PeriodStart);
+        if (endDate.IsFailure)
+            return Result.Failure<Guid>(endDate.Error);
+
+        if (endDate.Value < request.PeriodStart)
+            return Result.Failure<Guid>(PlanError.InvalidPlanPeriod);
         var result = Subscription.Create(
             request.PlanId,
             request.OrganizationId,
-            request.SubscriptionType,
-            request.PeriodStart);
+            request.PeriodStart,
+            endDate);
         if (result.IsFailure)
-        {
             return Result.Failure<Guid>(result.Error);
-        }
         subscriptionRepository.Add(result.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(result.Value.Id);
