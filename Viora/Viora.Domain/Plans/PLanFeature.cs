@@ -2,13 +2,13 @@
 
 namespace Viora.Domain.Plans;
 
-public class PLanFeature : Entity
+public class PlanFeature : Entity
 {
     public Guid PlanId { get; private set; }
     public Guid FeatureId { get; private set; }
     public Guid LimitedFeatureId { get; private set; }
 
-    private PLanFeature(Guid id, Guid planId, Guid featureId, Guid limitedFeatureId) : base(id)
+    private PlanFeature(Guid id, Guid planId, Guid featureId, Guid limitedFeatureId) : base(id)
     {
         PlanId = planId;
         FeatureId = featureId;

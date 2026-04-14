@@ -22,11 +22,11 @@ public class Subscription : Entity
     }
 
 
-    public static Result<Guid> Create(Guid planId, Guid organizationId, string subscriptionType, DateTime periodStart, DateTime periodEnd)
+    public static Result<Subscription> Create(Guid planId, Guid organizationId, DateTime periodStart, DateTime periodEnd)
     {
         var subscriptionStatus = SubscriptionStatus.Active;
         var newSubscription = new Subscription(Guid.NewGuid(), planId, organizationId, subscriptionStatus, periodStart, periodEnd);
-        return Result.Success(newSubscription.Id);
+        return Result.Success(newSubscription);
     }
     public Result Renew(DateTime periodStart, DateTime periodEnd)
     {

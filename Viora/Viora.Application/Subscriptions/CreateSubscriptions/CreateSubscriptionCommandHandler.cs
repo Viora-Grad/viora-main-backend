@@ -1,12 +1,13 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Organizations;
 using Viora.Domain.Plans;
 using Viora.Domain.Subscriptions;
 
-namespace Viora.Application.Subscriptions.MakeSubscriptions;
+namespace Viora.Application.Subscriptions.CreateSubscriptions;
 
-public class MakeSubscriptionCommandHandler(
+public class CreateSubscriptionCommandHandler(
     IPlanRepository planRepository,
     IOrganizationRepository organizationRepository,
     ISubscriptionRepository subscriptionRepository,
@@ -28,7 +29,7 @@ public class MakeSubscriptionCommandHandler(
             request.PlanId,
             request.OrganizationId,
             request.PeriodStart,
-            endDate);
+            endDate.Value);
         if (result.IsFailure)
             return Result.Failure<Guid>(result.Error);
         subscriptionRepository.Add(result.Value);

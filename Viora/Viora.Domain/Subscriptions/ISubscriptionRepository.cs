@@ -2,7 +2,8 @@
 
 public interface ISubscriptionRepository
 {
-    void Add(Subscription subscription);
-    Task<Subscription> GetByIdAsync(Guid id, CancellationToken cancellationToken);
-    Task<Subscription> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken);
+    public void Add(Subscription subscription);
+    public Task<Subscription> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    public Task<Subscription> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken);
+
 }

@@ -23,4 +23,13 @@ public class FeatureUsage : Entity
     {
         Quota--;
     }
+    public static Result<FeatureUsage> Create(Guid organizationId, Guid limitedFeatureId, int value, DateTime periodStart, DateTime periodEnd)
+    {
+        if (value < 0)
+        {
+            return Result.Failure<FeatureUsage>(PlanError.InvalidFeatureUsageQuota);
+        }
+        var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeatureId, value, periodStart, periodEnd);
+        return Result.Success(featureUsage);
+    }
 }
