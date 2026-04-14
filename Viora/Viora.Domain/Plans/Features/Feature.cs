@@ -1,7 +1,7 @@
 ﻿using Viora.Domain.Abstractions;
-using Viora.Domain.Features.Internal;
+using Viora.Domain.Plans.Features.Internal;
 
-namespace Viora.Domain.Features;
+namespace Viora.Domain.Plans.Features;
 
 public class Feature : Entity
 {
