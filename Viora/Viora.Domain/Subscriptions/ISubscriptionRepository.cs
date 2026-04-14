@@ -4,4 +4,5 @@ public interface ISubscriptionRepository
 {
     void Add(Subscription subscription);
     Task<Subscription> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Subscription> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken);
 }

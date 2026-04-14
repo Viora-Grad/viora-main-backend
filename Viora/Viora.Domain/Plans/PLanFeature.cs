@@ -7,13 +7,11 @@ public class PLanFeature : Entity
     public Guid PlanId { get; private set; }
     public Guid FeatureId { get; private set; }
     public Guid LimitedFeatureId { get; private set; }
-    public int Limit { get; private set; }
 
-    private PLanFeature(Guid id, Guid planId, Guid featureId, Guid limitedFeatureId, int limit) : base(id)
+    private PLanFeature(Guid id, Guid planId, Guid featureId, Guid limitedFeatureId) : base(id)
     {
         PlanId = planId;
         FeatureId = featureId;
         LimitedFeatureId = limitedFeatureId;
-        Limit = limit;
     }
 }
