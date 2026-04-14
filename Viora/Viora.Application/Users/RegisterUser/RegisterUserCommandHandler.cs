@@ -13,20 +13,19 @@ public sealed class RegisterUserCommandHandler(IUserRepository userRepository,
 {
     public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        var existingUser = await userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (existingUser != null)
-            return Result.Failure<Guid>(UserErrors.EmailInUse);
-
         var user = User.Create(
-            new FirstName(request.FirstName),
-            new LastName(request.LastName),
-            new Email(request.Email),
-            new Age(request.Age)
+        new FirstName(request.FirstName),
+        new LastName(request.LastName),
+        new UserName(request.UserName),
+        new Email(request.Email),
+        new Age(request.Age)
         );
 
-        var registrationResult = await authenticationService.RegisterAsync(request.Email, request.Password, cancellationToken);
-        if (string.IsNullOrEmpty(registrationResult))
-        { }
+        var registrationResult = await authenticationService.RegisterAsync(user, request.Password, cancellationToken);
+        if (registrationResult.IsFailure)
+        {
+            return Result.Failure<Guid>(registrationResult.Error);
+        }
 
         userRepository.Add(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);

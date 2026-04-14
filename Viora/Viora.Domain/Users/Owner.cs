@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Users.Events;
 using Viora.Domain.Users.Internal;
 
 namespace Viora.Domain.Users;
@@ -23,7 +24,11 @@ public sealed class Owner : Entity
     public static Owner Create(Guid nationalityId, Guid userId, Guid gatewayCredentialsId, AcceptedTerms acceptedTerms)
     {
         // add any validation if needed
-        return new Owner(Guid.NewGuid(), nationalityId, userId, gatewayCredentialsId, acceptedTerms);
+        Owner owner = new(Guid.NewGuid(), userId, nationalityId, gatewayCredentialsId, acceptedTerms);
+
+        owner.RaiseDomainEvent(new OwnerCreatedEvent(owner.Id, owner.UserId, owner.GatewayCredentialsId));
+
+        return owner;
     }
     public Result UpdateTerms()
     {

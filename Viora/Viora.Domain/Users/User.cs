@@ -12,22 +12,29 @@ namespace Viora.Domain.Users;
 public class User : Entity
 {
     private readonly HashSet<Contact> _contact = [];
-    protected User(Guid id, FirstName firstName, LastName lastName, Email email, Age age)
+    // TODO: private readonly HashSet<Role> _roles = []; // for future role-based access control implementation
+    private readonly List<AuthIdentity> _identities = [];
+    protected User(Guid id, FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
         : base(id)
     {
         FirstName = firstName;
         LastName = lastName;
+        UserName = userName;
         Email = email;
         Age = age;
     }
     private User() { } // for ef core
     public FirstName FirstName { get; private set; } = null!;
     public LastName LastName { get; private set; } = null!;
-    public UserName UserName { get; private set; } = null!; // based on mobile application request
+    public UserName UserName { get; private set; } = null!; // based on mobile application request {Unique}
     public Email Email { get; private set; } = null!;
     public Age Age { get; private set; } = null!;
-    public HashedPassword HashedPassword { get; private set; } = HashedPassword.Empty;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public bool IsActive { get; private set; } = true;
+    public bool IsDeleted { get; private set; } // for soft delete implementation
+    public bool IsEmailVerified { get; private set; }
     public IReadOnlyList<Contact> Contact => _contact.ToList().AsReadOnly();
+    public IReadOnlyCollection<AuthIdentity> Identities => _identities.AsReadOnly();
 
     public void AddContact(Contact contact)
     {
@@ -66,9 +73,38 @@ public class User : Entity
         Email = newEmail;
         return Result.Success();
     }
-    public static User Create(FirstName firstName, LastName lastName, Email email, Age age)
+    public void MarkAsDeleted()
     {
-        return new User(Guid.NewGuid(), firstName, lastName, email, age);
+        IsDeleted = true;
+        IsActive = false;
+    }
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+    public void Activate()
+    {
+        IsActive = true;
+    }
+    public void VerifyEmail()
+    {
+        IsEmailVerified = true;
+    }
+    public Result LinkIdentity(AuthIdentity identity)
+    {
+        if (identity is null)
+            return Result.Failure(UserErrors.EmptyField);
+
+        var exists = _identities.Any(i => i.Provider == identity.Provider.ToLower() && i.ProviderKey == identity.ProviderKey);
+        if (exists)
+            return Result.Failure(UserErrors.IdentityLinked);
+
+        _identities.Add(identity);
+        return Result.Success();
+    }
+    public static User Create(FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
+    {
+        return new User(Guid.NewGuid(), firstName, lastName, userName, email, age);
 
     }
 

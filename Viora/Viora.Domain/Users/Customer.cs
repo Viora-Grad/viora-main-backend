@@ -27,7 +27,10 @@ public sealed class Customer : Entity
     public Result AddMedicalRecord(Guid medicalRecordId)
     {
         // might trigger domain events for medical record change
-        MedicalRecordId = medicalRecordId;
+        if (MedicalRecordId is null)
+            MedicalRecordId = medicalRecordId;
+        else
+            return Result.Failure(CustomerErrors.MedicalRecordAlreadyExists);
         return Result.Success();
     }
 
@@ -41,9 +44,9 @@ public sealed class Customer : Entity
         _organizationsVisited.Remove(organizationId);
         return Result.Success();
     }
-    public Result<bool> IsOrganizationVisited(Guid organizationId)
+    public bool IsOrganizationVisited(Guid organizationId)
     {
-        return Result.Success(_organizationsVisited.Contains(organizationId));
+        return _organizationsVisited.Contains(organizationId);
     }
 
 }
