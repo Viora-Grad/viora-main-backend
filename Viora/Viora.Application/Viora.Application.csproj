@@ -14,8 +14,4 @@
     <ProjectReference Include="..\Viora.Domain\Viora.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Plans\" />
-  </ItemGroup>
-
 </Project>

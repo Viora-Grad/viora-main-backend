@@ -1,5 +1,6 @@
-﻿using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Plans.GetPlans.DTO;
+﻿using Viora.Application.Abstractions.Exceptions;
+using Viora.Application.Abstractions.Messaging;
+using Viora.Application.Plans.DTO;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
@@ -17,7 +18,7 @@ public class GetPlansQueryHandler(
         // 1. Fetch all data upfront — 4 DB calls total, not N*M
         var plans = await planRepository.GetAllAsync(cancellationToken);
         if (!plans.Any())
-            return Result.Success(new List<PlanDTO>());
+            throw new NotFoundException("No plans found.");
 
         var planIds = plans.Select(p => p.Id).ToList();
 

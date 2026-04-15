@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Plans;
 
-namespace Viora.Application.Plans.GetPlans.DTO;
+namespace Viora.Application.Plans.DTO;
 
 public class PlanDTO
 {
@@ -9,17 +9,19 @@ public class PlanDTO
     public string Description { get; set; } = default!;
     public double Price { get; set; }
     public string PlanPeriod { get; set; } = default!;
+    public string PlanContent { get; set; } = default!;
     public List<LimitedFeatureDTO> LimitedFeatures { get; set; } = default!;
     public List<FeatureDTO> Features { get; set; } = default!;
 
 
-    public PlanDTO(Guid id, string name, string description, double price, string planPeriod, List<LimitedFeatureDTO> limitedFeatures, List<FeatureDTO> features)
+    public PlanDTO(Guid id, string name, string description, double price, string planPeriod, string planContent, List<LimitedFeatureDTO> limitedFeatures, List<FeatureDTO> features)
     {
         Id = id;
         Name = name;
         Description = description;
         Price = price;
         PlanPeriod = planPeriod;
+        PlanContent = planContent;
         LimitedFeatures = limitedFeatures;
         Features = features;
     }
@@ -32,6 +34,7 @@ public class PlanDTO
             plan.Description.Value,
             plan.Price,
             plan.PlanPeriod.ToString(),
+            plan.Content.Value,
             limitedFeature,
             feature
         );
