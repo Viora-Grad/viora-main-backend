@@ -1,4 +1,5 @@
-﻿using Viora.Domain.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using Viora.Domain.Abstractions;
 
 
 namespace Viora.Infrastructure.Repositories;

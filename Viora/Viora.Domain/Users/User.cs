@@ -12,7 +12,7 @@ namespace Viora.Domain.Users;
 public class User : Entity
 {
     private readonly HashSet<Contact> _contact = [];
-    // TODO: private readonly HashSet<Role> _roles = []; // for future role-based access control implementation
+    private readonly HashSet<Role> _roles = []; // for future role-based access control implementation
     private readonly List<AuthIdentity> _identities = [];
     protected User(Guid id, FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
         : base(id)
@@ -33,9 +33,9 @@ public class User : Entity
     public bool IsActive { get; private set; } = true;
     public bool IsDeleted { get; private set; } // for soft delete implementation
     public bool IsEmailVerified { get; private set; }
-    public IReadOnlyList<Contact> Contact => _contact.ToList().AsReadOnly();
+    public IReadOnlyList<Contact> Contacts => _contact.ToList().AsReadOnly();
     public IReadOnlyCollection<AuthIdentity> Identities => _identities.AsReadOnly();
-
+    public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
     public void AddContact(Contact contact)
     {
         // might trigger domain events for contact change
@@ -104,8 +104,10 @@ public class User : Entity
     }
     public static User Create(FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
     {
-        return new User(Guid.NewGuid(), firstName, lastName, userName, email, age);
 
+        var user = new User(Guid.NewGuid(), firstName, lastName, userName, email, age);
+        user._roles.Add(Role.Registered); // default role assignment, can be changed later
+        return user;
     }
 
 

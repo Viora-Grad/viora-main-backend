@@ -8,6 +8,8 @@ namespace Viora.Domain.Users;
 /// <remarks><strong>Opting for not using Value Objects to not over complicate things</strong></remarks>
 public sealed class AuthIdentity : Entity
 {
+
+
     private AuthIdentity(Guid id, string provider, Guid userId, string providerKey)
         : base(id)
     {
@@ -25,7 +27,7 @@ public sealed class AuthIdentity : Entity
 
     public static AuthIdentity Create(string provider, Guid userId, string providerKey)
     {
-        return new AuthIdentity(Guid.NewGuid(), provider.ToLower(), userId, providerKey);
+        return new AuthIdentity(Guid.NewGuid(), provider.ToLower().Trim(), userId, providerKey);
     }
     public void RecordLogin()
     {

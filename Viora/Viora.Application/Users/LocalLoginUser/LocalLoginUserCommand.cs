@@ -1,6 +1,7 @@
-﻿using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Abstractions.Messaging;
 
 namespace Viora.Application.Users.LocalLoginUser;
 
-public sealed record LocalLoginUserCommand(string Email, string Password) : ICommand;
+public sealed record LocalLoginUserCommand(string Email, string Password) : ICommand<AuthResult>;
 
