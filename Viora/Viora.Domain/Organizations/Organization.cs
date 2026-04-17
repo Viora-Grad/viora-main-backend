@@ -1,5 +1,7 @@
-﻿namespace Viora.Domain.Organizations;
+﻿using Viora.Domain.Abstractions;
 
-public class Organization
+namespace Viora.Domain.Organizations;
+
+public class Organization : Entity
 {
 }

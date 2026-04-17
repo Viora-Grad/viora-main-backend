@@ -31,10 +31,11 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
                 $"Organization with id " +
                 $"{limitedFeatureRequest.organizationId} " +
                 $"has exceeded its quota for feature {limitedFeatureRequest.LimitedFeatureId}.");
-        await limitedFeatureUsageService.IncrementUsageAsync(
+        limitedFeatureUsageService.ConsumeLimit(
             limitedFeatureRequest.organizationId,
             limitedFeatureRequest.LimitedFeatureId,
-            cancellationToken);
+            cancellationToken
+            );
         return await next();
     }
 }

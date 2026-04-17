@@ -15,7 +15,7 @@ public class LimitedFeatureUsageService(
         var subscription = await subscriptionRepository.GetByOrganizationIdAsync(organizationId, cancellationToken);
         if (subscription is null)
             return Result.Failure(SubscriptionError.OrganizationNotSubscribed);
-        if (subscription.Stauts != SubscriptionStatus.Active)
+        if (subscription.Status != SubscriptionStatus.Active)
             return Result.Failure(SubscriptionError.SubscriptionNotActivated);
         var organizationFeatureUsage = await featureUsageRepository.GetByOrganizationIdAndFeatureIdAsync(organizationId, limitedFeatureId, cancellationToken);
         if (organizationFeatureUsage.Quota < 1)

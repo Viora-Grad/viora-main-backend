@@ -12,9 +12,9 @@ internal class CreateSubscriptionDomainEventHandler(
     IPlanFeatureRepository planFeatureRepository,
     ILimitedFeatureRepository limitedFeatureRepository,
     IUnitOfWork unitOfWork
-    ) : INotificationHandler<CreateSubscriptionDomainEvent>
+    ) : INotificationHandler<SubscriptionCreatedDomainEvent>
 {
-    public async Task Handle(CreateSubscriptionDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(SubscriptionCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         var limitedFeatures = await planFeatureRepository.GetByPlanIdAsync(notification.PlanId, cancellationToken);
         if (limitedFeatures != null)

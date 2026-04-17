@@ -2,5 +2,5 @@
 
 public interface IOrganizationRepository
 {
-    public Task<Organization> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    public Task<Organization?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }

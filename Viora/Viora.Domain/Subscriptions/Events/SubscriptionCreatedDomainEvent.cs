@@ -2,7 +2,7 @@
 
 namespace Viora.Domain.Subscriptions.Events;
 
-public sealed record CreateSubscriptionDomainEvent(
+public sealed record SubscriptionCreatedDomainEvent(
     Guid SubscriptionId,
     Guid PlanId,
     Guid OrganizationId,

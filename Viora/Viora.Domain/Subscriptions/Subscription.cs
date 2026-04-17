@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Subscriptions.Events;
 using Viora.Domain.Subscriptions.Internal;
 
 namespace Viora.Domain.Subscriptions;
@@ -7,18 +8,18 @@ public class Subscription : Entity
 {
     public Guid PlanId { get; private set; }
     public Guid OrganizationId { get; private set; }
-    public SubscriptionStatus Stauts { get; private set; }
+    public SubscriptionStatus Status { get; private set; }
 
     public DateTime SubscriptionsStartTime { get; private set; }
-    public DateTime SubscriptionEndTime { get; private set; }
+    public DateTime SubscriptionsEndTime { get; private set; }
 
     private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus stauts, DateTime startTime, DateTime endTime) : base(Id)
     {
         PlanId = planId;
         OrganizationId = organizationId;
-        Stauts = stauts;
+        Status = stauts;
         SubscriptionsStartTime = startTime;
-        SubscriptionEndTime = endTime;
+        SubscriptionsEndTime = endTime;
     }
 
 
@@ -26,17 +27,26 @@ public class Subscription : Entity
     {
         var subscriptionStatus = SubscriptionStatus.Active;
         var newSubscription = new Subscription(Guid.NewGuid(), planId, organizationId, subscriptionStatus, periodStart, periodEnd);
+        newSubscription.RaiseDomainEvent(
+            new SubscriptionCreatedDomainEvent(
+                newSubscription.Id,
+                planId,
+                organizationId,
+                periodStart,
+                periodEnd
+            )
+        );
         return Result.Success(newSubscription);
     }
     public Result Renew(DateTime periodStart, DateTime periodEnd)
     {
-        if (Stauts == SubscriptionStatus.Active)
+        if (Status == SubscriptionStatus.Active)
         {
             return Result.Failure(SubscriptionError.SubscriptionAlreadyActive);
         }
-        Stauts = SubscriptionStatus.Active;
+        Status = SubscriptionStatus.Active;
         SubscriptionsStartTime = periodStart;
-        SubscriptionEndTime = periodEnd;
+        SubscriptionsEndTime = periodEnd;
         return Result.Success();
     }
 

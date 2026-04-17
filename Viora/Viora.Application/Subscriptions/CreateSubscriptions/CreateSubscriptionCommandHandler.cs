@@ -11,9 +11,9 @@ public class CreateSubscriptionCommandHandler(
     IPlanRepository planRepository,
     IOrganizationRepository organizationRepository,
     ISubscriptionRepository subscriptionRepository,
-    IUnitOfWork unitOfWork) : ICommandHandler<MakeSubscriptionCommand, Guid>
+    IUnitOfWork unitOfWork) : ICommandHandler<CreateSubscriptionCommand, Guid>
 {
-    public async Task<Result<Guid>> Handle(MakeSubscriptionCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateSubscriptionCommand request, CancellationToken cancellationToken)
     {
         var plan = await planRepository.GetByIdAsync(request.PlanId, cancellationToken)
             ?? throw new NotFoundException($"the plan with id {request.PlanId} not found");

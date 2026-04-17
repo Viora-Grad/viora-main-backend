@@ -5,11 +5,11 @@ namespace Viora.Domain.Plans.Features;
 
 public class LimitedFeature : Entity
 {
-    public LimitKey Key { get; private set; }
-    public LimitDescription Description { get; private set; }
+    public FeatureKey Key { get; private set; }
+    public FeatureDescription Description { get; private set; }
     public int Limit { get; private set; }
 
-    private LimitedFeature(Guid Id, LimitKey key, LimitDescription description, int limit) : base(Id)
+    private LimitedFeature(Guid Id, FeatureKey key, FeatureDescription description, int limit) : base(Id)
     {
         this.Key = key;
         this.Description = description;
