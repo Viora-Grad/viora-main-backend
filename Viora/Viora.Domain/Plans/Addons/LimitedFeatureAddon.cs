@@ -8,7 +8,7 @@ public class LimitedFeatureAddon : Entity
     public int RestoreValue { get; private set; }
     public double Price { get; private set; }
 
-    private LimitedFeatureAddon(Guid Id, Guid LimitedFeatureId, int RestoreValue, int price) : base(Id)
+    private LimitedFeatureAddon(Guid Id, Guid LimitedFeatureId, int RestoreValue, double price) : base(Id)
     {
         this.LimitedFeatureId = LimitedFeatureId;
         this.RestoreValue = RestoreValue;

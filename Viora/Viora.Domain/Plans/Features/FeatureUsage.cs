@@ -10,11 +10,11 @@ public class FeatureUsage : Entity
     public DateTime PeriodStart { get; private set; }
     public DateTime PeriodEnd { get; private set; }
 
-    private FeatureUsage(Guid Id, Guid organizationId, Guid limitedFeatureId, int Value, DateTime periodStart, DateTime periodEnd) : base(Id)
+    private FeatureUsage(Guid Id, Guid organizationId, Guid limitedFeatureId, int quota, DateTime periodStart, DateTime periodEnd) : base(Id)
     {
         this.OrganizationId = organizationId;
         this.LimitedFeatureId = limitedFeatureId;
-        this.Quota = Value;
+        this.Quota = quota;
         this.PeriodStart = periodStart;
         this.PeriodEnd = periodEnd;
     }
@@ -31,5 +31,10 @@ public class FeatureUsage : Entity
         }
         var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeatureId, value, periodStart, periodEnd);
         return Result.Success(featureUsage);
+    }
+
+    public void RechargeQuota(int newQuota)
+    {
+        Quota = newQuota;
     }
 }

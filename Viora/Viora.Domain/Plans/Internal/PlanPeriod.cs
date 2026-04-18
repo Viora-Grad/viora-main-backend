@@ -34,5 +34,15 @@ public record PlanPeriod
             return Result.Failure<DateTime>(PlanError.InvalidPlanPeriod);
     }
 
+    public static PlanPeriod FromId(int id)
+    {
+        return id switch
+        {
+            1 => monthly,
+            2 => annually,
+            3 => semiAnnually,
+            _ => throw new ArgumentException("Invalid PlanPeriod Id")
+        };
+    }
 }
 
