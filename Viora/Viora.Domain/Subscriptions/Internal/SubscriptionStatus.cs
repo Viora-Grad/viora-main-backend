@@ -18,5 +18,15 @@ public record SubscriptionStatus(string Value)
         else
             return Result.Failure<SubscriptionStatus>(SubscriptionError.InvalidStatus);
     }
+    public static SubscriptionStatus FromValue(string value)
+    {
+        return value switch
+        {
+            "Active" => Active,
+            "Canceled" => Canceled,
+            "Expired" => Expired,
+            _ => throw new ArgumentException("Invalid SubscriptionStatus")
+        };
+    }
 
 }

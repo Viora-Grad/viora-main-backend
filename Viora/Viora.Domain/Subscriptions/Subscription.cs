@@ -13,13 +13,13 @@ public class Subscription : Entity
     public DateTime SubscriptionsStartTime { get; private set; }
     public DateTime SubscriptionsEndTime { get; private set; }
 
-    private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus stauts, DateTime startTime, DateTime endTime) : base(Id)
+    private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus status, DateTime subscriptionsStartTime, DateTime subscriptionsEndTime) : base(Id)
     {
         PlanId = planId;
         OrganizationId = organizationId;
-        Status = stauts;
-        SubscriptionsStartTime = startTime;
-        SubscriptionsEndTime = endTime;
+        Status = status;
+        SubscriptionsStartTime = subscriptionsStartTime;
+        SubscriptionsEndTime = subscriptionsEndTime;
     }
 
 
@@ -50,4 +50,13 @@ public class Subscription : Entity
         return Result.Success();
     }
 
+    public Result ChangePlan(Guid planId, DateTime startTime, DateTime endTime)
+    {
+
+        PlanId = planId;
+        Status = SubscriptionStatus.Active;
+        SubscriptionsStartTime = startTime;
+        SubscriptionsEndTime = endTime;
+        return Result.Success();
+    }
 }

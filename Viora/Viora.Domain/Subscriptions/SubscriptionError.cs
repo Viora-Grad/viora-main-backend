@@ -10,4 +10,5 @@ public static class SubscriptionError
     public static readonly Error OrganizationNotSubscribed = new Error("organizationNotSubscribed", "The organization does not have a subscription.", ErrorCategory.Validation);
     public static readonly Error SubscriptionNotActivated = new Error("subscriptionNotActivated", "The subscription is not activated.", ErrorCategory.Validation);
     public static readonly Error LimitExceeded = new Error("limitExceeded", "The usage limit for the feature has been exceeded.", ErrorCategory.Validation);
+    public static readonly Error OrganizationAlreadySubscribed = new Error("organizationAlreadySubscribed", "The organization already has an active subscription.", ErrorCategory.Validation);
 }
