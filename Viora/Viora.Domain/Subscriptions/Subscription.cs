@@ -47,16 +47,33 @@ public class Subscription : Entity
         Status = SubscriptionStatus.Active;
         SubscriptionsStartTime = periodStart;
         SubscriptionsEndTime = periodEnd;
+        RaiseDomainEvent(
+            new SubscriptionRenewedDomainEvent(
+                PlanId,
+                OrganizationId,
+                periodStart,
+                periodEnd
+            )
+        );
         return Result.Success();
     }
 
-    public Result ChangePlan(Guid planId, DateTime startTime, DateTime endTime)
+    public Result ChangePlan(Guid organizationId, Guid oldPlanId, Guid newplanId, DateTime startTime, DateTime endTime)
     {
 
-        PlanId = planId;
+        PlanId = newplanId;
         Status = SubscriptionStatus.Active;
         SubscriptionsStartTime = startTime;
         SubscriptionsEndTime = endTime;
+        RaiseDomainEvent(
+            new SubscriptionPlanChangedDomainEvent(
+                oldPlanId,
+                newplanId,
+                organizationId,
+                startTime,
+                endTime
+            )
+        );
         return Result.Success();
     }
 }

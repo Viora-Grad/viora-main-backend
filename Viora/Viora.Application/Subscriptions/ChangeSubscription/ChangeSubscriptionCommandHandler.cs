@@ -7,7 +7,7 @@ using Viora.Domain.Subscriptions;
 
 namespace Viora.Application.Subscriptions.ChangeSubscription;
 
-public class ChangeSubscriptionHandler(
+public class ChangeSubscriptionCommandHandler(
     IPlanRepository planRepository,
     ISubscriptionRepository subscriptionRepository,
     IDateTimeProvider dateTimeProvider,
@@ -23,7 +23,7 @@ public class ChangeSubscriptionHandler(
         var endTimeResult = newPlan.PlanPeriod.CalculateEndTime(startTime);
         if (endTimeResult.IsFailure)
             return Result.Failure(endTimeResult.Error);
-        var result = subscription.ChangePlan(newPlan.Id, startTime, endTimeResult.Value);
+        var result = subscription.ChangePlan(subscription.PlanId, subscription.OrganizationId, newPlan.Id, startTime, endTimeResult.Value);
         if (result.IsFailure)
             return Result.Failure(result.Error);
         await unitOfWork.SaveChangesAsync();

@@ -1,4 +1,5 @@
-﻿using Viora.Application.Abstractions.Exceptions;
+﻿using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations;
@@ -11,7 +12,8 @@ public class CreateSubscriptionCommandHandler(
     IPlanRepository planRepository,
     IOrganizationRepository organizationRepository,
     ISubscriptionRepository subscriptionRepository,
-    IUnitOfWork unitOfWork) : ICommandHandler<CreateSubscriptionCommand, Guid>
+    IUnitOfWork unitOfWork,
+    IDateTimeProvider dateTimeProvider) : ICommandHandler<CreateSubscriptionCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(CreateSubscriptionCommand request, CancellationToken cancellationToken)
     {
@@ -19,16 +21,20 @@ public class CreateSubscriptionCommandHandler(
             ?? throw new NotFoundException($"the plan with id {request.PlanId} not found");
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"the organization with id {request.OrganizationId} not found");
-        var endDate = plan.PlanPeriod.CalculateEndTime(request.PeriodStart);
+        var subscription = await subscriptionRepository.GetByOrganizationIdAsync(request.OrganizationId, cancellationToken);
+        if (subscription is null)
+            return Result.Failure<Guid>(SubscriptionError.OrganizationAlreadySubscribed);
+        var startDate = dateTimeProvider.UtcNow;
+        var endDate = plan.PlanPeriod.CalculateEndTime(startDate);
         if (endDate.IsFailure)
             return Result.Failure<Guid>(endDate.Error);
 
-        if (endDate.Value < request.PeriodStart)
+        if (endDate.Value < startDate)
             return Result.Failure<Guid>(PlanError.InvalidPlanPeriod);
         var result = Subscription.Create(
             request.PlanId,
             request.OrganizationId,
-            request.PeriodStart,
+            startDate,
             endDate.Value);
         if (result.IsFailure)
             return Result.Failure<Guid>(result.Error);

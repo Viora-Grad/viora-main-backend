@@ -1,0 +1,37 @@
+﻿using MediatR;
+using Viora.Application.Abstractions.Exceptions;
+using Viora.Domain.Abstractions;
+using Viora.Domain.Plans;
+using Viora.Domain.Plans.Features;
+using Viora.Domain.Subscriptions.Events;
+
+namespace Viora.Application.Subscriptions.CreateSubscriptions;
+
+internal class SubscriptionCreatedDomainEvnetHandler(
+    IFeatureUsageRepository featureUsageRepository,
+    IPlanFeatureRepository planFeatureRepository,
+    ILimitedFeatureRepository limitedFeatureRepository,
+    IUnitOfWork unitOfWork
+    ) : INotificationHandler<SubscriptionCreatedDomainEvent>
+{
+    public async Task Handle(SubscriptionCreatedDomainEvent notification, CancellationToken cancellationToken)
+    {
+        var features = await planFeatureRepository.GetByPlanIdAsync(notification.PlanId, cancellationToken)
+            ?? throw new NotFoundException($"Plan features with {notification.PlanId} not found.");
+        var limitedFeaturesIds = features.Select(feature => feature.LimitedFeatureId).ToList();
+        var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeaturesIds, cancellationToken);
+        var featureUsages = FeatureUsage.CreateMany(
+            notification.OrganizationId,
+            limitedFeatures,
+            notification.SubscriptionsStartTime,
+            notification.SubscriptionEndTime
+        );
+
+        if (featureUsages.IsFailure)
+            throw new InvalidOperationException("Failed to create feature usages for the subscription.");
+
+        featureUsageRepository.AddRange(featureUsages.Value, cancellationToken);
+        await unitOfWork.SaveChangesAsync();
+
+    }
+}
