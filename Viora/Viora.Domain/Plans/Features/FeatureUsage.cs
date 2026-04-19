@@ -23,16 +23,23 @@ public class FeatureUsage : Entity
     {
         Quota--;
     }
-    public static Result<FeatureUsage> Create(Guid organizationId, Guid limitedFeatureId, int value, DateTime periodStart, DateTime periodEnd)
+    public static Result<List<FeatureUsage>> CreateMany(Guid organizationId, IEnumerable<LimitedFeature> limitedFeatures, DateTime periodStart, DateTime periodEnd)
     {
-        if (value < 0)
+        if (limitedFeatures == null || !limitedFeatures.Any())
         {
-            return Result.Failure<FeatureUsage>(PlanError.InvalidFeatureUsageQuota);
+            return Result.Failure<List<FeatureUsage>>(PlanError.InvalidPlanFeature);
         }
-        var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeatureId, value, periodStart, periodEnd);
-        return Result.Success(featureUsage);
+        var featureUsages = limitedFeatures.
+            Select(feature => new FeatureUsage(Guid.NewGuid(), organizationId, feature.Id, feature.Limit, periodStart, periodEnd)).ToList();
+        return Result.Success(featureUsages);
     }
 
+    public void Renew(int value, DateTime periodEnd, DateTime periodStart)
+    {
+        Quota = value;
+        PeriodEnd = periodEnd;
+        PeriodStart = periodStart;
+    }
     public void RechargeQuota(int newQuota)
     {
         Quota = newQuota;

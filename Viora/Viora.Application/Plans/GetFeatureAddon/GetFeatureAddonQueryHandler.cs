@@ -7,6 +7,17 @@ using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetFeatureAddon;
 
+/// <summary>
+/// Handles retrieval of available add-ons for a specific feature.
+/// 
+/// Responsibilities:
+/// - Returns add-on configurations such as limits, pricing, and availability.
+/// 
+/// Notes:
+/// - Used to determine what add-ons can be purchased for a feature.
+/// - Read-only operation (no state changes).
+/// </summary>
+
 public class GetFeatureAddonQueryHandler(
     ILimitedFeatureRepository limitedFeatureRepository,
     ILimitedFeatureAddonRepository limitedFeatureAddonRepository) : IQueryHandler<GetFeatureAddonQuery, List<FeatureAddonDTO>>

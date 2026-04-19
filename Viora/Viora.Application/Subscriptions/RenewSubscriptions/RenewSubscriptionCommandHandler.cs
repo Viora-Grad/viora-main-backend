@@ -7,6 +7,20 @@ using Viora.Domain.Subscriptions;
 
 namespace Viora.Application.Subscriptions.RenewSubscriptions;
 
+/// <summary>
+/// Handles renewal of an existing subscription.
+/// 
+/// Responsibilities:
+/// - Validates that the subscription is eligible for renewal.
+/// - Extends the subscription period.
+/// - Maintains or refreshes subscription configuration.
+/// - Raises a domain event to reset or reinitialize feature usage for the new period.
+/// 
+/// Notes:
+/// - Renewal may reset usage limits depending on business rules.
+/// - Delegates feature usage reset to domain event handler.
+/// </summary>
+
 public class RenewSubscriptionCommandHandler(
     ISubscriptionRepository subscriptionRepository,
     IPlanRepository planRepository,

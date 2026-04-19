@@ -8,6 +8,19 @@ using Viora.Domain.Subscriptions;
 
 namespace Viora.Application.Subscriptions.CreateSubscriptions;
 
+/// <summary>
+/// Handles the creation of a new subscription for an organization.
+/// 
+/// Responsibilities:
+/// - Validates that the organization does not already have an active subscription.
+/// - Creates a new Subscription aggregate based on the selected plan.
+/// - Initializes subscription period (start/end dates).
+/// - Raises a domain event to initialize feature usage for the subscription.
+/// 
+/// Notes:
+/// - Enforces business rule: one active subscription per organization.
+/// - Delegates feature usage initialization to domain event handler.
+/// </summary>
 public class CreateSubscriptionCommandHandler(
     IPlanRepository planRepository,
     IOrganizationRepository organizationRepository,

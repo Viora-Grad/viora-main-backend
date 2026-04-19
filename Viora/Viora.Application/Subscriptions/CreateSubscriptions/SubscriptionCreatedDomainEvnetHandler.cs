@@ -7,6 +7,15 @@ using Viora.Domain.Subscriptions.Events;
 
 namespace Viora.Application.Subscriptions.CreateSubscriptions;
 
+/// <summary>
+/// Domain event triggered when a subscription is created.
+/// 
+/// Responsibilities:
+/// - Creates usage entries for limited features based on plan configuration.
+/// - Ensures feature limits are correctly applied for the subscription period.
+/// 
+/// </summary>
+
 internal class SubscriptionCreatedDomainEvnetHandler(
     IFeatureUsageRepository featureUsageRepository,
     IPlanFeatureRepository planFeatureRepository,
@@ -30,7 +39,7 @@ internal class SubscriptionCreatedDomainEvnetHandler(
         if (featureUsages.IsFailure)
             throw new InvalidOperationException("Failed to create feature usages for the subscription.");
 
-        featureUsageRepository.AddRange(featureUsages.Value, cancellationToken);
+        featureUsageRepository.AddRange(featureUsages.Value);
         await unitOfWork.SaveChangesAsync();
 
     }

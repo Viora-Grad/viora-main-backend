@@ -7,6 +7,18 @@ using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetPlans;
 
+/// <summary>
+/// Handles retrieval of all available subscription plans.
+/// 
+/// Responsibilities:
+/// - Fetches all plans from the data source.
+/// - Returns plan details including pricing and feature configurations.
+/// 
+/// Notes:
+/// - Read-only operation (no side effects).
+/// - Used for displaying available plans to clients.
+/// </summary>
+
 public class GetPlansQueryHandler(
     IPlanFeatureRepository planFeatureRepository,
     IPlanRepository planRepository,

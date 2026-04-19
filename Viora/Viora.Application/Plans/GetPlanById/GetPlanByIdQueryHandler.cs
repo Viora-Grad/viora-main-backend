@@ -7,6 +7,18 @@ using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetPlanById;
 
+/// <summary>
+/// Handles retrieval of a specific subscription plan by its identifier.
+/// 
+/// Responsibilities:
+/// - Fetches the plan matching the provided ID.
+/// - Returns detailed information about the plan and its features.
+/// 
+/// Notes:
+/// - Returns failure if the plan does not exist.
+/// - Read-only operation with no domain side effects.
+/// </summary>
+
 public class GetPlanByIdQueryHandler(
     IPlanRepository planRepository,
     IPlanFeatureRepository planFeatureRepository,

@@ -7,6 +7,17 @@ using Viora.Domain.Subscriptions;
 
 namespace Viora.Application.Subscriptions.ChangeSubscription;
 
+/// <summary>
+/// Handles changing an organization's current subscription plan.
+/// 
+/// Responsibilities:
+/// - Retrieves the active subscription.
+/// - Applies plan change (upgrade/downgrade).
+/// - Adjusts subscription period and pricing if needed.
+/// - Raises a domain event to recalculate or reset feature usage based on the new plan.
+/// 
+/// </summary>
+
 public class ChangeSubscriptionCommandHandler(
     IPlanRepository planRepository,
     ISubscriptionRepository subscriptionRepository,

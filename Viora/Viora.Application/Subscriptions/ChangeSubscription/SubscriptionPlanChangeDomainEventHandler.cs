@@ -7,6 +7,15 @@ using Viora.Domain.Subscriptions.Events;
 
 namespace Viora.Application.Subscriptions.ChangeSubscription;
 
+/// <summary>
+/// Domain event triggered when a subscription is created, changed, or renewed.
+/// 
+/// Responsibilities:
+/// - Initializes or updates feature usage records for the subscription.
+/// - Creates usage entries for limited features based on plan configuration.
+/// - Ensures feature limits are correctly applied for the subscription period.
+/// 
+/// </summary>
 public class SubscriptionPlanChangeDomainEventHandler(
     IPlanFeatureRepository planFeatureRepository,
     IPlanRepository planRepository,
@@ -40,7 +49,7 @@ public class SubscriptionPlanChangeDomainEventHandler(
         var newFeatureUsages = FeatureUsage.CreateMany(notification.OrganizationId, newLimitedFeatures, notification.StartTime, notification.EndTime);
         if (newFeatureUsages.IsFailure)
             throw new InvalidOperationException($"Failed to create feature usages for the new plan: {newFeatureUsages.Error}");
-        featureUsageRepository.AddRange(newFeatureUsages.Value, cancellationToken);
+        featureUsageRepository.AddRange(newFeatureUsages.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

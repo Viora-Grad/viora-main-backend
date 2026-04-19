@@ -3,7 +3,8 @@
 public interface IFeatureUsageRepository
 {
     Task<FeatureUsage?> GetByOrganizationIdAndFeatureIdAsync(Guid organizationId, Guid featureId, CancellationToken cancellationToken);
-    public void Add(FeatureUsage featureUsage);
+    public void AddRange(IEnumerable<FeatureUsage> featureUsages);
 
+    public void RemoveRange(IEnumerable<Guid> featureUsageIds);
 
 }
