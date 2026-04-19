@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Organizations;
 using Viora.Domain.Plans;
 using Viora.Domain.Subscriptions;
+using Viora.Domain.Subscriptions.Internal;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -33,7 +34,10 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
 
         builder.Property(x => x.Status)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .HasConversion(
+                v => v.Value,
+                v => SubscriptionStatus.CheckSubscriptionStatus(v).Value);
 
         builder.Property(x => x.SubscriptionsStartTime)
             .IsRequired();

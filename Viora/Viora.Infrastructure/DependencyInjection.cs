@@ -5,6 +5,7 @@ using Viora.Application.Abstractions.Clock;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations;
 using Viora.Domain.Plans;
+using Viora.Domain.Plans.Addons;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
 using Viora.Infrastructure.Clock;
@@ -12,9 +13,9 @@ using Viora.Infrastructure.Repositories;
 
 namespace Viora.Infrastructure;
 
-internal class DependencyInjection
+public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
 
         var ConnectionString = configuration.GetConnectionString("Database");
@@ -27,6 +28,7 @@ internal class DependencyInjection
         services.AddScoped<ILimitedFeatureRepository, LimitedFeatureRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+        services.AddScoped<ILimitedFeatureAddonRepository, LimitedFeatutreAddonRepository>();
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 

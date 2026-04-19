@@ -32,8 +32,12 @@ internal sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
         builder.Property(p => p.Price)
             .HasPrecision(18, 2);
 
-        builder.Property(p => p.PlanPeriod)
-            .IsRequired();
+        builder.Property(x => x.PlanPeriod)
+            .HasConversion(
+                v => v.Id,
+                v => PlanPeriod.FromId(v)
+            )
+            .HasColumnName("PlanPeriodId");
 
         builder.Property(p => p.Content)
             .HasConversion(
