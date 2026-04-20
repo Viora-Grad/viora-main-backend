@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.MedicalRecords;
 
 namespace Viora.Domain.Users;
 /// <summary>
@@ -12,6 +13,8 @@ public sealed class Customer : Entity
     public Guid UserId { get; private set; } // required and Unique
     public Guid? MedicalRecordId { get; private set; } // can be removed since the relation is optional from the customer side
     public IReadOnlyList<Guid> OrganizationsVisited => _organizationsVisited.ToList().AsReadOnly();
+    public User User { get; private set; } = null!; // navigation property for ef core
+    public MedicalRecord? MedicalRecord { get; private set; } // navigation property for ef core
     private Customer() { } // for ef core
     private Customer(Guid id, Guid userId, Guid? medicalRecordId)
         : base(id)

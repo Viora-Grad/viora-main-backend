@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.MedicalRecord.Internal;
+﻿namespace Viora.Domain.MedicalRecords.Internal;
 
 public sealed record Allergy
 {

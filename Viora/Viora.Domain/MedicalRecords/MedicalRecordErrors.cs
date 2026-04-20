@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 
-namespace Viora.Domain.MedicalRecord;
+namespace Viora.Domain.MedicalRecords;
 
 public static class MedicalRecordErrors
 {

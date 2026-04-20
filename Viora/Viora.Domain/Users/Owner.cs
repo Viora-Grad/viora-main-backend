@@ -11,6 +11,7 @@ public sealed class Owner : Entity
 
     public AcceptedTerms AcceptedTerms { get; private set; } = AcceptedTerms.Empty; // not sure why this is included here not in organization, but leave it for now 
     public Guid GatewayCredentialsId { get; private set; } = Guid.Empty;
+    public User User { get; private set; } = null!; // navigation property for ef core
 
     private Owner() { } // for ef core
     private Owner(Guid id, Guid userId, Guid nationalityId, Guid gatewayCredentialsId, AcceptedTerms acceptedTerms)
@@ -21,6 +22,7 @@ public sealed class Owner : Entity
         GatewayCredentialsId = gatewayCredentialsId;
         AcceptedTerms = acceptedTerms;
     }
+
     public static Owner Create(Guid nationalityId, Guid userId, Guid gatewayCredentialsId, AcceptedTerms acceptedTerms)
     {
         // add any validation if needed

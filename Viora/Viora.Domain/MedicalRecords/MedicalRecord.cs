@@ -1,7 +1,8 @@
 ﻿using Viora.Domain.Abstractions;
-using Viora.Domain.MedicalRecord.Internal;
+using Viora.Domain.MedicalRecords.Internal;
+using Viora.Domain.Users;
 
-namespace Viora.Domain.MedicalRecord;
+namespace Viora.Domain.MedicalRecords;
 
 public sealed class MedicalRecord : Entity
 {
@@ -12,6 +13,8 @@ public sealed class MedicalRecord : Entity
     public HeartRate HeartRate { get; private set; } = null!;
     public BloodGlucose BloodGlucose { get; private set; } = null!;
     public IReadOnlyList<Allergy> Allergies => _allergies.ToList().AsReadOnly();
+    public Customer Customer { get; private set; } = null!; // navigation property for ef core
+
 
 
     private MedicalRecord() { } // for ef core
