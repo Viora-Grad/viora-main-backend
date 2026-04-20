@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 
-namespace Viora.Domain.Users;
+namespace Viora.Domain.Users.Customers;
 
 public static class CustomerErrors
 {

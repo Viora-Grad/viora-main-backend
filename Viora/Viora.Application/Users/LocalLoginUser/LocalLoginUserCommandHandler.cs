@@ -2,7 +2,9 @@
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Customers;
+using Viora.Domain.Users.Identity;
+using Viora.Domain.Users.Owners;
 
 namespace Viora.Application.Users.LocalLoginUser;
 

@@ -27,7 +27,7 @@ internal class OrganizationVisitConfiguration : IEntityTypeConfiguration<Organiz
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(ov => ov.Customer)
-            .WithMany()
+            .WithMany(customer => customer.OrganizationVisits)
             .HasForeignKey(ov => ov.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
     }

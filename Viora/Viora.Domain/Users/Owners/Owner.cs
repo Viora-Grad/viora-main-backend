@@ -1,8 +1,9 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Users.Events;
+using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
 
-namespace Viora.Domain.Users;
+namespace Viora.Domain.Users.Owners;
 
 public sealed class Owner : Entity
 {

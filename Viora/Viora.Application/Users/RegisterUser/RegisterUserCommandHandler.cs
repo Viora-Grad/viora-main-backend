@@ -1,7 +1,7 @@
 ﻿using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
 
 namespace Viora.Application.Users.RegisterUser;

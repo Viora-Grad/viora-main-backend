@@ -2,7 +2,7 @@
 using Viora.Domain.Shared;
 using Viora.Domain.Users.Internal;
 
-namespace Viora.Domain.Users;
+namespace Viora.Domain.Users.Identity;
 
 /// <summary>
 /// User entity represents the identity of the different actors in the system, such as customers and owners.
@@ -14,7 +14,8 @@ public class User : Entity
     private readonly HashSet<Contact> _contact = [];
     private readonly HashSet<Role> _roles = []; // for future role-based access control implementation
     private readonly List<AuthIdentity> _identities = [];
-    protected User(Guid id, FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
+    protected User(Guid id, FirstName firstName, LastName lastName, UserName userName, Email email,
+        Age age, UserStatus status, DateTime utcNow)
         : base(id)
     {
         FirstName = firstName;
@@ -22,6 +23,8 @@ public class User : Entity
         UserName = userName;
         Email = email;
         Age = age;
+        Status = status;
+        JoinedAt = utcNow;
     }
     private User() { } // for ef core
     public FirstName FirstName { get; private set; } = null!;
@@ -29,10 +32,9 @@ public class User : Entity
     public UserName UserName { get; private set; } = null!; // based on mobile application request {Unique}
     public Email Email { get; private set; } = null!;
     public Age Age { get; private set; } = null!;
-    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-    public bool IsActive { get; private set; } = true;
-    public bool IsDeleted { get; private set; } // for soft delete implementation
-    public bool IsEmailVerified { get; private set; }
+    public DateTime JoinedAt { get; private set; }
+    public UserStatus Status { get; private set; }
+    public bool IsEmailVerified { get; private set; } = false;
     public IReadOnlyList<Contact> Contacts => _contact.ToList().AsReadOnly();
     public IReadOnlyCollection<AuthIdentity> Identities => _identities.AsReadOnly();
     public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
@@ -75,16 +77,15 @@ public class User : Entity
     }
     public void MarkAsDeleted()
     {
-        IsDeleted = true;
-        IsActive = false;
+        Status = UserStatus.Deleted;
     }
     public void Deactivate()
     {
-        IsActive = false;
+        Status = UserStatus.Deactivated;
     }
     public void Activate()
     {
-        IsActive = true;
+        Status = UserStatus.Active;
     }
     public void VerifyEmail()
     {
@@ -102,13 +103,12 @@ public class User : Entity
         _identities.Add(identity);
         return Result.Success();
     }
-    public static User Create(FirstName firstName, LastName lastName, UserName userName, Email email, Age age)
+    public static User Create(FirstName firstName, LastName lastName, UserName userName, Email email, Age age, DateTime utcNow)
     {
 
-        var user = new User(Guid.NewGuid(), firstName, lastName, userName, email, age);
+        var user = new User(Guid.NewGuid(), firstName, lastName, userName, email, age, UserStatus.Active, utcNow);
         user._roles.Add(Role.Registered); // default role assignment, can be changed later
         return user;
     }
-
 
 }

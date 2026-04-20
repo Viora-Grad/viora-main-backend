@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
 
 namespace Viora.Infrastructure.Configurations;
@@ -42,9 +42,14 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(age => age.Value, value => new Age(value))
             .IsRequired();
 
-        builder.Property(user => user.CreatedAt);
-        builder.Property(user => user.IsActive);
-        builder.Property(user => user.IsDeleted);
+        builder.Property(user => user.JoinedAt)
+            .HasColumnType("datetime")
+            .IsRequired();
+
+        builder.Property(user => user.Status)
+            .HasConversion<string>()
+            .IsRequired();
+
         builder.Property(user => user.IsEmailVerified);
 
         builder.HasMany(user => user.Identities)
@@ -86,7 +91,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 j => j.HasOne<Role>().WithMany()
                   .HasForeignKey("RoleId").OnDelete(DeleteBehavior.Cascade),
                 j => j.HasOne<User>().WithMany()
-                  .HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade));
+                  .HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade),
+                j => j.HasKey("UserId", "RoleId")
+            );
 
         builder.Navigation(user => user.Roles)
             .HasField("_roles")

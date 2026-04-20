@@ -40,9 +40,9 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
     {
         try
         {
-            int result = await base.SaveChangesAsync(cancellationToken);
-
             await PublishDomainEventsAsync();
+
+            int result = await base.SaveChangesAsync(cancellationToken);
 
             return result;
         }

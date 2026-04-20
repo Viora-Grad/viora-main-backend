@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Owners;
 
 namespace Viora.Infrastructure.Repositories.Users;
 

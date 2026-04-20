@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.MedicalRecords.Internal;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Customers;
 
 namespace Viora.Domain.MedicalRecords;
 

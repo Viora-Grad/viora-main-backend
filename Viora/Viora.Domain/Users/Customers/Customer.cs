@@ -1,7 +1,9 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.MedicalRecords;
+using Viora.Domain.Organizations.OrganizationHistory;
+using Viora.Domain.Users.Identity;
 
-namespace Viora.Domain.Users;
+namespace Viora.Domain.Users.Customers;
 /// <summary>
 /// <strong>Resolving User instances to Customer in first assignment
 /// might allow Customer and Owner existence for the same UserId which might not be a bad resolution</strong>
@@ -15,6 +17,7 @@ public sealed class Customer : Entity
     public IReadOnlyList<Guid> OrganizationsVisited => _organizationsVisited.ToList().AsReadOnly();
     public User User { get; private set; } = null!; // navigation property for ef core
     public MedicalRecord? MedicalRecord { get; private set; } // navigation property for ef core
+    public ICollection<OrganizationVisits> OrganizationVisits { get; private set; } = null!; // navigation property for ef core
     private Customer() { } // for ef core
     private Customer(Guid id, Guid userId, Guid? medicalRecordId)
         : base(id)

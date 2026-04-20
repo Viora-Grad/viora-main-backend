@@ -1,7 +1,9 @@
 ﻿using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Customers;
+using Viora.Domain.Users.Identity;
+using Viora.Domain.Users.Owners;
 
 namespace Viora.Infrastructure.Authentication;
 

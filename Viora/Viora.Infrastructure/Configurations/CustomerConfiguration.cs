@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.MedicalRecords;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Customers;
 
 namespace Viora.Infrastructure.Configurations;
 

@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 
-namespace Viora.Domain.Users;
+namespace Viora.Domain.Users.Identity;
 
 public static class UserErrors
 {

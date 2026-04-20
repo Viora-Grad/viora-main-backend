@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Identity;
 namespace Viora.Infrastructure.Repositories.Users;
 
 internal class UserRepository : Repository<User>, IUserRepository

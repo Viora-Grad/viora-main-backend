@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Users;
+﻿namespace Viora.Domain.Users.Customers;
 
 public interface ICustomerRepository
 {

@@ -1,5 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Abstractions.Authentication;
 

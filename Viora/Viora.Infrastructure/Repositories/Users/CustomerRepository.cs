@@ -1,4 +1,4 @@
-﻿using Viora.Domain.Users;
+﻿using Viora.Domain.Users.Customers;
 
 namespace Viora.Infrastructure.Repositories.Users;
 

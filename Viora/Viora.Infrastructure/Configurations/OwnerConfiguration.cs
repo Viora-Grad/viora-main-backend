@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Viora.Domain.Users;
+using Viora.Domain.Users.Owners;
 
 namespace Viora.Infrastructure.Configurations;
 
