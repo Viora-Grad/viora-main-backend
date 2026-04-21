@@ -7,7 +7,6 @@ using Viora.Application.Subscriptions.RenewSubscriptions;
 namespace Viora.Api.Controllers.Subscriptions;
 
 [ApiController]
-[Route("api/subscription")]
 public class SubscriptionController : ControllerBase
 {
     private readonly ISender _sender;
@@ -17,7 +16,7 @@ public class SubscriptionController : ControllerBase
     }
 
     [HttpPost]
-    [Route("/CreateSubscription")]
+    [Route("api/subscription/create")]
     public async Task<IActionResult> CreateSubscriptions(
         CreateSubscriptionRequest request,
         CancellationToken cancellationToken)
@@ -30,7 +29,7 @@ public class SubscriptionController : ControllerBase
     }
 
     [HttpPut]
-    [Route("/RenewSubscription")]
+    [Route("api/subscription/renew")]
     public async Task<IActionResult> RenewSubscription(
         RenewSubscriptionRequest request,
         CancellationToken cancellationToken)
@@ -39,11 +38,11 @@ public class SubscriptionController : ControllerBase
         var result = await _sender.Send(command, cancellationToken);
         if (result.IsFailure)
             return BadRequest(result.Error);
-        return Ok(result);
+        return Ok();
     }
 
     [HttpPut]
-    [Route("/ChangeSubscriptionPlan")]
+    [Route("api/subscription/change")]
     public async Task<IActionResult> ChangeSubscriptionPlan(
         ChangeSubscriptionPlanRequest request,
         CancellationToken cancellationToken)

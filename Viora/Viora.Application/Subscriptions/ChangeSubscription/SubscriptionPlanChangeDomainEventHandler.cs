@@ -31,8 +31,8 @@ public class SubscriptionPlanChangeDomainEventHandler(
             ?? throw new NotFoundException($"Plan with ID {notification.OldPlanId} not found.");
         var oldPlanFeatures = await planFeatureRepository.GetByPlanIdAsync(notification.OldPlanId, cancellationToken)
             ?? throw new NotFoundException($"Features for Plan with ID {notification.OldPlanId} not found.");
-        var LimitedFeaturesIds = oldPlanFeatures.Select(f => f.LimitedFeatureId).ToList();
-        featureUsageRepository.RemoveRange(LimitedFeaturesIds);
+        var LimitedFeaturesIds = oldPlanFeatures.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
+        featureUsageRepository.RemoveRangeByLimitedId(LimitedFeaturesIds);
 
         //add feature usages for the new plan
         var newPlan = await planRepository.GetByIdAsync(notification.NewPlanId, cancellationToken)
@@ -41,7 +41,7 @@ public class SubscriptionPlanChangeDomainEventHandler(
         var newPlanFeatures = await planFeatureRepository.GetByPlanIdAsync(notification.NewPlanId, cancellationToken)
             ?? throw new NotFoundException($"Features for Plan with ID {notification.NewPlanId} not found.");
 
-        var newLimitedFeaturesIds = newPlanFeatures.Select(f => f.LimitedFeatureId).ToList();
+        var newLimitedFeaturesIds = newPlanFeatures.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
 
         var newLimitedFeatures = await limitedFeatureRepository.GetByIdsAsync(newLimitedFeaturesIds, cancellationToken)
             ?? throw new NotFoundException($"Limited Features with IDs {string.Join(", ", newLimitedFeaturesIds)} not found.");

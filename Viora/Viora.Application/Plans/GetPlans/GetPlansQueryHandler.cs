@@ -35,8 +35,8 @@ public class GetPlansQueryHandler(
         var planIds = plans.Select(p => p.Id).ToList();
 
         var planFeatures = await planFeatureRepository.GetByPlanIdsAsync(planIds, cancellationToken);
-        var featureIds = planFeatures.Select(pf => pf.FeatureId).Distinct().ToList();
-        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Distinct().ToList();
+        var featureIds = planFeatures.Select(pf => pf.FeatureId).Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
+        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
 
         var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
         var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
@@ -52,12 +52,12 @@ public class GetPlansQueryHandler(
         {
             var features = planFeatureLookup.GetValueOrDefault(plan.Id, []);
             var featureDtos = features
-                                    .Where(pf => featureLookup.ContainsKey(pf.FeatureId))
-                                    .Select(pf => FeatureDTO.MapToDTO(featureLookup[pf.FeatureId]))
+                                    .Where(pf => pf.FeatureId.HasValue && featureLookup.ContainsKey(pf.FeatureId.Value))
+                                    .Select(pf => FeatureDTO.MapToDTO(featureLookup[pf.FeatureId.Value]))
                                     .ToList();
             var limitedFeatureDtos = features
-                                    .Where(pf => limitedFeatureLookup.ContainsKey(pf.LimitedFeatureId))
-                                    .Select(pf => LimitedFeatureDTO.MapToDTO(limitedFeatureLookup[pf.LimitedFeatureId]))
+                                    .Where(pf => pf.LimitedFeatureId.HasValue && limitedFeatureLookup.ContainsKey(pf.LimitedFeatureId.Value))
+                                    .Select(pf => LimitedFeatureDTO.MapToDTO(limitedFeatureLookup[pf.LimitedFeatureId.Value]))
                                     .ToList();
 
             return PlanDTO.MapToDTO(plan, featureDtos, limitedFeatureDtos);

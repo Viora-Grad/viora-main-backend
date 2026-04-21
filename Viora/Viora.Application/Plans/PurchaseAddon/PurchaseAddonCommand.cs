@@ -3,5 +3,5 @@
 namespace Viora.Application.Plans.PurchaseAddon;
 
 public sealed record PurchaseAddonCommand(Guid SubscriptionId,
-    Guid LimitedFeatureAddon,
-    Guid LimitedFeatureId) : ICommand;
+    Guid LimitedFeatureId,
+    Guid LimitedFeatureAddonId) : ICommand;

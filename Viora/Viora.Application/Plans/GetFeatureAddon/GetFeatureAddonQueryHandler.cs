@@ -26,9 +26,11 @@ public class GetFeatureAddonQueryHandler(
     {
         var limitedFeature = await limitedFeatureRepository.GetByIdAsync(request.LimitedFeatureId, cancellationToken)
             ?? throw new NotFoundException($"Limited feature with id {request.LimitedFeatureId} not found.");
-        var addon = await limitedFeatureAddonRepository.GetByLimitedFeatureIdAsync(request.LimitedFeatureId, cancellationToken)
-            ?? throw new NotFoundException($"Addon for limited feature with id {request.LimitedFeatureId} not found.");
+        var addon = await limitedFeatureAddonRepository.GetByLimitedFeatureIdAsync(request.LimitedFeatureId, cancellationToken);
+        if (addon == null || !addon.Any())
+            throw new NotFoundException($"Limited feature with id {request.LimitedFeatureId} does not have Addon");
         var addonDTOs = addon.Select(FeatureAddonDTO.MapToDto).ToList();
+
         return Result.Success(addonDTOs);
     }
 }

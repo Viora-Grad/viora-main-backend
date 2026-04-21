@@ -49,8 +49,8 @@ public class PurchaseAddonCommandHandler(
             cancellationToken)
             ?? throw new NotFoundException(
                 $"Feature usage for Organization ID {organization.Id} and Feature ID {request.LimitedFeatureId} not found.");
-        var addon = await limitedFeatureAddonRepository.GetByIdAsync(request.LimitedFeatureId, cancellationToken)
-            ?? throw new NotFoundException($"there are not addons for this Feature with id {request.LimitedFeatureId}");
+        var addon = await limitedFeatureAddonRepository.GetByIdAsync(request.LimitedFeatureAddonId, cancellationToken)
+            ?? throw new NotFoundException($"there are not addons with id {request.LimitedFeatureAddonId}");
         featureUsage.RechargeQuota(addon.RestoreValue);
         await unitOfWork.SaveChangesAsync();
         return Result.Success();

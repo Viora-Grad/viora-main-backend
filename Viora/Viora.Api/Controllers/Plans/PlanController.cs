@@ -8,7 +8,6 @@ using Viora.Application.Plans.PurchaseAddon;
 namespace Viora.Api.Controllers.Plans;
 
 [ApiController]
-[Route("api/plan")]
 
 public class PlanController : ControllerBase
 {
@@ -20,7 +19,7 @@ public class PlanController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/get/{planId}")]
+    [Route("api/plan/get/{planId}")]
     public async Task<IActionResult> GetPlan(
         Guid planId,
         CancellationToken cancellationToken)
@@ -35,7 +34,7 @@ public class PlanController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/getAll")]
+    [Route("api/plan/getAll")]
     public async Task<IActionResult> GetAllPlans(
         CancellationToken cancellationToken)
     {
@@ -48,7 +47,7 @@ public class PlanController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/GetAddon/{LimitedFeatureId}")]
+    [Route("api/plan/GetAddon/{LimitedFeatureId}")]
     public async Task<IActionResult> GetFeatureAddon(Guid LimitedFeatureId, CancellationToken cancellationToken)
     {
         var query = new GetFeatureAddonQuery(LimitedFeatureId);
@@ -61,7 +60,7 @@ public class PlanController : ControllerBase
 
 
     [HttpPut]
-    [Route("/Recharge/LimitFeature")]
+    [Route("api/plan/recharge/LimitedFeature")]
     public async Task<IActionResult> RechargeLimitedFeature(
         CreateAddonRequest request,
         CancellationToken cancellationToken)
@@ -70,6 +69,6 @@ public class PlanController : ControllerBase
         var result = await _sender.Send(command, cancellationToken);
         if (result.IsFailure)
             return BadRequest(result.Error);
-        return Ok(result);
+        return Ok();
     }
 }

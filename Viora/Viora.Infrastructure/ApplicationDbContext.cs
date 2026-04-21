@@ -29,7 +29,7 @@ internal class ApplicationDbContext : DbContext, IUnitOfWork
         base.OnModelCreating(modelBuilder);
     }
 
-    public async Task<int> SaveChangeAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -56,11 +56,14 @@ internal class ApplicationDbContext : DbContext, IUnitOfWork
         var domainEvents = domainEntities
             .SelectMany(e => e.DomainEvents)
             .ToList();
+        ChangeTracker.Entries<Entity>()
+        .ToList()
+        .ForEach(e => e.Entity.ClearDomainEvents());
         foreach (var domainEvent in domainEvents)
         {
             await _publisher.Publish(domainEvent, cancellationToken);
         }
-        domainEntities.ForEach(e => e.ClearDomainEvents());
+
     }
 
 }

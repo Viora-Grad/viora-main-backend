@@ -4,8 +4,8 @@ namespace Viora.Application.Plans.DTO;
 
 public class FeatureAddonDTO
 {
-    Guid id { get; set; }
-    Guid LimitedFeatureId { get; set; }
+    public Guid id { get; set; }
+    public Guid LimitedFeatureId { get; set; }
     public int AdditionalQuota { get; set; }
     public double Price { get; set; }
 

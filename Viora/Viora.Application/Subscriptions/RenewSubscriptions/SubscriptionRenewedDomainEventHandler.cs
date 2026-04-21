@@ -29,9 +29,11 @@ internal class SubscriptionRenewedDomainEventHandler(
             ?? throw new NotFoundException($"The plan features for plan with id {notification.PlanId} were not found");
         foreach (var feature in Features)
         {
-            var LimitedFeature = await limitedFeatureRepository.GetByIdAsync(feature.LimitedFeatureId, cancellationToken)
-                ?? throw new NotFoundException($"The limited feature for plan feature with id {feature.LimitedFeatureId} was not found");
+            if (feature.LimitedFeatureId is null)
 
+                continue;
+
+            var LimitedFeature = await limitedFeatureRepository.GetByIdAsync((Guid)feature.LimitedFeatureId, cancellationToken);
             var featureUsage = await featureUsageRepository.GetByOrganizationIdAndFeatureIdAsync(
                 notification.OrganizationId,
                 LimitedFeature.Id, cancellationToken)

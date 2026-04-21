@@ -27,7 +27,7 @@ internal class SubscriptionCreatedDomainEvnetHandler(
     {
         var features = await planFeatureRepository.GetByPlanIdAsync(notification.PlanId, cancellationToken)
             ?? throw new NotFoundException($"Plan features with {notification.PlanId} not found.");
-        var limitedFeaturesIds = features.Select(feature => feature.LimitedFeatureId).ToList();
+        var limitedFeaturesIds = features.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
         var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeaturesIds, cancellationToken);
         var featureUsages = FeatureUsage.CreateMany(
             notification.OrganizationId,

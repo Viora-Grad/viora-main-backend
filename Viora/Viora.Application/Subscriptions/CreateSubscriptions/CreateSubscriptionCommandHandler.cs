@@ -35,7 +35,7 @@ public class CreateSubscriptionCommandHandler(
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"the organization with id {request.OrganizationId} not found");
         var subscription = await subscriptionRepository.GetByOrganizationIdAsync(request.OrganizationId, cancellationToken);
-        if (subscription is null)
+        if (subscription is not null)
             return Result.Failure<Guid>(SubscriptionError.OrganizationAlreadySubscribed);
         var startDate = dateTimeProvider.UtcNow;
         var endDate = plan.PlanPeriod.CalculateEndTime(startDate);

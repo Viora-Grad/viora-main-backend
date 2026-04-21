@@ -1,4 +1,5 @@
 
+using Viora.Api.Middleware;
 using Viora.Application;
 using Viora.Infrastructure;
 
@@ -17,8 +18,9 @@ if (app.Environment.IsDevelopment())
 }
 */
 app.UseHttpsRedirection();
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
+app.UseRouting();
 
 app.MapControllers();
 app.MapGet("/", () => "welcome in Viora API");

@@ -30,8 +30,8 @@ public class GetPlanByIdQueryHandler(
         var plan = await planRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Plan with ID {request.Id} not found.");
         var planFeatures = await planFeatureRepository.GetByPlanIdAsync(request.Id, cancellationToken);
-        var featureIds = planFeatures.Select(pf => pf.FeatureId).ToList();
-        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).ToList();
+        var featureIds = planFeatures.Select(pf => pf.FeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
+        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
         var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
         var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
 

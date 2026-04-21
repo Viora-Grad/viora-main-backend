@@ -13,7 +13,6 @@ internal sealed class PlanFeatureRepository : Repository<PlanFeature>, IPlanFeat
     {
         return await DbContext.Set<PlanFeature>()
             .Where(pf => pf.PlanId == planId)
-            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
@@ -25,7 +24,6 @@ internal sealed class PlanFeatureRepository : Repository<PlanFeature>, IPlanFeat
         var distinctIds = planIds.Distinct().ToList();
 
         return await DbContext.Set<PlanFeature>()
-            .AsNoTracking()
             .Where(pf => distinctIds.Contains(pf.PlanId))
             .ToListAsync(cancellationToken);
     }
