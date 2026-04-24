@@ -6,6 +6,6 @@ namespace Viora.Domain.Users.Events;
 /// <strong> This event is made entirely for future purposes when other features are implemented,
 /// this could be used to trigger additional actions or notifications. </strong>
 /// </summary>
-public sealed record OwnerCreatedEvent(Guid Id, Guid UserId, Guid GatewayCredentialsId) : IDomainEvent;
+public sealed record OwnerCreatedEvent(Guid Id) : IDomainEvent;
 
 

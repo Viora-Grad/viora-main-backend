@@ -1,7 +1,9 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.MedicalRecords;
 using Viora.Domain.Organizations.OrganizationHistory;
+using Viora.Domain.Shared;
 using Viora.Domain.Users.Identity;
+using Viora.Domain.Users.Internal;
 
 namespace Viora.Domain.Users.Customers;
 /// <summary>
@@ -12,23 +14,29 @@ namespace Viora.Domain.Users.Customers;
 public sealed class Customer : Entity
 {
     private readonly HashSet<Guid> _organizationsVisited = [];
-    public Guid UserId { get; private set; } // required and Unique
+    private readonly HashSet<Contact> _contacts = [];
+    public UserName? UserName { get; private set; }
+    public PersonalInfo PersonalInfo { get; private set; } = null!;
+    public DateTime JoinedAt { get; private set; }
     public Guid? MedicalRecordId { get; private set; } // can be removed since the relation is optional from the customer side
     public IReadOnlyList<Guid> OrganizationsVisited => _organizationsVisited.ToList().AsReadOnly();
-    public User User { get; private set; } = null!; // navigation property for ef core
+    public IReadOnlyList<Contact> Contacts => _contacts.ToList().AsReadOnly();
+    public AuthAccount AuthAccount { get; private set; } = null!; // navigation property for ef core
     public MedicalRecord? MedicalRecord { get; private set; } // navigation property for ef core
     public ICollection<OrganizationVisits> OrganizationVisits { get; private set; } = null!; // navigation property for ef core
     private Customer() { } // for ef core
-    private Customer(Guid id, Guid userId, Guid? medicalRecordId)
+    private Customer(Guid id, UserName? userName, PersonalInfo personalInfo, DateTime joinedAt, Guid? medicalRecordId)
         : base(id)
     {
-        UserId = userId;
+        UserName = userName;
+        PersonalInfo = personalInfo;
+        JoinedAt = joinedAt;
         MedicalRecordId = medicalRecordId;
     }
-    public static Customer Create(Guid userId, Guid? medicalRecordId)
+    public static Customer Create(UserName? userName, PersonalInfo personalInfo, DateTime utcNow, Guid? medicalRecordId)
     {
         // add any validation if needed
-        return new Customer(Guid.NewGuid(), userId, medicalRecordId);
+        return new Customer(Guid.NewGuid(), userName, personalInfo, utcNow, medicalRecordId);
     }
     public Result AddMedicalRecord(Guid medicalRecordId)
     {

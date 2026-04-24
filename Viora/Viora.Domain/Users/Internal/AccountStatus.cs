@@ -1,6 +1,6 @@
 ﻿namespace Viora.Domain.Users.Internal;
 
-public enum UserStatus
+public enum AccountStatus
 {
     Active,
     Suspended,
