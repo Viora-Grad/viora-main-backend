@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
 
 
@@ -6,8 +9,63 @@ namespace Viora.Infrastructure;
 
 internal class ApplicationDbContext : DbContext, IUnitOfWork
 {
-    public override Task<int> SaveChangesAsync(CancellationToken token = default)
+
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IPublisher _publisher;
+
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        IDateTimeProvider dateTimeProvider,
+        IPublisher publisher
+        ) : base(options)
     {
-        throw new NotImplementedException();
+        _publisher = publisher;
+        _dateTimeProvider = dateTimeProvider;
     }
+
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await PuplishDomainEventAsync(cancellationToken);
+
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+
+            return result;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyException("Concurrency exception occurred.", ex);
+
+        }
+    }
+
+    public async Task PuplishDomainEventAsync(CancellationToken cancellationToken)
+    {
+        var domainEntities = ChangeTracker.Entries<Entity>()
+            .Where(e => e.Entity.DomainEvents != null && e.Entity.DomainEvents.Any())
+            .Select(e => e.Entity)
+            .ToList();
+        var domainEvents = domainEntities
+            .SelectMany(e => e.DomainEvents)
+            .ToList();
+        ChangeTracker.Entries<Entity>()
+        .ToList()
+        .ForEach(e => e.Entity.ClearDomainEvents());
+        foreach (var domainEvent in domainEvents)
+        {
+            await _publisher.Publish(domainEvent, cancellationToken);
+        }
+
+    }
+
 }

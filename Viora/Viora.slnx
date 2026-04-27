@@ -1,7 +1,4 @@
 <Solution>
-  <Project Path="docker-compose.dcproj">
-    <Build />
-  </Project>
   <Project Path="Viora.Api/Viora.Api.csproj" />
   <Project Path="Viora.Application/Viora.Application.csproj" />
   <Project Path="Viora.Domain/Viora.Domain.csproj" />

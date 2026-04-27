@@ -1,4 +1,5 @@
-﻿using Viora.Domain.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using Viora.Domain.Abstractions;
 
 
 namespace Viora.Infrastructure.Repositories;
@@ -15,6 +16,26 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<T>().FindAsync([id], cancellationToken);
+    }
+
+    public async Task<List<T>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<T>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
+    {
+        if (ids is null || !ids.Any())
+            return new List<T>();
+
+        var idList = ids.Distinct().ToList();
+
+        return await DbContext.Set<T>()
+            .Where(e => idList.Contains(EF.Property<Guid>(e, "Id")))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
     #endregion  
 
