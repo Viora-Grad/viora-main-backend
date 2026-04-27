@@ -6,11 +6,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Viora.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class intial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AddonOrders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalPrice = table.Column<double>(type: "float", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SubscriptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AddonOrders", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Features",
                 columns: table => new
@@ -66,17 +82,61 @@ namespace Viora.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SubscriptionOrder",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlanId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubscriptionOrderType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrganizationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalPrice = table.Column<double>(type: "float(18)", precision: 18, scale: 2, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SubscriptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionOrder", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AddonOrderLimitedFeatures",
+                columns: table => new
+                {
+                    AddonOrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LimitedFeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AddonOrderLimitedFeatures", x => new { x.AddonOrderId, x.LimitedFeatureId });
+                    table.ForeignKey(
+                        name: "FK_AddonOrderLimitedFeatures_AddonOrders_AddonOrderId",
+                        column: x => x.AddonOrderId,
+                        principalTable: "AddonOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LimitedFeatureAddons",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LimitedFeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RestoreValue = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<double>(type: "float(18)", precision: 18, scale: 2, nullable: false)
+                    AddonType = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<double>(type: "float(18)", precision: 18, scale: 2, nullable: false),
+                    AddonOrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LimitedFeatureAddons", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LimitedFeatureAddons_AddonOrders_AddonOrderId",
+                        column: x => x.AddonOrderId,
+                        principalTable: "AddonOrders",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_LimitedFeatureAddons_LimitedFeatures_LimitedFeatureId",
                         column: x => x.LimitedFeatureId,
@@ -113,8 +173,8 @@ namespace Viora.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PlanId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LimitedFeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    FeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LimitedFeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -123,8 +183,7 @@ namespace Viora.Infrastructure.Migrations
                         name: "FK_PlanFeatures_Features_FeatureId",
                         column: x => x.FeatureId,
                         principalTable: "Features",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PlanFeatures_LimitedFeatures_LimitedFeatureId",
                         column: x => x.LimitedFeatureId,
@@ -166,10 +225,40 @@ namespace Viora.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SubscriptionAddon",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubscriptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LimitedFeatureAddonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionAddon", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubscriptionAddon_LimitedFeatureAddons_LimitedFeatureAddonId",
+                        column: x => x.LimitedFeatureAddonId,
+                        principalTable: "LimitedFeatureAddons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SubscriptionAddon_Subscriptions_SubscriptionId",
+                        column: x => x.SubscriptionId,
+                        principalTable: "Subscriptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_FeatureUsages_OrganizationId",
                 table: "FeatureUsages",
                 column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LimitedFeatureAddons_AddonOrderId",
+                table: "LimitedFeatureAddons",
+                column: "AddonOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LimitedFeatureAddons_LimitedFeatureId",
@@ -192,6 +281,16 @@ namespace Viora.Infrastructure.Migrations
                 column: "PlanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SubscriptionAddon_LimitedFeatureAddonId",
+                table: "SubscriptionAddon",
+                column: "LimitedFeatureAddonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubscriptionAddon_SubscriptionId",
+                table: "SubscriptionAddon",
+                column: "SubscriptionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Subscriptions_OrganizationId",
                 table: "Subscriptions",
                 column: "OrganizationId");
@@ -206,19 +305,31 @@ namespace Viora.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FeatureUsages");
+                name: "AddonOrderLimitedFeatures");
 
             migrationBuilder.DropTable(
-                name: "LimitedFeatureAddons");
+                name: "FeatureUsages");
 
             migrationBuilder.DropTable(
                 name: "PlanFeatures");
 
             migrationBuilder.DropTable(
-                name: "Subscriptions");
+                name: "SubscriptionAddon");
+
+            migrationBuilder.DropTable(
+                name: "SubscriptionOrder");
 
             migrationBuilder.DropTable(
                 name: "Features");
+
+            migrationBuilder.DropTable(
+                name: "LimitedFeatureAddons");
+
+            migrationBuilder.DropTable(
+                name: "Subscriptions");
+
+            migrationBuilder.DropTable(
+                name: "AddonOrders");
 
             migrationBuilder.DropTable(
                 name: "LimitedFeatures");

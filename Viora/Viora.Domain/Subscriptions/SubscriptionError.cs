@@ -11,4 +11,7 @@ public static class SubscriptionError
     public static readonly Error SubscriptionNotActivated = new Error("subscriptionNotActivated", "The subscription is not activated.", ErrorCategory.Validation);
     public static readonly Error LimitExceeded = new Error("limitExceeded", "The usage limit for the feature has been exceeded.", ErrorCategory.Validation);
     public static readonly Error OrganizationAlreadySubscribed = new Error("organizationAlreadySubscribed", "The organization already has an active subscription.", ErrorCategory.Validation);
+    public static readonly Error InvalidAddonList = new Error("invalidAddonList", "The provided list of addons is invalid.", ErrorCategory.Validation);
+    public static readonly Error InvalidPlan = new Error("invalidPlan", "organization already subscribed to this plan", ErrorCategory.Validation);
+    public static readonly Error InvalidData = new Error("InvalidData", "the subscription organization does not match with organizationId", ErrorCategory.Validation);
 }

@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Viora.Domain.Plans.Addons;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.Subscriptions.Addons;
+using Viora.Domain.Subscriptions.Addons.Internal;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -18,6 +19,13 @@ internal sealed class LimitedFeatureAddonConfiguration : IEntityTypeConfiguratio
 
         builder.Property(x => x.Price)
             .HasPrecision(18, 2);
+
+        builder.Property(x => x.AddonType)
+            .IsRequired()
+            .HasConversion(
+            v => v.Id,
+            v => AddonType.FromId(v)
+            );
 
         builder.HasOne<LimitedFeature>()
             .WithMany()

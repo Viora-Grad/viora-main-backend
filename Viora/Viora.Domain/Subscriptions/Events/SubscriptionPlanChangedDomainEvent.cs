@@ -3,6 +3,7 @@
 namespace Viora.Domain.Subscriptions.Events;
 
 public sealed record SubscriptionPlanChangedDomainEvent(
+    Guid SubscriptionId,
     Guid OldPlanId,
     Guid NewPlanId,
     Guid OrganizationId,

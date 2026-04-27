@@ -1,5 +1,4 @@
 ﻿using Viora.Domain.Abstractions;
-using Viora.Domain.Subscriptions.Events;
 using Viora.Domain.Subscriptions.Internal;
 
 namespace Viora.Domain.Subscriptions;
@@ -10,8 +9,12 @@ public class Subscription : Entity
     public Guid OrganizationId { get; private set; }
     public SubscriptionStatus Status { get; private set; }
 
+
     public DateTime SubscriptionsStartTime { get; private set; }
     public DateTime SubscriptionsEndTime { get; private set; }
+
+    private readonly List<SubscriptionAddon> _addons = new();
+    public IReadOnlyCollection<SubscriptionAddon> Addons => _addons;
 
     private Subscription(Guid Id, Guid planId, Guid organizationId, SubscriptionStatus status, DateTime subscriptionsStartTime, DateTime subscriptionsEndTime) : base(Id)
     {
@@ -27,53 +30,67 @@ public class Subscription : Entity
     {
         var subscriptionStatus = SubscriptionStatus.Active;
         var newSubscription = new Subscription(Guid.NewGuid(), planId, organizationId, subscriptionStatus, periodStart, periodEnd);
-        newSubscription.RaiseDomainEvent(
+        /*newSubscription.RaiseDomainEvent(
             new SubscriptionCreatedDomainEvent(
-                newSubscription.Id,
                 planId,
-                organizationId,
-                periodStart,
-                periodEnd
+                organizationId
             )
-        );
+        );*/
         return Result.Success(newSubscription);
     }
-    public Result Renew(DateTime periodStart, DateTime periodEnd)
+
+    public Result<Subscription> Renew(DateTime periodStart, DateTime periodEnd)
     {
-        if (Status == SubscriptionStatus.Active)
+        Status = SubscriptionStatus.Expired;
+        if (SubscriptionsEndTime > periodStart)
         {
-            return Result.Failure(SubscriptionError.SubscriptionAlreadyActive);
+            periodEnd = periodEnd.Add(SubscriptionsEndTime.Subtract(periodStart));
+            SubscriptionsEndTime = periodStart;
         }
-        Status = SubscriptionStatus.Active;
-        SubscriptionsStartTime = periodStart;
-        SubscriptionsEndTime = periodEnd;
-        RaiseDomainEvent(
+
+        var renwedSubscription = new Subscription(Guid.NewGuid(), PlanId, OrganizationId, SubscriptionStatus.Active, periodStart, periodEnd);
+
+        /*RaiseDomainEvent(
             new SubscriptionRenewedDomainEvent(
+                Id,
                 PlanId,
-                OrganizationId,
-                periodStart,
-                periodEnd
+                OrganizationId
             )
-        );
-        return Result.Success();
+        );*/
+        return Result.Success(renwedSubscription);
     }
 
-    public Result ChangePlan(Guid organizationId, Guid oldPlanId, Guid newplanId, DateTime startTime, DateTime endTime)
+    public Result<Subscription> ChangePlan(Guid organizationId, Guid oldPlanId, Guid newplanId, DateTime startTime, DateTime endTime)
     {
+        Status = SubscriptionStatus.Canceled;
 
-        PlanId = newplanId;
-        Status = SubscriptionStatus.Active;
-        SubscriptionsStartTime = startTime;
-        SubscriptionsEndTime = endTime;
-        RaiseDomainEvent(
+        var newSubscription = new Subscription(Guid.NewGuid(), newplanId, organizationId, SubscriptionStatus.Active, startTime, endTime);
+
+        /*RaiseDomainEvent(
             new SubscriptionPlanChangedDomainEvent(
+                Id,
                 oldPlanId,
                 newplanId,
                 organizationId,
                 startTime,
                 endTime
             )
-        );
+        );*/
+        return Result.Success(newSubscription);
+    }
+
+
+    public Result AddAddons(List<Guid> addonIds)
+    {
+        if (addonIds is null || !addonIds.Any())
+            return Result.Failure(SubscriptionError.InvalidAddonList);
+        var subscriptionAddon = SubscriptionAddon.CreateMany(addonIds, Id);
+        _addons.AddRange(subscriptionAddon);
         return Result.Success();
+    }
+
+    public List<SubscriptionAddon> GetAddons()
+    {
+        return _addons;
     }
 }

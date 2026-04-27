@@ -3,11 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viora.Application.Abstractions.Clock;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Orders;
 using Viora.Domain.Organizations;
 using Viora.Domain.Plans;
-using Viora.Domain.Plans.Addons;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
+using Viora.Domain.Subscriptions.Addons;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Repositories;
 
@@ -29,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<IFeatureRepository, FeatureRepository>();
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<ILimitedFeatureAddonRepository, LimitedFeatutreAddonRepository>();
+        services.AddScoped<ISubscriptionOrderRepository, SubscriptionOrderRepository>();
+        services.AddScoped<IAddonOrderRepository, AddonOrderRepository>();
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 

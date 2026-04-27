@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Viora.Domain.Plans.Addons;
+using Viora.Domain.Subscriptions.Addons;
 
 namespace Viora.Infrastructure.Repositories;
 
@@ -9,6 +9,7 @@ internal sealed class LimitedFeatutreAddonRepository : Repository<LimitedFeature
     public LimitedFeatutreAddonRepository(ApplicationDbContext dbContext) : base(dbContext)
     {
     }
+
 
     public async Task<List<LimitedFeatureAddon>> GetByLimitedFeatureIdAsync(Guid limitedFeatureId, CancellationToken cancellationToken)
     {

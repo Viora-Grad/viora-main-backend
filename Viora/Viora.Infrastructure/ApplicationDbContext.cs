@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
@@ -10,11 +9,12 @@ namespace Viora.Infrastructure;
 
 internal class ApplicationDbContext : DbContext, IUnitOfWork
 {
+
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPublisher _publisher;
 
     public ApplicationDbContext(
-        DbContextOptions options,
+        DbContextOptions<ApplicationDbContext> options,
         IDateTimeProvider dateTimeProvider,
         IPublisher publisher
         ) : base(options)
@@ -23,9 +23,11 @@ internal class ApplicationDbContext : DbContext, IUnitOfWork
         _dateTimeProvider = dateTimeProvider;
     }
 
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
         base.OnModelCreating(modelBuilder);
     }
 

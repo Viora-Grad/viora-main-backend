@@ -45,6 +45,13 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.Property(x => x.SubscriptionsEndTime)
             .IsRequired();
 
+        builder.HasMany(s => s.Addons)
+            .WithOne(a => a.Subscription)
+            .HasForeignKey(a => a.SubscriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(s => s.Addons)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
     }
 }

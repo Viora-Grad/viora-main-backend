@@ -18,10 +18,19 @@ internal sealed class FeatureUsageRepository : Repository<FeatureUsage>, IFeatur
                 cancellationToken);
     }
 
-    public void RemoveRangeByLimitedId(IEnumerable<Guid> limitedFeatureIds)
+    public async Task<List<FeatureUsage>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<FeatureUsage>()
+            .Where(x => x.OrganizationId == organizationId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public void RemoveRangeByLimitedIdAndOrganizationId(IEnumerable<Guid> limitedFeatureIds, Guid organizationId)
     {
         DbContext.Set<FeatureUsage>()
-            .Where(fu => limitedFeatureIds.Contains(fu.LimitedFeatureId))
+            .Where(fu => limitedFeatureIds.Contains(fu.LimitedFeatureId) &&
+            fu.OrganizationId == organizationId)
             .ExecuteDelete();
     }
+
 }
