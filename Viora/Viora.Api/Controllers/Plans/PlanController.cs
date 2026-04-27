@@ -1,9 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Viora.Application.Plans.GetFeatureAddon;
 using Viora.Application.Plans.GetPlanById;
 using Viora.Application.Plans.GetPlans;
-using Viora.Application.Plans.PurchaseAddon;
 
 namespace Viora.Api.Controllers.Plans;
 
@@ -46,29 +44,4 @@ public class PlanController : ControllerBase
             return NotFound(result.Error);
     }
 
-    [HttpGet]
-    [Route("api/plan/GetAddon/{LimitedFeatureId}")]
-    public async Task<IActionResult> GetFeatureAddon(Guid LimitedFeatureId, CancellationToken cancellationToken)
-    {
-        var query = new GetFeatureAddonQuery(LimitedFeatureId);
-        var result = await _sender.Send(query);
-        if (result.IsSuccess)
-            return Ok(result.Value);
-        return NotFound(result.Error);
-    }
-
-
-
-    [HttpPut]
-    [Route("api/plan/recharge/LimitedFeature")]
-    public async Task<IActionResult> RechargeLimitedFeature(
-        CreateAddonRequest request,
-        CancellationToken cancellationToken)
-    {
-        var command = new PurchaseAddonCommand(request.SubscriptionId, request.LimitedFeatureId, request.LimitedFeatureAddonId);
-        var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
-    }
 }

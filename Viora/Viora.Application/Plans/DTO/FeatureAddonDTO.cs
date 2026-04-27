@@ -1,4 +1,4 @@
-﻿using Viora.Domain.Plans.Addons;
+﻿using Viora.Domain.Subscriptions.Addons;
 
 namespace Viora.Application.Plans.DTO;
 

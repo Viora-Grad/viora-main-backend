@@ -23,6 +23,16 @@ public class FeatureUsage : Entity
     {
         Quota--;
     }
+
+    public static Result<FeatureUsage> Create(Guid organizationId, LimitedFeature limitedFeature, DateTime periodStart, DateTime periodEnd)
+    {
+        if (limitedFeature == null)
+        {
+            return Result.Failure<FeatureUsage>(PlanError.InvalidPlanFeature);
+        }
+        var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeature.Id, limitedFeature.Limit, periodStart, periodEnd);
+        return Result.Success(featureUsage);
+    }
     public static Result<List<FeatureUsage>> CreateMany(Guid organizationId, IEnumerable<LimitedFeature> limitedFeatures, DateTime periodStart, DateTime periodEnd)
     {
         if (limitedFeatures == null || !limitedFeatures.Any())
@@ -43,5 +53,10 @@ public class FeatureUsage : Entity
     public void RechargeQuota(int newQuota)
     {
         Quota = newQuota;
+    }
+
+    public void AddAddon(int addonValue)
+    {
+        Quota += addonValue;
     }
 }
