@@ -40,7 +40,7 @@ public sealed class UserRoleAssignment
 
     public bool IsActive => RevokedAt is null;
 
-    public AuthAccount User { get; private set; } = null!;
+    public User User { get; private set; } = null!;
     public Role Role { get; private set; } = null!;
 
     public static UserRoleAssignment Create(

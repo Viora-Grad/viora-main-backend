@@ -1,6 +1,4 @@
-﻿using Viora.Domain.Users.Internal;
-
-namespace Viora.Application.Abstractions.Authentication;
+﻿namespace Viora.Application.Abstractions.Authentication;
 
 /// <summary>
 /// Represents the context of the currently authenticated user.
@@ -15,6 +13,5 @@ namespace Viora.Application.Abstractions.Authentication;
 public interface IUserContext
 {
     Guid UserId { get; }
-    UserType UserType { get; }
 }
 

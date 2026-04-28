@@ -1,27 +1,20 @@
 ﻿using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
-using Viora.Domain.Users.Customers;
-using Viora.Domain.Users.Identity;
-using Viora.Domain.Users.Owners;
 
 namespace Viora.Application.Users.LocalLoginUser;
 
-public sealed class LocalLoginUserCommandHandler(
-    IUserRepository userRepository,
-    ICustomerRepository customerRepository,
-    IOwnerRepository ownerRepository,
-    IAuthenticationService authenticationService,
-    IJwtService jwtService,
-    IUnitOfWork unitOfWork) : ICommandHandler<LocalLoginUserCommand, AuthResult>
+public sealed class LocalLoginUserCommandHandler(IAuthenticationService authenticationService) : ICommandHandler<LocalLoginUserCommand, AuthResult>
 {
     public async Task<Result<AuthResult>> Handle(LocalLoginUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByEmailAsync(request.Email, cancellationToken) ?? throw new NotFoundException(request.Email);
 
-        await authenticationService.LocalLoginAsync(request.Email, request.Password, cancellationToken);
+        var authResult = await authenticationService.LocalLoginAsync(request.Email, request.Password, cancellationToken);
 
+        if (authResult.IsFailure)
+            return Result.Failure<AuthResult>(authResult.Error);
+
+        return Result.Success(authResult.Value);
     }
 
 }
