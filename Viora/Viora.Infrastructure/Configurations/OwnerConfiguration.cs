@@ -11,20 +11,23 @@ internal class OwnerConfiguration : IEntityTypeConfiguration<Owner>
         builder.ToTable("Owners");
 
         builder.HasKey(owner => owner.Id);
-        builder.HasOne(owner => owner.UserProfile)
+
+        builder.Property(owner => owner.UserId).IsRequired();
+        builder.HasIndex(owner => owner.UserId).IsUnique();
+        builder.HasOne(owner => owner.User)
             .WithOne()
-            .HasForeignKey<Owner>(owner => owner.Id)
+            .HasForeignKey<Owner>(owner => owner.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsOne(owner => owner.PersonalInfo, personalInfo =>
+        builder.Property(owner => owner.NationalityId).IsRequired();
+
+        builder.Property(owner => owner.GatewayCredentialsId).IsRequired();
+
+        builder.OwnsOne(owner => owner.AcceptedTerms, acceptedTerms =>
         {
-            personalInfo.Property(info => info.FirstName).HasColumnName("FirstName").IsRequired();
-            personalInfo.Property(info => info.LastName).HasColumnName("LastName").IsRequired();
-            personalInfo.Property(info => info.DateOfBirth).HasColumnName("DateOfBirth").IsRequired();
-            personalInfo.Property(info => info.Gender).HasColumnName("Gender").HasConversion<string>().IsRequired();
+            acceptedTerms.Property(at => at.AcceptedAt).IsRequired().HasColumnName("AcceptedAt");
+            acceptedTerms.Property(at => at.Version).IsRequired().HasColumnName("Version");
         });
-        builder.Property(owner => owner.NationalityId).IsRequired(); // relation will be configured in NationalityConfiguration
-        builder.Property(owner => owner.BecameOwnerAt).IsRequired();
 
 
     }

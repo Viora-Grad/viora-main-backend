@@ -1,36 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Users.Identity;
-using Viora.Domain.Users.Internal;
-
 namespace Viora.Infrastructure.Repositories.Users;
 
 internal class UserRepository : Repository<User>, IUserRepository
 {
-    public UserRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public override async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public UserRepository(ApplicationDbContext dbContext) : base(dbContext)
     {
-        return await DbContext.Set<User>()
-            .Include(user => user.Identities)
-            .Include(user => user.Roles)
-            .ThenInclude(role => role.Permissions)
-            .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var normalized = new Email(email);
-        return await DbContext.Set<User>()
-            .AnyAsync(user => user.Email == normalized, cancellationToken);
+        return await DbContext.Set<User>().AnyAsync(user => user.Email.Value == email, cancellationToken);
     }
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var normalized = new Email(email);
-        return await DbContext.Set<User>()
+        return DbContext.Set<User>()
             .Include(user => user.Identities)
             .Include(user => user.Roles)
-            .ThenInclude(role => role.Permissions)
-            .FirstOrDefaultAsync(user => user.Email == normalized, cancellationToken);
+            .Include(user => user.Contacts)
+            .FirstOrDefaultAsync(user => user.Email.Value == email, cancellationToken);
     }
 }

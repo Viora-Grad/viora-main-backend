@@ -22,7 +22,7 @@ public sealed class AuthIdentity : Entity
     public Guid UserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
-    public User User { get; private set; } = null!;
+    public AuthAccount AuthUser { get; private set; } = null!;
 
     public static AuthIdentity Create(string provider, Guid userId, string providerKey, DateTime utcNow)
     {

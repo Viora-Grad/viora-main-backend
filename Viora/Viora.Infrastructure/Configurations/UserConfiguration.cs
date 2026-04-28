@@ -13,6 +13,15 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(user => user.Id);
 
+        builder.Property(user => user.FirstName)
+            .HasConversion(firstName => firstName.Value, value => new FirstName(value))
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.Property(user => user.LastName)
+            .HasConversion(lastName => lastName.Value, value => new LastName(value))
+            .HasMaxLength(200)
+            .IsRequired();
 
         builder.Property(user => user.Email)
             .HasConversion(email => email.Value, value => new Email(value))
@@ -22,25 +31,24 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(user => user.Email)
             .IsUnique();
 
-
-        builder.Property(user => user.CreatedAt)
-            .HasColumnType("datetime")
+        builder.Property(user => user.UserName)
+            .HasConversion(userName => userName.Value, value => new UserName(value))
+            .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(user => user.LastLoginAt)
-            .HasColumnType("datetime");
+        builder.HasIndex(user => user.UserName).IsUnique();
+
+        builder.Property(user => user.Age)
+            .HasConversion(age => age.Value, value => new Age(value))
+            .IsRequired();
+
+        builder.Property(user => user.JoinedAt)
+            .HasColumnType("datetime")
+            .IsRequired();
 
         builder.Property(user => user.Status)
             .HasConversion<string>()
             .IsRequired();
-
-        builder.OwnsOne(user => user.PersonalInfo, owned =>
-        {
-            owned.Property(p => p.FirstName).HasMaxLength(100).IsRequired();
-            owned.Property(p => p.LastName).HasMaxLength(100).IsRequired();
-            owned.Property(p => p.DateOfBirth).IsRequired();
-            owned.Property(p => p.Gender).HasConversion<string>().IsRequired();
-        });
 
         builder.Property(user => user.IsEmailVerified);
 
@@ -53,6 +61,28 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
 
+        builder.OwnsMany(user => user.Contacts, b =>
+        {
+            b.ToTable("UserContacts");
+            b.WithOwner().HasForeignKey("UserId");
+
+            b.Property<int>("Id");
+            b.HasKey("Id");
+
+            b.OwnsOne(contact => contact.PhoneNumber, pb =>
+            {
+                pb.Property(p => p.Value).HasColumnName("PhoneNumber").HasMaxLength(32).IsRequired();
+            });
+
+            b.OwnsOne(contact => contact.Email, eb =>
+            {
+                eb.Property(e => e.Value).HasColumnName("ContactEmail").HasMaxLength(256).IsRequired(); // Column name set to ContactEmail to avoid confusion with User's Email
+            });
+        });
+
+        builder.Navigation(user => user.Contacts)
+            .HasField("_contact")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(user => user.Roles)
             .WithMany(role => role.Users)

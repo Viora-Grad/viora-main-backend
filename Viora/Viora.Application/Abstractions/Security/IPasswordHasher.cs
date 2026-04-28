@@ -7,5 +7,5 @@ public interface IPasswordHasher
     /// <remark>The return type of this method might differ if Asp.Net Identity is used</remark>
     /// </summary>
     /// <returns>Boolean indicating password matching</returns>
-    bool VerifyPassword(string providedPassword, string hashedPassword);
+    bool VerifyPassword(string hashedPassword, string providedPassword);
 }

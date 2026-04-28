@@ -6,13 +6,13 @@ internal class LocalCredential(Guid userId, string hashedPassword, int hashVersi
     public string HashedPassword { get; private set; } = hashedPassword;
     public int FailedLoginAttempts { get; private set; } // for account lockout policies
     public int HashVersion { get; private set; } = hashVersion; // to support future password hashing algorithm upgrades
-    public DateTime? LastChangedAt { get; private set; }
+    public DateTime LastChangedAt { get; private set; } = DateTime.UtcNow;
 
-    public void UpdatePassword(string newHashedPassword, DateTime utcNow, int newHashVersion = 1)
+    public void UpdatePassword(string newHashedPassword, int newHashVersion = 1)
     {
         HashedPassword = newHashedPassword;
         HashVersion = newHashVersion;
-        LastChangedAt = utcNow;
+        LastChangedAt = DateTime.UtcNow;
     }
     public void RecordFailedLogin()
     {

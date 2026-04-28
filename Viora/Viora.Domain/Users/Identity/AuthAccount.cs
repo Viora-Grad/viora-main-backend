@@ -3,34 +3,29 @@ using Viora.Domain.Users.Internal;
 
 namespace Viora.Domain.Users.Identity;
 
+/// <summary>
+/// Represents the authentication account for a user.
+/// This aggregate tracks the account's email, verification state, current status,
+/// last login timestamp, linked authentication identities, and assigned roles.
+/// </summary>
 /// <remarks>
-/// `User` is intentionally not a base class for `Customer`/`Owner`.
-/// We use composition instead of inheritance because identity/authentication is a separate concern
-/// from business personas. A single account may legitimately be both `Customer` and `Owner`,
-/// which inheritance models poorly (and C# has no multiple class inheritance).
-/// Keeping them separate also preserves clear aggregate boundaries, avoids tight coupling of lifecycle rules,
-/// and leaves room for future role/permission expansion (for example tenant-scoped staff authorization)
-/// without forcing persona types into an inheritance hierarchy.
+/// Roles are reserved for future role-based access control support.
 /// </remarks>
-
-public class User : Entity
+public class AuthAccount : Entity
 {
 
     private readonly HashSet<Role> _roles = []; // for future role-based access control implementation
     private readonly List<AuthIdentity> _identities = [];
-    private User(Guid id, PersonalInfo personalInfo, Email email, DateTime createdAt, AccountStatus status)
+    private AuthAccount(Guid id, Email email, DateTime lastLoginAt, AccountStatus status)
         : base(id)
     {
-        PersonalInfo = personalInfo;
         Email = email;
-        CreatedAt = createdAt;
+        LastLoginAt = lastLoginAt;
         Status = status;
     }
-    private User() { } // for ef core
-    public PersonalInfo PersonalInfo { get; set; } = null!;
+    private AuthAccount() { } // for ef core
     public Email Email { get; private set; } = null!;
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? LastLoginAt { get; private set; }
+    public DateTime LastLoginAt { get; private set; }
     public AccountStatus Status { get; private set; }
     public bool IsEmailVerified { get; private set; } = false;
     public IReadOnlyCollection<AuthIdentity> Identities => _identities.AsReadOnly();
@@ -67,9 +62,9 @@ public class User : Entity
     {
         LastLoginAt = utcNow;
     }
-    public static User Create(PersonalInfo personalInfo, Email email, DateTime utcNow)
+    public static AuthAccount Create(Email email, DateTime utcNow)
     {
-        var user = new User(Guid.NewGuid(), personalInfo, email, utcNow, AccountStatus.Active);
+        var user = new AuthAccount(Guid.NewGuid(), email, utcNow, AccountStatus.Active);
         user._roles.Add(Role.Registered); // default role assignment, can be changed later
         return user;
     }
