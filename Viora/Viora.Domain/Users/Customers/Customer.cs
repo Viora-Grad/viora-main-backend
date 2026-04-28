@@ -21,7 +21,7 @@ public sealed class Customer : Entity
     public Guid? MedicalRecordId { get; private set; } // can be removed since the relation is optional from the customer side
     public IReadOnlyList<Guid> OrganizationsVisited => _organizationsVisited.ToList().AsReadOnly();
     public IReadOnlyList<Contact> Contacts => _contacts.ToList().AsReadOnly();
-    public AuthAccount AuthAccount { get; private set; } = null!; // navigation property for ef core
+    public User UserProfile { get; private set; } = null!; // navigation property for ef core
     public MedicalRecord? MedicalRecord { get; private set; } // navigation property for ef core
     public ICollection<OrganizationVisits> OrganizationVisits { get; private set; } = null!; // navigation property for ef core
     private Customer() { } // for ef core
@@ -33,10 +33,10 @@ public sealed class Customer : Entity
         JoinedAt = joinedAt;
         MedicalRecordId = medicalRecordId;
     }
-    public static Customer Create(UserName? userName, PersonalInfo personalInfo, DateTime utcNow, Guid? medicalRecordId)
+    public static Customer Create(Guid id, UserName? userName, PersonalInfo personalInfo, DateTime utcNow, Guid? medicalRecordId)
     {
         // add any validation if needed
-        return new Customer(Guid.NewGuid(), userName, personalInfo, utcNow, medicalRecordId);
+        return new Customer(id, userName, personalInfo, utcNow, medicalRecordId);
     }
     public Result AddMedicalRecord(Guid medicalRecordId)
     {
