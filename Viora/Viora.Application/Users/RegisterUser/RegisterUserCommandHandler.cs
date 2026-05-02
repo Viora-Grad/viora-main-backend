@@ -9,8 +9,7 @@ namespace Viora.Application.Users.RegisterUser;
 
 public sealed class RegisterUserCommandHandler(
     IAuthenticationService authenticationService,
-    IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork)
+    IDateTimeProvider dateTimeProvider)
     : ICommandHandler<RegisterUserCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -26,7 +25,6 @@ public sealed class RegisterUserCommandHandler(
         {
             return Result.Failure<Guid>(registrationResult.Error);
         }
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(user.Id);
     }

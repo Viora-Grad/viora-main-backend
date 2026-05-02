@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Viora.Domain\Viora.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Customers\" />
-  </ItemGroup>
-
 </Project>

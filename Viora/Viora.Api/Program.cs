@@ -38,14 +38,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapOpenApi();
-
-}
-
-using (var scope = app.Services.CreateScope()) // apply pending migrations on startup
-{
+    using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
+
 }
+
 
 app.UseHttpsRedirection();
 

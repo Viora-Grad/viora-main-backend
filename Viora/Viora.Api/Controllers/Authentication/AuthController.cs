@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.RegisterUser;
-using Viora.Domain.Users.Internal;
 
 namespace Viora.Api.Controllers.Authentication;
 
@@ -35,11 +34,19 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken = default)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        if (!Enum.IsDefined(request.Gender))
+        {
+            return BadRequest("Invalid gender value.");
+        }
         var command = new RegisterUserCommand(
             request.FirstName,
             request.LastName,
             request.DateOfBirth,
-            (Gender)request.Gender,
+            request.Gender,
             request.Email,
             request.Password);
 
