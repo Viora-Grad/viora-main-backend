@@ -35,20 +35,20 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
         {
             return await next();
         }
-        var organization = await organizationRepository.GetByIdAsync(limitedFeatureRequest.organizationId, cancellationToken)
-            ?? throw new NotFoundException($"Organization with id {limitedFeatureRequest.organizationId} not found.");
+        var organization = await organizationRepository.GetByIdAsync(limitedFeatureRequest.OrganizationId, cancellationToken)
+            ?? throw new NotFoundException($"Organization with id {limitedFeatureRequest.OrganizationId} not found.");
         var checkResult = await limitedFeatureUsageService.CheckLimitAsync(
-            limitedFeatureRequest.organizationId,
+            limitedFeatureRequest.OrganizationId,
             limitedFeatureRequest.LimitedFeatureId,
             cancellationToken);
         if (checkResult.IsFailure)
             throw new
                 QuotaExceededException(
                 $"Organization with id " +
-                $"{limitedFeatureRequest.organizationId} " +
+                $"{limitedFeatureRequest.OrganizationId} " +
                 $"has exceeded its quota for feature {limitedFeatureRequest.LimitedFeatureId}.");
         var result = await limitedFeatureUsageService.ConsumeLimit(
-            limitedFeatureRequest.organizationId,
+            limitedFeatureRequest.OrganizationId,
             limitedFeatureRequest.LimitedFeatureId,
             cancellationToken
             );

@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Plans;
+using Viora.Domain.Plans.Internal;
 
 namespace Viora.Application.Plans.DTO;
 
@@ -8,7 +9,7 @@ public class PlanDTO
     public string Name { get; set; } = default!;
     public string Description { get; set; } = default!;
     public double Price { get; set; }
-    public string PlanPeriod { get; set; } = default!;
+    public string PlanPeriodTime { get; set; } = default!;
     public string PlanContent { get; set; } = default!;
     public List<LimitedFeatureDTO> LimitedFeatures { get; set; } = default!;
     public List<FeatureDTO> Features { get; set; } = default!;
@@ -20,7 +21,7 @@ public class PlanDTO
         Name = name;
         Description = description;
         Price = price;
-        this.planPeriod = planPeriod;
+        PlanPeriodTime = planPeriod;
         PlanContent = planContent;
         LimitedFeatures = limitedFeatures;
         Features = features;
