@@ -62,7 +62,9 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRole");
-                });
+                }
+                )
+            );
 
             modelBuilder.Entity("Viora.Domain.MedicalRecords.MedicalRecord", b =>
                 {
@@ -110,6 +112,7 @@ namespace Viora.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Viora.Domain.Plans.Features.Feature", b =>
+            { 
                     b.Property<long>("BloodGlucose")
                         .HasColumnType("bigint");
 
@@ -128,7 +131,8 @@ namespace Viora.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("MedicalRecords", (string)null);
-                });
+            }
+        );
 
             modelBuilder.Entity("Viora.Domain.Organizations.OrganizationHistory.Organization", b =>
                 {
@@ -152,10 +156,12 @@ namespace Viora.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Viora.Domain.Plans.Features.FeatureUsage", b =>
+                { 
                     b.HasKey("Id");
 
                     b.ToTable("Organization");
-                });
+                }
+            );
 
             modelBuilder.Entity("Viora.Domain.Organizations.OrganizationHistory.OrganizationVisits", b =>
                 {
@@ -163,7 +169,7 @@ namespace Viora.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LimitedFeatureId")
+                    b.Property<Guid>("LimitedFeatureId");
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -224,7 +230,7 @@ namespace Viora.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Name");
                     b.Property<DateTime>("VisitedAt")
                         .HasColumnType("datetime2");
 
@@ -335,6 +341,7 @@ namespace Viora.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.LimitedFeatureAddon", b =>
+                { 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -563,7 +570,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasOne("Viora.Domain.Plans.Plan", null)
                         .WithMany()
-                        .HasForeignKey("PlanId")
+                        .HasForeignKey("PlanId");
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
 
@@ -842,7 +849,7 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Subscription");
                 });
 
-            modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
+                modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
                 {
                     b.Navigation("Addons");
                 });
@@ -850,109 +857,112 @@ namespace Viora.Infrastructure.Migrations
             modelBuilder.Entity("Viora.Domain.Subscriptions.Subscription", b =>
                 {
                     b.Navigation("Addons");
-            modelBuilder.Entity("Viora.Domain.Users.Identity.User", b =>
-                {
-                    b.OwnsOne("Viora.Domain.Users.Internal.PersonalInfo", "PersonalInfo", b1 =>
+                    modelBuilder.Entity("Viora.Domain.Users.Identity.User", b =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uniqueidentifier");
+                            b.OwnsOne("Viora.Domain.Users.Internal.PersonalInfo", "PersonalInfo", b1 =>
+                                {
+                                    b1.Property<Guid>("UserId")
+                                        .HasColumnType("uniqueidentifier");
 
-                            b1.Property<DateOnly>("DateOfBirth")
-                                .HasColumnType("date");
+                                    b1.Property<DateOnly>("DateOfBirth")
+                                        .HasColumnType("date");
 
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
+                                    b1.Property<string>("FirstName")
+                                        .IsRequired()
+                                        .HasMaxLength(100)
+                                        .HasColumnType("nvarchar(100)");
 
-                            b1.Property<string>("Gender")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                    b1.Property<string>("Gender")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)");
 
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
+                                    b1.Property<string>("LastName")
+                                        .IsRequired()
+                                        .HasMaxLength(100)
+                                        .HasColumnType("nvarchar(100)");
 
-                            b1.HasKey("UserId");
+                                    b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                                    b1.ToTable("Users");
 
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
+                                    b1.WithOwner()
+                                        .HasForeignKey("UserId");
+                                });
+                            b.Navigation("PersonalInfo")
+                                .IsRequired();
+
+
+                        });
+             });
+                    modelBuilder.Entity("Viora.Domain.Users.Owners.Owner", b =>
+                        {
+                            b.HasOne("Viora.Domain.Users.Identity.User", "UserProfile")
+                                .WithOne()
+                                .HasForeignKey("Viora.Domain.Users.Owners.Owner", "Id")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b.OwnsOne("Viora.Domain.Users.Internal.PersonalInfo", "PersonalInfo", b1 =>
+                                {
+                                    b1.Property<Guid>("OwnerId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b1.Property<DateOnly>("DateOfBirth")
+                                        .HasColumnType("date")
+                                        .HasColumnName("DateOfBirth");
+
+                                    b1.Property<string>("FirstName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("FirstName");
+
+                                    b1.Property<string>("Gender")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("Gender");
+
+                                    b1.Property<string>("LastName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("LastName");
+
+                                    b1.HasKey("OwnerId");
+
+                                    b1.ToTable("Owners");
+
+                                    b1.WithOwner()
+                                        .HasForeignKey("OwnerId");
+                                });
+
+                            b.Navigation("PersonalInfo")
+                                .IsRequired();
+
+                            b.Navigation("UserProfile");
                         });
 
-                    b.Navigation("PersonalInfo")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Viora.Domain.Users.Owners.Owner", b =>
-                {
-                    b.HasOne("Viora.Domain.Users.Identity.User", "UserProfile")
-                        .WithOne()
-                        .HasForeignKey("Viora.Domain.Users.Owners.Owner", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("Viora.Domain.Users.Internal.PersonalInfo", "PersonalInfo", b1 =>
+                    modelBuilder.Entity("Viora.Infrastructure.Authentication.LocalCredential", b =>
                         {
-                            b1.Property<Guid>("OwnerId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<DateOnly>("DateOfBirth")
-                                .HasColumnType("date")
-                                .HasColumnName("DateOfBirth");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("Gender")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Gender");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("LastName");
-
-                            b1.HasKey("OwnerId");
-
-                            b1.ToTable("Owners");
-
-                            b1.WithOwner()
-                                .HasForeignKey("OwnerId");
+                            b.HasOne("Viora.Domain.Users.Identity.User", null)
+                                .WithOne()
+                                .HasForeignKey("Viora.Infrastructure.Authentication.LocalCredential", "UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
                         });
 
-                    b.Navigation("PersonalInfo")
-                        .IsRequired();
+                    modelBuilder.Entity("Viora.Domain.Users.Customers.Customer", b =>
+                        {
+                            b.Navigation("MedicalRecord");
 
-                    b.Navigation("UserProfile");
-                });
+                            b.Navigation("OrganizationVisits");
+                        });
 
-            modelBuilder.Entity("Viora.Infrastructure.Authentication.LocalCredential", b =>
-                {
-                    b.HasOne("Viora.Domain.Users.Identity.User", null)
-                        .WithOne()
-                        .HasForeignKey("Viora.Infrastructure.Authentication.LocalCredential", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    modelBuilder.Entity("Viora.Domain.Users.Identity.User", b =>
+                        {
+                            b.Navigation("Identities");
+                        });
 
-            modelBuilder.Entity("Viora.Domain.Users.Customers.Customer", b =>
-                {
-                    b.Navigation("MedicalRecord");
-
-                    b.Navigation("OrganizationVisits");
-                });
-
-            modelBuilder.Entity("Viora.Domain.Users.Identity.User", b =>
-                {
-                    b.Navigation("Identities");
-                });
 #pragma warning restore 612, 618
+
         }
     }
 }
