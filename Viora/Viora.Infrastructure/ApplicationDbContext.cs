@@ -1,13 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Viora.Application.Abstractions.Clock;
+using System.Data;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
 
 
 namespace Viora.Infrastructure;
 
-internal class ApplicationDbContext : DbContext, IUnitOfWork
+public sealed class ApplicationDbContext : DbContext, IUnitOfWork
 {
 
     private readonly IDateTimeProvider _dateTimeProvider;
