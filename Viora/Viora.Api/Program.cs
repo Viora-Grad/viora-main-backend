@@ -19,9 +19,9 @@ if (app.Environment.IsDevelopment())
 */
 app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseAuthorization();
-app.UseRouting();
 
+app.UseRouting();
+app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/", () => "welcome in Viora API");
 app.Run();

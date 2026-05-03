@@ -31,7 +31,7 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (request is not ILimitedFeatureRequest limitedFeatureRequest)
+        if (request is not ILimitedFeature limitedFeatureRequest)
         {
             return await next();
         }
@@ -47,11 +47,13 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
                 $"Organization with id " +
                 $"{limitedFeatureRequest.organizationId} " +
                 $"has exceeded its quota for feature {limitedFeatureRequest.LimitedFeatureId}.");
-        limitedFeatureUsageService.ConsumeLimit(
+        var result = await limitedFeatureUsageService.ConsumeLimit(
             limitedFeatureRequest.organizationId,
             limitedFeatureRequest.LimitedFeatureId,
             cancellationToken
             );
+        if (result.IsFailure)
+            throw new NotFoundException("this organization does not have this feature");
         return await next();
     }
 }

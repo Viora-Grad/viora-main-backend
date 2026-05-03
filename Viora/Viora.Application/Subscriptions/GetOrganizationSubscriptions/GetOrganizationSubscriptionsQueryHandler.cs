@@ -2,15 +2,13 @@
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations;
-using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
 
 namespace Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 
 public class GetOrganizationSubscriptionsQueryHandler(
     ISubscriptionRepository subscriptionRepository,
-    IOrganizationRepository organizationRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetOrganizationSubscriptionsQuery, List<SubscriptionDto>>
+    IOrganizationRepository organizationRepository) : IQueryHandler<GetOrganizationSubscriptionsQuery, List<SubscriptionDto>>
 {
     public async Task<Result<List<SubscriptionDto>>> Handle(GetOrganizationSubscriptionsQuery request, CancellationToken cancellationToken)
     {

@@ -1,8 +1,8 @@
 ﻿namespace Viora.Application.Abstractions.Interfaces;
 
-public interface ILimitedFeatureRequest
+public interface ILimitedFeature
 {
-    public Guid organizationId { get; }
+    public Guid OrganizationId { get; }
     public Guid LimitedFeatureId { get; }
 
 }

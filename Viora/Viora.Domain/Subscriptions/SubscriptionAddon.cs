@@ -19,9 +19,9 @@ public class SubscriptionAddon : Entity
     }
 
 
-    public static List<SubscriptionAddon> CreateMany(List<Guid> ids, Guid sbsscriptionId)
+    public static List<SubscriptionAddon> CreateMany(List<Guid> ids, Guid subscriptionId)
     {
-        var addons = ids.Select(a => new SubscriptionAddon(Guid.NewGuid(), a, sbsscriptionId)).ToList();
+        var addons = ids.Select(a => new SubscriptionAddon(Guid.NewGuid(), a, subscriptionId)).ToList();
         return addons;
     }
 

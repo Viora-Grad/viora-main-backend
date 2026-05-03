@@ -19,7 +19,7 @@ namespace Viora.Application.Subscriptions.CreateSubscriptions;
 /// 
 /// </summary>
 
-internal class SubscriptionCreatedDomainEvnetHandler(
+internal class SubscriptionCreatedDomainEventHandler(
     IPlanRepository planRepository,
     IOrganizationRepository organizationRepository,
     ISubscriptionRepository subscriptionRepository,

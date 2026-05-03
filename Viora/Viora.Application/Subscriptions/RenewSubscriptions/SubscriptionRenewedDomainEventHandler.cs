@@ -76,7 +76,9 @@ internal class SubscriptionRenewedDomainEventHandler(
             ?? throw new NotFoundException($"The plan features for plan with id {PlanId} were not found");
 
         var Addons = subscription.GetAddons();
-        var AddonIds = Addons.Select(x => x.LimitedFeatureAddonId).ToList();
+        var AddonIds = Addons.Where(x => x.IsActive == true)
+            .Select(x => x.LimitedFeatureAddonId)
+            .ToList();
         var LimitedFeatureAddon = await limitedFeatureAddonRepository.GetByIdsAsync(AddonIds, cancellationToken);
 
         foreach (var feature in Features)

@@ -24,10 +24,13 @@ public class LimitedFeatureUsageService(
 
     }
 
-    public async void ConsumeLimit(Guid organizationId, Guid limitedFeatureId, CancellationToken cancellationToken)
+    public async Task<Result> ConsumeLimit(Guid organizationId, Guid limitedFeatureId, CancellationToken cancellationToken)
     {
         var organizationFeatureUsage = await featureUsageRepository.GetByOrganizationIdAndFeatureIdAsync(organizationId, limitedFeatureId, cancellationToken);
+        if (organizationFeatureUsage is null)
+            return Result.Failure(SubscriptionError.LimitExceeded);
         organizationFeatureUsage.Consume();
+        return Result.Success();
     }
 
 

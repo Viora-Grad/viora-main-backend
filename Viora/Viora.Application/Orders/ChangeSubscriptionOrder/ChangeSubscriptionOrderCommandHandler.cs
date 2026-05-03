@@ -29,6 +29,6 @@ public class ChangeSubscriptionOrderCommandHandler(
             return Result.Failure(subscriptionOrder.Error);
         subscriptionOrderRepository.Add(subscriptionOrder.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(subscriptionOrder);
+        return Result.Success();
     }
 }

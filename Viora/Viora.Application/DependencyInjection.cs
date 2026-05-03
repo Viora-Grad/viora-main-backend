@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Viora.Application.Abstractions.Behaviors;
+using Viora.Application.Subscriptions.AddAddon;
 using Viora.Application.Subscriptions.ChangeSubscription;
 using Viora.Application.Subscriptions.CreateSubscriptions;
 using Viora.Application.Subscriptions.RenewSubscriptions;
@@ -14,9 +15,10 @@ public static class DependencyInjection
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
-            typeof(SubscriptionCreatedDomainEvnetHandler).Assembly,
+            typeof(SubscriptionCreatedDomainEventHandler).Assembly,
             typeof(SubscriptionRenewedDomainEventHandler).Assembly,
-            typeof(SubscriptionPlanChangeDomainEventHandler).Assembly
+            typeof(SubscriptionPlanChangeDomainEventHandler).Assembly,
+            typeof(AddonAddedDomainEventHandler).Assembly
             ));
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LimitedFeaturePipelineBehavior<,>));

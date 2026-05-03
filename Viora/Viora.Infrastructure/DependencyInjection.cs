@@ -22,14 +22,20 @@ public static class DependencyInjection
         var ConnectionString = configuration.GetConnectionString("Database");
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(ConnectionString));
+
+
         services.AddScoped<IPlanRepository, PlanRepository>();
         services.AddScoped<IFeatureUsageRepository, FeatureUsageRepository>();
+
         services.AddScoped<IPlanFeatureRepository, PlanFeatureRepository>();
         services.AddScoped<IOrganizationRepository, OrganziationRepository>();
+
         services.AddScoped<ILimitedFeatureRepository, LimitedFeatureRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
+
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<ILimitedFeatureAddonRepository, LimitedFeatutreAddonRepository>();
+
         services.AddScoped<ISubscriptionOrderRepository, SubscriptionOrderRepository>();
         services.AddScoped<IAddonOrderRepository, AddonOrderRepository>();
 
