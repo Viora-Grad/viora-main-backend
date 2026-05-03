@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Viora.Application.Abstractions.Clock;
 using System.Data;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
@@ -9,20 +10,25 @@ namespace Viora.Infrastructure;
 
 public sealed class ApplicationDbContext : DbContext, IUnitOfWork
 {
+
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IPublisher _publisher;
 
     public ApplicationDbContext(
-        DbContextOptions options,
-        IPublisher publisher)
-        : base(options)
+        DbContextOptions<ApplicationDbContext> options,
+        IDateTimeProvider dateTimeProvider,
+        IPublisher publisher
+        ) : base(options)
     {
         _publisher = publisher;
+        _dateTimeProvider = dateTimeProvider;
     }
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
         base.OnModelCreating(modelBuilder);
     }
 
@@ -30,36 +36,37 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
     {
         try
         {
-            await PublishDomainEventsAsync();
+            await PuplishDomainEventAsync(cancellationToken);
 
-            int result = await base.SaveChangesAsync(cancellationToken);
+            var result = await base.SaveChangesAsync(cancellationToken);
+
 
             return result;
         }
         catch (DbUpdateConcurrencyException ex)
         {
             throw new ConcurrencyException("Concurrency exception occurred.", ex);
+
         }
     }
 
-    private async Task PublishDomainEventsAsync()
+    public async Task PuplishDomainEventAsync(CancellationToken cancellationToken)
     {
-        var domainEvents = ChangeTracker
-            .Entries<Entity>()
-            .Select(entry => entry.Entity)
-            .SelectMany(entity =>
-            {
-                IReadOnlyList<IDomainEvent> domainEvents = entity.GetDomainEvents();
-
-                entity.ClearDomainEvents();
-
-                return domainEvents;
-            }).ToList();
-
+        var domainEntities = ChangeTracker.Entries<Entity>()
+            .Where(e => e.Entity.DomainEvents != null && e.Entity.DomainEvents.Any())
+            .Select(e => e.Entity)
+            .ToList();
+        var domainEvents = domainEntities
+            .SelectMany(e => e.DomainEvents)
+            .ToList();
+        ChangeTracker.Entries<Entity>()
+        .ToList()
+        .ForEach(e => e.Entity.ClearDomainEvents());
         foreach (var domainEvent in domainEvents)
         {
-            await _publisher.Publish(domainEvent);
-
+            await _publisher.Publish(domainEvent, cancellationToken);
         }
+
     }
+
 }
