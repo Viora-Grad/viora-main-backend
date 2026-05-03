@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 
-namespace Viora.Application.Medias;
+namespace Viora.Domain.Medias;
 
 public static class MediaErrors
 {

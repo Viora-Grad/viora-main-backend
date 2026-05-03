@@ -2,4 +2,4 @@
 
 namespace Viora.Domain.Organizations.OrganizationDetails.Internal;
 
-public record ServiceSpecification(string? Description, ServiceType Type);
+public record ServiceSpecification(string Description, ServiceType Type);

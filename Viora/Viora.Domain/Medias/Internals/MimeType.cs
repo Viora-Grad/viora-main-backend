@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Medias.Internals;
+﻿namespace Viora.Domain.Medias.Internals;
 
 public record MimeType(string Value)
 {

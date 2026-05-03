@@ -15,7 +15,7 @@ public sealed class LegalPaper : Entity
 
     private LegalPaper() { } // for Ef
 
-    private LegalPaper(Guid attachemntId, OfficalName name, AcceptanceStatus status, LegalPaperType type, DateTime submissionDate)
+    private LegalPaper(Guid id, Guid attachemntId, OfficalName name, AcceptanceStatus status, LegalPaperType type, DateTime submissionDate) : base(id)
     {
         AttachemntId = attachemntId;
         Name = name;
@@ -26,7 +26,7 @@ public sealed class LegalPaper : Entity
 
     public static Result<LegalPaper> Create(Guid attachemntId, string name, AcceptanceStatus status, LegalPaperType type, DateTime submissionDateUtc)
     {
-        LegalPaper legalPaper = new(attachemntId, new(name), status, type, submissionDateUtc);
+        LegalPaper legalPaper = new(Guid.NewGuid(), attachemntId, new(name), status, type, submissionDateUtc);
 
         return Result.Success(legalPaper);
     }

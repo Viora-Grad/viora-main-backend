@@ -1,10 +1,11 @@
-﻿using Viora.Application.Medias.Internals;
-using Viora.Domain.Abstractions;
+﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Medias.Internals;
 
-namespace Viora.Application.Medias;
+namespace Viora.Domain.Medias;
 
 public sealed class MediaFile : Entity
 {
+    public Name Name { get; set; } = default!;
     public MimeType MimeType { get; private set; } = default!;
     public long SizeInBytes { get; private set; }
     public MediaKey Key { get; private set; } = default!;
@@ -18,8 +19,9 @@ public sealed class MediaFile : Entity
         _ => MediaType.Binary
     };
 
-    private MediaFile(Guid id, long sizeInBytes, MediaKey key, MimeType type, DateTime uploadedAtUtc) : base(id)
+    private MediaFile(Guid id, Name name, long sizeInBytes, MediaKey key, MimeType type, DateTime uploadedAtUtc) : base(id)
     {
+        Name = name;
         MimeType = type;
         SizeInBytes = sizeInBytes;
         Key = key;
@@ -28,9 +30,9 @@ public sealed class MediaFile : Entity
 
     private MediaFile() : base() { } // for EfCore
 
-    public static Result<MediaFile> Create(long sizeInBytes, string key, string mimeType, DateTime uploadTimeUtc, long maximumMediaSizeInBytes)
+    public static Result<MediaFile> Create(string name, long sizeInBytes, string key, string mimeType, DateTime uploadTimeUtc, long maximumMediaSizeInBytes)
     {
-        var media = new MediaFile(Guid.NewGuid(), sizeInBytes, key, mimeType, uploadTimeUtc);
+        var media = new MediaFile(Guid.NewGuid(), name, sizeInBytes, key, mimeType, uploadTimeUtc);
 
         if (media.SizeInBytes > maximumMediaSizeInBytes)
             return Result.Failure<MediaFile>(MediaErrors.InvalidMediaSize(sizeInBytes, maximumMediaSizeInBytes));
