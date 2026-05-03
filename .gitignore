@@ -10,6 +10,8 @@
 
 # Visual Studio workspace
 .vs/
+# env
+.env
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
