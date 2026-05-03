@@ -13,14 +13,33 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     // for the read queries resulting in better memory management and performance
 
     #region query ops
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    // marked virtual to allow overriding for better performance in some cases.
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<T>().FindAsync([id], cancellationToken);
     }
-
     public IQueryable<T> GetByIds(IEnumerable<Guid> ids)
     {
         return DbContext.Set<T>().Where(entity => ids.Contains(entity.Id));
+    }
+    public async Task<List<T>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<T>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
+    {
+        if (ids is null || ids.Count == 0)
+            return[];
+
+        var idList = ids.Distinct().ToList();
+
+        return await DbContext.Set<T>()
+            .Where(e => idList.Contains(EF.Property<Guid>(e, "Id")))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
     #endregion  
 
