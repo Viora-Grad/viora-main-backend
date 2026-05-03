@@ -13,7 +13,8 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     // for the read queries resulting in better memory management and performance
 
     #region query ops
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    // marked virtual to allow overriding for better performance in some cases.
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<T>().FindAsync([id], cancellationToken);
     }
