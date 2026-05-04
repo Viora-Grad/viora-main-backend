@@ -4,4 +4,5 @@ namespace Viora.Domain.Organizations;
 
 public class Organization : Entity
 {
+    private Organization() { } // for ef core
 }
