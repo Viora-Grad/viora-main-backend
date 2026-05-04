@@ -1,16 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Viora.Application.Abstractions.Clock;
-using Viora.Domain.Abstractions;
-using Viora.Domain.Orders;
-using Viora.Domain.Organizations;
-using Viora.Domain.Plans;
-using Viora.Domain.Plans.Features;
-using Viora.Domain.Subscriptions;
-using Viora.Domain.Subscriptions.Addons;
-using Viora.Infrastructure.Clock;
-using Viora.Infrastructure.Repositories;
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,11 +8,18 @@ using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Orders;
+using Viora.Domain.Organizations;
+using Viora.Domain.Plans;
+using Viora.Domain.Plans.Features;
+using Viora.Domain.Subscriptions;
+using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Security;
@@ -36,8 +30,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-
+        // Database configuration
         var ConnectionString = configuration.GetConnectionString("Database");
+        if (ConnectionString == null)
+            throw new ArgumentNullException(nameof(ConnectionString));
+
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(ConnectionString));
 
@@ -59,23 +56,13 @@ public static class DependencyInjection
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        return services;
 
         // register services here
-        services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
 
-        // database context
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        if (connectionString == null)
-            throw new ArgumentNullException(nameof(connectionString));
-
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString));
 
         // register repositories here
         services.AddScoped<IUserRepository, UserRepository>();
