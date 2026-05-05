@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments.Events;
 using Viora.Domain.Appointments.Internal;
 using Viora.Domain.MedicalRecords;
 using Viora.Domain.Users.Customers;
@@ -53,8 +54,19 @@ public sealed class Appointment : Entity
         Platform requestPlatform,
         TimeSpan estimatedDuration)
     {
-        return new Appointment(Guid.NewGuid(), customerId, serviceId, staffId, reservationDate, status ?? CustomerStatus.NotArrived,
-            createdBy, requestPlatform, estimatedDuration);
+        var appointmentStatus = status ?? CustomerStatus.NotArrived;
+        var appointment = new Appointment(Guid.NewGuid(),
+            customerId,
+            serviceId,
+            staffId,
+            reservationDate,
+            appointmentStatus,
+            createdBy,
+            requestPlatform,
+            estimatedDuration);
+
+        appointment.RaiseDomainEvent(new AppointmentBookedEvent(appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
+        return appointment;
     }
     public Result CheckIn()
     {
@@ -85,10 +97,22 @@ public sealed class Appointment : Entity
     }
     public Result Delay(TimeSpan delay)
     {
-        // Only allow delaying the appointment if it is not completed
-        if (Status == CustomerStatus.Completed)
+        // Only allow delaying the appointment if it is not completed or in progress
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
             return Result.Failure(AppointmentErrors.DelayProhibited);
+
+        var originalDate = ReservationDate;
         ReservationDate = ReservationDate.Add(delay);
+        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay));
+        return Result.Success();
+    }
+    public Result NoShow()
+    {
+        // Only allow marking as no-show if the customer has not arrived yet
+        if (Status != CustomerStatus.NotArrived)
+            return Result.Failure(AppointmentErrors.NoShowProhibited);
+        Status = CustomerStatus.NoShow;
+        RaiseDomainEvent(new AppointmentNoShowEvent(Id, ReservationDate));
         return Result.Success();
     }
 }

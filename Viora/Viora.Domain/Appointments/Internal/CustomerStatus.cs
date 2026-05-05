@@ -6,4 +6,5 @@ public enum CustomerStatus
     Waiting,
     InProgress,
     Completed,
+    NoShow,
 }
