@@ -30,9 +30,3 @@ public sealed class OrganizationVisits : Entity
     }
 }
 
-// This class is a placeholder for the Organization entity, will be merged later.
-public class Organization : Entity
-{
-    private Organization() { } // for ef core
-
-}
