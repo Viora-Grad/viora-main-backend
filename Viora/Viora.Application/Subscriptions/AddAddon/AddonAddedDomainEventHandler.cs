@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
-using Viora.Domain.Organizations;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;

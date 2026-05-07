@@ -1,6 +1,6 @@
 ﻿namespace Viora.Application.Abstractions.Media;
 
-internal interface IStorageService
+public interface IStorageService
 {
     public Task<Stream> GetFileStreamAsync(string key);
 }

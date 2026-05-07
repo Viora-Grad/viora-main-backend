@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using Viora.Application.Abstractions.Cipher;
+using Viora.Application.Abstractions.Security;
 
-namespace Viora.Infrastructure.Cipher;
+namespace Viora.Infrastructure.Security;
 
 
 public class Cipher : ICipher

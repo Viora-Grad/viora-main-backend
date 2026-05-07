@@ -4,11 +4,13 @@ using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OnBoardings.Internals;
 using Viora.Domain.Organizations.Shared.Enums;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Organizations.SearchApplications;
 
 internal class SearchApplicationsQueryHandler(
-    IOrganizationApplicationRepository applicationRepository) : IQueryHandler<SearchApplicationsQuery, PaginatedModel<ApplicationsResponse>>
+    IOrganizationApplicationRepository applicationRepository,
+    IUserRepository userRepository) : IQueryHandler<SearchApplicationsQuery, PaginatedModel<ApplicationsResponse>>
 {
     public async Task<Result<PaginatedModel<ApplicationsResponse>>> Handle(SearchApplicationsQuery request, CancellationToken cancellationToken)
     {
@@ -22,12 +24,13 @@ internal class SearchApplicationsQueryHandler(
         var repoResult = await applicationRepository.ListAsync(speicifcation, cancellationToken);
         var countResults = await applicationRepository.CountAsync(speicifcation, cancellationToken);
 
-        // TODO add the user names from user repo injection when completed
+        var usersDict = await userRepository.GetNamesDictAsync(repoResult.Select(r => r.OwnerId), cancellationToken);
+
         var applicationResponseModel = repoResult.Select(a =>
         {
             return new ApplicationsResponse(a.Id,
                 a.OwnerId,
-                "PLACEHOLDER",
+                usersDict[a.OwnerId],
                 a.ProposedName,
                 a.ApplicationLetter,
                 a.ServiceDescription,
@@ -36,7 +39,7 @@ internal class SearchApplicationsQueryHandler(
                 a.Status.ToString(),
                 a.ReferralSource.ToString(),
                 a.RejectedBy,
-                "PLACEHOLDER",
+                a.RejectedBy != null ? usersDict[(Guid)a.RejectedBy] : null,
                 a.ExpiryDateUtc,
                 a.BillingEmail,
                 a.SupportEmail);

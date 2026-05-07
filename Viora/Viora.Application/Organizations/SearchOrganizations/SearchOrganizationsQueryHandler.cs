@@ -46,7 +46,7 @@ internal class SearchOrganizationsQueryHandler(
             .Distinct()
             .ToList();
 
-        var logos = mediaRepository.GetByIds(logoIds);
+        var logos = await mediaRepository.GetByIdsAsync(logoIds,cancellationToken);
 
         // Convert to Dictionary for O(1) lookup speed during mapping
         var logoDict = logos.ToDictionary(m => m.Id);

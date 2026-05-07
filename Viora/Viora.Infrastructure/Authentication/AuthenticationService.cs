@@ -10,7 +10,7 @@ namespace Viora.Infrastructure.Authentication;
 
 internal class AuthenticationService(IUserRepository userRepository,
     IJwtService jwtService,
-    IPasswordHasher passwordHasher,
+    IHasher passwordHasher,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
     LocalCredentialRepository localCredentialRepository,
@@ -30,7 +30,7 @@ internal class AuthenticationService(IUserRepository userRepository,
             return Result.Failure<AuthResult>(UserErrors.InvalidCredentials); // User exists but doesn't have local credentials, could be a social login user
         }
 
-        var passwordVerificationResult = passwordHasher.VerifyPassword(password, localCredential.HashedPassword);
+        var passwordVerificationResult = passwordHasher.Verify(password, localCredential.HashedPassword);
         if (!passwordVerificationResult)
         {
             localCredential.RecordFailedLogin();
@@ -71,7 +71,7 @@ internal class AuthenticationService(IUserRepository userRepository,
 
         dbContext.Attach(Role.Registered);
 
-        var hashedPassword = passwordHasher.HashPassword(password);
+        var hashedPassword = passwordHasher.Hash(password);
 
         var localCredential = new LocalCredential(user.Id, hashedPassword);
         localCredentialRepository.Add(localCredential);

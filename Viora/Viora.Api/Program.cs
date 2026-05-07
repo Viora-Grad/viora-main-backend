@@ -1,19 +1,19 @@
 using DotNetEnv;
+using Microsoft.EntityFrameworkCore;
 using Viora.Api.Middleware;
 using Viora.Application;
+using Viora.Application.Abstractions.Media;
+using Viora.Domain.Organizations.OnBoardings;
+using Viora.Domain.Organizations.Suspensions;
+using Viora.Domain.Scheduling;
 using Viora.Infrastructure;
-
+using Viora.Infrastructure.Settings;
 
 
 // Load .env first
 var cwd = Directory.GetCurrentDirectory();
-var projectEnvPath = Path.Combine(cwd, ".env");
-var solutionEnvPath = Path.GetFullPath(Path.Combine(cwd, "..", ".env"));
-
-if (File.Exists(projectEnvPath))
-    Env.Load(projectEnvPath);
-else if (File.Exists(solutionEnvPath))
-    Env.Load(solutionEnvPath);
+var envPath = Path.Combine(cwd, ".env");
+Env.Load(envPath);
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,8 +31,19 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region Settings
+builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
+    builder.Configuration, "Scheduling");
+builder.Services.AddInterfacedOptions<IStorageConfiguration, StorageConfigurations>(
+    builder.Configuration, "Storage");
+builder.Services.AddInterfacedOptions<IOnboardingSettings, OnboardingSettings>(
+    builder.Configuration, "Onboarding");
+builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
+    builder.Configuration, "Suspension");
+#endregion Settings
+
 var app = builder.Build();
-/*
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -41,10 +52,7 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
-
 }
-*/
-
 
 app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionMiddleware>();

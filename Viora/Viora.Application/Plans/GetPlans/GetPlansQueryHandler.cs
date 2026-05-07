@@ -28,7 +28,7 @@ public class GetPlansQueryHandler(
     public async Task<Result<List<PlanDTO>>> Handle(GetPlansQuery request, CancellationToken cancellationToken)
     {
         // 1. Fetch all data upfront — 4 DB calls total, not N*M
-        var plans = await planRepository.GetAllAsync(cancellationToken);
+        var plans = await planRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (!plans.Any())
             throw new NotFoundException("No plans found.");
 

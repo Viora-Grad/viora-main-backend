@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Interfaces;
-using Viora.Domain.Organizations;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans.Services;
 
 namespace Viora.Application.Abstractions.Behaviors;
