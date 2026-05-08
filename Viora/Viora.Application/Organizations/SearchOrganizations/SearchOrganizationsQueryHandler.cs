@@ -13,7 +13,7 @@ internal class SearchOrganizationsQueryHandler(
     IOrganizationRepository organizationRepository,
     IMediaRepository mediaRepository,
     IStorageService storageService,
-    IEnumerable<Country> countries) : IQueryHandler<SearchOrganizationsQuery, PaginatedModel<OrganizationsResponse>>
+    IReadOnlyList<Country> countries) : IQueryHandler<SearchOrganizationsQuery, PaginatedModel<OrganizationsResponse>>
 {
 
     public async Task<Result<PaginatedModel<OrganizationsResponse>>> Handle(SearchOrganizationsQuery request, CancellationToken cancellationToken)

@@ -8,7 +8,7 @@ namespace Viora.Application.Organizations.GetOrganizationDetails;
 
 internal class GetOrganizationDetailsQueryHandler(
     IOrganizationRepository organizationRepository,
-    IEnumerable<Country> countries
+    IReadOnlyList<Country> countries
     ) : IQueryHandler<GetOrganizationDetailsQuery, OrganizationDetailsResponse>
 {
     public async Task<Result<OrganizationDetailsResponse>> Handle(GetOrganizationDetailsQuery request, CancellationToken cancellationToken)

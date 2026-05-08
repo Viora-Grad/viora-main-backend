@@ -17,6 +17,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.Shared;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
@@ -31,6 +32,7 @@ using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
+using Viora.Infrastructure.Seeding;
 
 namespace Viora.Infrastructure;
 
@@ -77,6 +79,7 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
+        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         #endregion ServicesRegisters
 
 
@@ -84,6 +87,15 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+        services.AddSingleton<IReadOnlyList<Country>>(sp =>
+        {
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return db.Set<Country>()
+                .AsNoTracking()
+                .ToList();
+        });
 
         services.AddHttpContextAccessor();
 

@@ -7,6 +7,7 @@ using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
 using Viora.Infrastructure;
+using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
 
@@ -49,6 +50,9 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
+
+    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    await seeder.SeedAsync();
 }
 
 app.UseHttpsRedirection();
