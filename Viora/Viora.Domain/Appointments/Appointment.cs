@@ -21,6 +21,7 @@ public sealed class Appointment : Entity
     public Creator CreatedBy { get; private set; }
     public Platform RequestPlatform { get; private set; }
     public TimeSpan EstimatedDuration { get; private set; }
+    public DateTime EndTime => ReservationDate.Add(EstimatedDuration); // Convenience property to calculate the end time of the appointment
 
     public Customer Customer { get; private set; } = null!; // Navigation property
     public MedicalRecord? MedicalRecord => Customer.MedicalRecord; // Convenience property to access the customer's medical record (should it be used like this ?)
