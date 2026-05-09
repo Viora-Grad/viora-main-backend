@@ -82,6 +82,9 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         #endregion ServicesRegisters
 
+        #region HostedWorkers
+        services.AddHostedService<ScheduledEventDispatcherService>();
+        #endregion HostedWorkers
 
         var connectionString = configuration.GetConnectionString("Default") ?? throw new ArgumentNullException(configuration.GetConnectionString("Default"));
 
