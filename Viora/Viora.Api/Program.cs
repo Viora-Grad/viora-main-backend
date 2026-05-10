@@ -25,9 +25,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 #region Settings
 builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
     builder.Configuration, "Scheduling");
@@ -43,9 +40,11 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Viora API v1");
+    });
 
     using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -61,5 +60,4 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapGet("/", () => "welcome in Viora API");
 app.Run();

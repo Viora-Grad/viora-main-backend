@@ -87,6 +87,7 @@ public static class DependencyInjection
         #endregion HostedWorkers
 
         var connectionString = configuration.GetConnectionString("Default") ?? throw new ArgumentNullException(configuration.GetConnectionString("Default"));
+        Console.WriteLine(connectionString);
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
