@@ -1,5 +1,4 @@
 using DotNetEnv;
-using Microsoft.EntityFrameworkCore;
 using Viora.Api.Middleware;
 using Viora.Application;
 using Viora.Infrastructure;
@@ -36,9 +35,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 
-    using var scope = app.Services.CreateScope(); // apply pending migrations on startup
+    /*using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
+    await dbContext.Database.MigrateAsync();*/
 
 }
 

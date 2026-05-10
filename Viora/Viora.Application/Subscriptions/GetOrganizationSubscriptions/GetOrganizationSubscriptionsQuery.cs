@@ -4,5 +4,5 @@
 namespace Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 
 public sealed record GetOrganizationSubscriptionsQuery(
-    Guid OrganizationId) : IQuery<List<SubscriptionDto>>;
+    Guid OrganizationId) : IQuery<List<SubscriptionResponse>>;
 

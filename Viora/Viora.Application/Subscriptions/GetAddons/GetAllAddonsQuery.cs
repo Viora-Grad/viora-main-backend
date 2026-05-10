@@ -1,7 +1,7 @@
 ﻿using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Plans.DTO;
+using Viora.Application.Subscriptions.GetAddons;
 
 namespace Viora.Application.Subscriptions.GetFeatureAddon;
 
-public sealed record GetAllAddonsQuery() : IQuery<List<FeatureAddonDTO>>;
+public sealed record GetAllAddonsQuery() : IQuery<List<FeatureAddonResponse>>;
 

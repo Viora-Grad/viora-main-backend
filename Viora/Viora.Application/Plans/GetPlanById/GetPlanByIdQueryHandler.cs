@@ -1,6 +1,6 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Plans.DTO;
+using Viora.Application.Plans.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
@@ -23,9 +23,9 @@ public class GetPlanByIdQueryHandler(
     IPlanRepository planRepository,
     IPlanFeatureRepository planFeatureRepository,
     IFeatureRepository featureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlanByIdQuery, PlanDTO>
+    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlanByIdQuery, PlanResponse>
 {
-    public async Task<Result<PlanDTO>> Handle(GetPlanByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlanResponse>> Handle(GetPlanByIdQuery request, CancellationToken cancellationToken)
     {
         var plan = await planRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Plan with ID {request.Id} not found.");
@@ -35,20 +35,20 @@ public class GetPlanByIdQueryHandler(
         var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
         var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
 
-        var featureDTOs = features.Select(f => new FeatureDTO(
+        var featureDTOs = features.Select(f => new FeatureResponse(
                f.Id,
                f.FeatureKey.value,
                f.Description.value
             )
         ).ToList();
-        var limitedFeatureDTOs = limitedFeatures.Select(lf => new LimitedFeatureDTO(
+        var limitedFeatureDTOs = limitedFeatures.Select(lf => new LimitedFeatureResponse(
             lf.Id,
             lf.Key.value,
             lf.Description.value,
             lf.Limit
             )
         ).ToList();
-        var planDTO = PlanDTO.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
+        var planDTO = PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
         return Result.Success(planDTO);
 
     }
