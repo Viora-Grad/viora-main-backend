@@ -16,5 +16,7 @@ public enum ErrorCategory
     Unauthorized,
     Forbidden,
     Internal,
-    Violation // for business rule violations (e.g., trying to delete a plan that has active subscriptions , should it be broken down to more specific categories?)
+    Violation, // for business rule violations (e.g., trying to delete a plan that has active subscriptions , should it be broken down to more specific categories?)
+    Timeout,
+    BadGateway
 }

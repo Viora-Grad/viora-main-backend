@@ -39,7 +39,9 @@ internal static class ActionResultMapper
             ErrorCategory.Unauthorized => StatusCodes.Status401Unauthorized,
             ErrorCategory.Forbidden => StatusCodes.Status403Forbidden,
             ErrorCategory.Violation => StatusCodes.Status422UnprocessableEntity,
-            _ => StatusCodes.Status500InternalServerError
+            ErrorCategory.Timeout => StatusCodes.Status408RequestTimeout,
+            ErrorCategory.BadGateway => StatusCodes.Status502BadGateway,
+            _ => StatusCodes.Status500InternalServerError,
         };
 
         var problemDetails = new ProblemDetails
