@@ -62,7 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
-
+        services.AddScoped<ITokenValidator, TokenValidator>();
 
         // register repositories here
         services.AddScoped<IUserRepository, UserRepository>();

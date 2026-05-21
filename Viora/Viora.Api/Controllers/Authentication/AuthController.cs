@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Application.Users.LocalLoginUser;
+using Viora.Application.Users.OAuthValidateToken;
 using Viora.Application.Users.RegisterUser;
 
 namespace Viora.Api.Controllers.Authentication;
@@ -51,6 +52,40 @@ public class AuthController : ControllerBase
             request.Password);
 
         var result = await _sender.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            return BadRequest(result.Error);
+        }
+    }
+    [HttpPost]
+    [Route("refresh")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+    [HttpPost]
+    [Route("oauth/{provider=google}/login")]
+    public async Task<IActionResult> OAuthLogin(string provider, OAuthLoginRequest request, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+    [HttpPost]
+    [Route("oauth/{provider=google}/register")]
+    public async Task<IActionResult> OAuthRegister(string provider, OAuthRegisterRequest request, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+    [HttpPost]
+    [Route("oauth/{provider=google}/validate")]
+    public async Task<IActionResult> OAuthValidate(string provider, OAuthValidateRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new OAuthValidateTokenCommand(provider, request.Token);
+        var result = await _sender.Send(command, cancellationToken);
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);
