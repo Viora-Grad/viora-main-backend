@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Vivi.Shared.Internals;
+﻿namespace Viora.Domain.Vivi.ChatSessions.Internals;
 
 public sealed record ModelUsed(string Value)
 {

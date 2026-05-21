@@ -1,5 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Vivi.Shared.Internals;
+using Viora.Domain.Vivi.SuggestedQuestions.Internals;
 
 namespace Viora.Domain.Vivi.Shared;
 

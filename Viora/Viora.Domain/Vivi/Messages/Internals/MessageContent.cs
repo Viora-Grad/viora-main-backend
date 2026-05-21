@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Vivi.Shared.Internals;
+﻿namespace Viora.Domain.Vivi.Messages.Internals;
 
 public record MessageContent(string Value)
 {

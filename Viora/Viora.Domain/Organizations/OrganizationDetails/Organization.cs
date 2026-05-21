@@ -5,6 +5,7 @@ using Viora.Domain.Organizations.Shared.Enums;
 
 namespace Viora.Domain.Organizations.OrganizationDetails;
 
+// TODO add multi service resgistery option instead of just one :))))))
 public sealed class Organization : Entity
 {
     public Guid OwnerId { get; private set; }

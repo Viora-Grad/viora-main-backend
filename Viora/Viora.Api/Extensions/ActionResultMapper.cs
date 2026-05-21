@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Viora.Domain.Abstractions;
 
 namespace Viora.Api.Extensions;
@@ -11,7 +12,7 @@ internal static class ActionResultMapper
     public static IActionResult ToActionResult(this Result result)
     {
         if (result.IsSuccess)
-            return new OkResult();
+            return new NoContentResult();
 
         return BuildProblemDetails(result.Error);
     }

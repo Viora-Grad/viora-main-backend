@@ -1,9 +1,8 @@
 ﻿using Viora.Domain.Abstractions;
 
-namespace Viora.Domain.Vivi;
+namespace Viora.Domain.Vivi.ChatSessions;
 
-public static class ViviErrors
+public static class ChatSessionErrors
 {
-    public static Error AgentFailedToLoadContent => new("Vivi.AgentFailedToLoadContent", "The agent returned empty content", ErrorCategory.BadGateway);
     public static Error ActivityTimeChatConflict => new("Vivi.ActivityTimeChatConflict", "The activity timeline conflicted with the current time track", ErrorCategory.Conflict);
 }

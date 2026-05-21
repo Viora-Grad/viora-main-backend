@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Vivi.Shared.Internals;
+﻿namespace Viora.Domain.Vivi.SuggestedQuestions.Internals;
 
 public sealed record Body(string Value)
 {

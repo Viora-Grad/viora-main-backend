@@ -1,7 +1,7 @@
 ﻿using Viora.Domain.Abstractions;
-using Viora.Domain.Vivi.Shared.Internals;
+using Viora.Domain.Vivi.Messages.Internals;
 
-namespace Viora.Domain.Vivi.Shared;
+namespace Viora.Domain.Vivi.Messages;
 
 public sealed class Message : Entity
 {
@@ -32,7 +32,7 @@ public sealed class Message : Entity
         int? latency = null)
     {
         if (senderRole == Role.Assistant && string.IsNullOrEmpty(content))
-            return Result.Failure<Message>(ViviErrors.AgentFailedToLoadContent);
+            return Result.Failure<Message>(MessageErrors.AgentFailedToLoadContent);
 
         return Result.Success(new Message(Guid.NewGuid(), sessionId, content, senderRole, currentDateTime, new(inputTokens, outputTokens, latency)));
     }
