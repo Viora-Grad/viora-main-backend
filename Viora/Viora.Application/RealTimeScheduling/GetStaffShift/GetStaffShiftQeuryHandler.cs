@@ -1,5 +1,4 @@
-﻿using Viora.Application.Abstractions.Exceptions;
-using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.RealTimeScheduling;
@@ -17,7 +16,7 @@ public class GetStaffShiftQeuryHandler(
         /*var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
             ?? throw new NotFoundException($"Staff with id {request.StaffId} not Found");
         var branch = await branchRepository.GetByIdAsync(staff.BranchId, cancellationToken)
-            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");*/
+            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");*//*
         var branchSchedule = await scheduleRepository.getByBranchIdAndDayAsync(branch.Id, request.Date.DayOfWeek, cancellationToken)
             ?? throw new NotFoundException($"branch with Id {branchSchedule.Id} does not havve schedule");
         var staffShifts = branchSchedule
@@ -42,7 +41,8 @@ public class GetStaffShiftQeuryHandler(
                 ).ToList()
             ).ToList();
 
-        return Result.Success(shiftResponses);
+        return Result.Success(shiftResponses);*/
+        throw new NotImplementedException();
     }
 }
 

@@ -1,5 +1,4 @@
-﻿using Viora.Application.Abstractions.Exceptions;
-using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.RealTimeScheduling;
 
@@ -39,7 +38,7 @@ public class CreateShiftCommandHandler(
         if (hasOverLap)
             return Result.Failure<Guid>(ScheduleError.ShiftOverlap);
 
-        var newShift = Shift.Create(branchSchedule.Id, , request.StartTime, request.EndTime, request.StaffId);
+        var newShift = Shift.Create(branchSchedule.Id, request.StartTime, request.EndTime, request.StaffId);
 
 
         shiftRepository.Add(newShift);
