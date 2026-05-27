@@ -6,15 +6,17 @@ namespace Viora.Application.Organizations.SearchApplications;
 
 internal class SearchApplicationsQueryValidator : AbstractValidator<SearchApplicationsQuery>
 {
-    SearchApplicationsQueryValidator()
+    public SearchApplicationsQueryValidator()
     {
         RuleFor(x => x.ReferralSource)
             .Must(s => Enum.TryParse<ReferralSource>(s, ignoreCase: true, out _))
-            .WithMessage("Invalid Referral Source type.");
+            .WithMessage("Invalid Referral Source type.")
+            .When(x => x.ReferralSource != null);
 
         RuleFor(x => x.Status)
             .Must(s => Enum.TryParse<ApplicationStatus>(s, ignoreCase: true, out _))
-            .WithMessage("Invalid Status Requested.");
+            .WithMessage("Invalid Status Requested.")
+            .When(x => x.Status != null);
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 100)

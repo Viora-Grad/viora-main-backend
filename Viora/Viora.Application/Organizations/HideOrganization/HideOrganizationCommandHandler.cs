@@ -6,18 +6,20 @@ using Viora.Domain.Organizations.OrganizationDetails;
 namespace Viora.Application.Organizations.HideOrganization;
 
 internal class HideOrganizationCommandHandler(
-    IOrganizationRepository organizationRepository) : ICommandHandler<HideOrganizationCommand>
+    IOrganizationRepository organizationRepository,
+    IUnitOfWork unitOfWork) : ICommandHandler<HideOrganizationCommand>
 {
     public async Task<Result> Handle(HideOrganizationCommand request, CancellationToken cancellationToken)
     {
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
-            ?? throw new NotFoundException($"Organization with Id {request.OrganizationId} not fonud");
+            ?? throw new NotFoundException($"Organization with Id {request.OrganizationId} not found.");
 
         var result = organization.Hide();
 
-        if (result.IsSuccess)
-            return Result.Failure(result.Error);
+        if (result.IsFailure)
+            return result;
 
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }

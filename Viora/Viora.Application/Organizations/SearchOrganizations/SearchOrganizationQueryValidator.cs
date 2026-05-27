@@ -9,7 +9,8 @@ internal class SearchOrganizationQueryValidator : AbstractValidator<SearchOrgani
     {
         RuleFor(x => x.ServiceType)
             .Must(s => Enum.TryParse<ServiceType>(s, ignoreCase: true, out _))
-            .WithMessage("Invalid service type.");
+            .WithMessage("Invalid service type.")
+            .When(x => x.ServiceType != null);
 
         RuleFor(x => x.PageSize)
             .InclusiveBetween(1, 100)

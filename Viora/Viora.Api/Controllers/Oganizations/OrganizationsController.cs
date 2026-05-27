@@ -8,6 +8,7 @@ using Viora.Application.Organizations.RequestOnboard;
 using Viora.Application.Organizations.SearchApplications;
 using Viora.Application.Organizations.SearchOrganizations;
 using Viora.Application.Organizations.SuspendOrganization;
+using Viora.Application.Organizations.UpdateLogo;
 
 namespace Viora.Api.Controllers.Oganizations;
 
@@ -83,14 +84,11 @@ public class OrganizationsController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
 
-    //[HttpPut("{organizationId:guid}/logo")]
-    //public async Task<IActionResult> UpdateLogo(
-    //    Guid organizationId,
-    //    [FromBody] UpdateLogoRequest request,
-    //    CancellationToken cancellationToken)
-    //{
-    //    var command = new UpdateLogoCommand(organizationId, request.MediaId);
-    //    var result = await sender.Send(command, cancellationToken);
-    //    return result.ToActionResult();
-    //}
+    [HttpPut("{organizationId:guid}/logo")]
+    public async Task<IActionResult> UpdateLogo(Guid organizationId, [FromBody] UpdateLogoRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateLogoCommand(organizationId, request.MediaId);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
 }

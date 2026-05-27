@@ -63,10 +63,17 @@ internal sealed class OrganizationApplicationConfiguration : IEntityTypeConfigur
                 .IsRequired();
         });
 
-        builder.Property(a => a.ProposedServiceType)
-            .HasConversion<string>()
-            .HasMaxLength(50)
-            .IsRequired();
+        builder.ComplexProperty(a => a.About, about =>
+        {
+            about.Property(a => a.Value)
+                .HasColumnName("About")
+                .HasMaxLength(500)
+                .IsRequired();
+        });
+
+        builder.PrimitiveCollection(a => a.ProposedServicesType)
+            .HasColumnName("ProposedServicesType")
+            .ElementType(b => b.HasConversion<string>().HasMaxLength(50));
 
         builder.Property(a => a.Status)
             .HasConversion<string>()

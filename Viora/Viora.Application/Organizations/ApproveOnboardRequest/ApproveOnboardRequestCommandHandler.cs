@@ -35,6 +35,9 @@ internal class ApproveOnboardRequestCommandHandler(
             application.BillingEmail,
             application.SupportEmail);
 
+        if (result.IsFailure)
+            return Result.Failure<Guid>(result.Error);
+
         organizationRepository.Add(result.Value);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

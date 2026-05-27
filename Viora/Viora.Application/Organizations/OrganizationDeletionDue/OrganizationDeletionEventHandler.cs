@@ -19,7 +19,7 @@ internal class OrganizationDeletionEventHandler(
         var suspension = await suspensionRepository.GetByIdAsync(notification.OrganizationId, cancellationToken) ??
             throw new NotFoundException($"Organization {notification.OrganizationId} was not found");
 
-        if (suspension.ScheduledDeletionDateUtc < dateTimeProvider.UtcNow)
+        if (suspension.ScheduledDeletionDateUtc > dateTimeProvider.UtcNow)
         {
             await scheduler.ScheduleAsync(new OrganizationDeletionDueEvent(notification.OrganizationId), suspension.ScheduledDeletionDateUtc, cancellationToken);
             return;

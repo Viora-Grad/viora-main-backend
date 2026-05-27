@@ -33,19 +33,25 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
             .HasMaxLength(255)
             .IsRequired();
 
-        builder.ComplexProperty(o => o.ServiceSpecification, spec =>
+        builder.ComplexProperty(o => o.About, about =>
         {
-            spec.Property(s => s.Description)
+            about.Property(a => a.Value)
+                .HasColumnName("About")
+                .HasMaxLength(500)
+                .IsRequired();
+        });
+
+        builder.ComplexProperty(o => o.ServiceDescription, desc =>
+        {
+            desc.Property(d => d.Value)
                 .HasColumnName("ServiceDescription")
                 .HasMaxLength(2000)
                 .IsRequired();
-
-            spec.Property(s => s.Type)
-                .HasColumnName("ServiceType")
-                .HasConversion<string>()
-                .HasMaxLength(50)
-                .IsRequired();
         });
+
+        builder.PrimitiveCollection(o => o.ServicesProvided)
+            .HasColumnName("ServicesProvided")
+            .ElementType(b => b.HasConversion<string>().HasMaxLength(50));
 
         builder.ComplexProperty(o => o.Rating, rating =>
         {

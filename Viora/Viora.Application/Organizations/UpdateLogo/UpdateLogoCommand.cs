@@ -1,3 +1,5 @@
-﻿namespace Viora.Application.Organizations.UpdateLogo;
+﻿using Viora.Application.Abstractions.Messaging;
 
-public record UpdateLogoCommand(Guid OrganizationId, Guid MediaId);
+namespace Viora.Application.Organizations.UpdateLogo;
+
+public record UpdateLogoCommand(Guid OrganizationId, Guid MediaId) : ICommand;

@@ -83,4 +83,13 @@ public sealed class Organization : Entity
         Status = OrganizationStatus.Suspended;
         return Result.Success();
     }
+
+    public Result UpdateLogo(Guid mediaId)
+    {
+        if (Status != OrganizationStatus.Active)
+            return Result.Failure(OrganizationErrors.OrganizationMustBeActiveToUpdateLogo);
+
+        LogoId = mediaId;
+        return Result.Success();
+    }
 }

@@ -78,7 +78,7 @@ internal class SearchOrganizationsQueryHandler(
         var response = await Task.WhenAll(responseTasks);
 
         var countAll = await organizationRepository.CountAsync(specfication, cancellationToken);
-        PaginatedModel<OrganizationsResponse> paginatedModel = new([.. response], request.Page, request.Page, countAll);
+        PaginatedModel<OrganizationsResponse> paginatedModel = new([.. response], request.Page, request.PageSize, countAll);
 
         return Result.Success(paginatedModel);
 
