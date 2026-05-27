@@ -2,6 +2,7 @@
 
 public interface IMediaRepository
 {
-    public Task<MediaFile> GetByIdAsync(Guid id, CancellationToken cancellationToken);
-    public Task<List<MediaFile>> GetByIdsAsync(List<Guid> Ids, CancellationToken cancellation);
+    void Add(MediaFile media);
+    Task<MediaFile?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<List<MediaFile>> GetByIdsAsync(List<Guid> Ids, CancellationToken cancellation);
 }

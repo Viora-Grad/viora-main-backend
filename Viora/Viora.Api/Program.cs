@@ -28,7 +28,7 @@ builder.Services.AddOpenApi();
 #region Settings
 builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
     builder.Configuration, "Scheduling");
-builder.Services.AddInterfacedOptions<IStorageConfiguration, StorageConfigurations>(
+builder.Services.AddInterfacedOptions<IStorageSettings, StorageConfigurations>(
     builder.Configuration, "Storage");
 builder.Services.AddInterfacedOptions<IOnboardingSettings, OnboardingSettings>(
     builder.Configuration, "Onboarding");

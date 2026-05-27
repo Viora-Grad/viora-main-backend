@@ -1,6 +1,7 @@
 ﻿namespace Viora.Application.Abstractions.Media;
 
-public interface IStorageConfiguration
+public interface IStorageSettings
 {
     string BasePath { get; }
+    long MaxFileSizeBytes { get; }
 }

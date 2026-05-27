@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
@@ -23,6 +24,7 @@ using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
+using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Media;
@@ -30,8 +32,10 @@ using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Users;
+using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
+using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Seeding;
 
 namespace Viora.Infrastructure;
@@ -68,6 +72,7 @@ public static class DependencyInjection
         #endregion UsersRepos
 
         services.AddScoped<IMediaRepository, MediaRepository>();
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -78,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<IStorageService, StorageService>();
+        services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         #endregion ServicesRegisters
@@ -100,6 +106,8 @@ public static class DependencyInjection
                 .AsNoTracking()
                 .ToList();
         });
+
+        services.AddDistributedMemoryCache();
 
         services.AddHttpContextAccessor();
 

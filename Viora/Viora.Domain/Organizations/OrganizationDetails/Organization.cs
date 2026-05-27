@@ -13,12 +13,12 @@ public sealed class Organization : Entity
     public Name Name { get; private set; } = default!;
     public About About { get; private set; } = default!;
 
-    public HashSet<ServiceType> ServicesProvided { get; private set; } = [];
+    public List<ServiceType> ServicesProvided { get; private set; } = [];
     public ServiceDescription ServiceDescription { get; private set; } = default!;
     public DateTime JoinedOnUtc { get; private set; }
     public OrganizationStatus Status { get; private set; }
     public ReferralSource ReferralSource { get; private set; }
-    public OrganizationRating Rating { get; private set; } = default!;
+    public OrganizationRating Rating { get; private set; } = new(0, 0.0);
 
     public BillingEmail BillingEmail { get; private set; } = default!;
     public SupportEmail SupportEmail { get; private set; } = default!;
@@ -41,7 +41,7 @@ public sealed class Organization : Entity
         Name = name;
         About = about;
         ServiceDescription = description;
-        ServicesProvided = [.. serviceTypes];
+        ServicesProvided = serviceTypes.Distinct().ToList();
         JoinedOnUtc = joinedOnUtc;
         ReferralSource = referralSource;
         BillingEmail = billingEmail;

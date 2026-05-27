@@ -2,7 +2,9 @@
 
 namespace Viora.Infrastructure.Settings;
 
-public class StorageConfigurations : IStorageConfiguration
+public class StorageConfigurations : IStorageSettings
 {
     public string BasePath { get; set; } = null!;
+
+    public long MaxFileSizeBytes { get; set; }
 }

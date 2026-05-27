@@ -1,8 +1,10 @@
 ﻿using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Organizations.RequestOnboard;
 
@@ -10,12 +12,17 @@ namespace Viora.Application.Organizations.RequestOnboard;
 internal class RequestOnboardCommandHandler(
     IOrganizationRepository organizationRepository,
     IOrganizationApplicationRepository applicationRepository,
+    IUserRepository userRepository,
     IDateTimeProvider dateTimeProvider,
     IOnboardingSettings onboardingSettings,
     IUnitOfWork unitOfWork) : ICommandHandler<RequestOnboardCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(RequestOnboardCommand request, CancellationToken cancellationToken)
     {
+        var isUserExisting = await userRepository.IsUserExistent(request.OwnerId);
+        if (!isUserExisting)
+            throw new NotFoundException($"User with Id {request.OwnerId} does not eixst");
+
         bool isOrganizationExistingForOwner = await organizationRepository.IsOrganizationExistForOwnerAsync(request.OwnerId, cancellationToken);
         if (isOrganizationExistingForOwner)
             return Result.Failure<Guid>(OnboardingErrors.OwnerHasOrganization);

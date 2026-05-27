@@ -12,6 +12,8 @@
 .vs/
 # env
 .env
+# Media file storage
+Viora/Viora.Api/Media/*
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

@@ -13,7 +13,7 @@ public sealed class OrganizationApplication : Entity
     public Letter ApplicationLetter { get; private set; } = default!;
     public About About { get; private set; } = default!;
 
-    public HashSet<ServiceType> ProposedServicesType { get; private set; } = [];
+    public List<ServiceType> ProposedServicesType { get; private set; } = [];
     public ServiceDescription ServiceDescription { get; private set; } = default!;
 
     public DateTime SubmittedOnUtc { get; private set; }
@@ -42,12 +42,13 @@ public sealed class OrganizationApplication : Entity
     {
         var application = new OrganizationApplication
         {
+            Id = Guid.NewGuid(),
             OwnerId = ownerId,
             CountryId = countryId,
             ProposedName = proposedName,
             ApplicationLetter = applicationLetter,
             About = about,
-            ProposedServicesType = [.. proposedServiceType],
+            ProposedServicesType = proposedServiceType.Distinct().ToList(),
             ServiceDescription = serviceDescription,
             ReferralSource = referralSource,
             BillingEmail = billingEmail,

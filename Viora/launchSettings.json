@@ -4,7 +4,7 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:8081/swagger",
+      "launchUrl": "{ServiceURL}/swagger",
       "serviceActions": {
         "viora.api": "StartDebugging"
       }

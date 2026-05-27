@@ -46,4 +46,27 @@ internal class UserRepository(ApplicationDbContext dbContext) : Repository<User>
             .ToDictionaryAsync(x => x.Id, x => x.FullName, cancellationToken);
 
     }
+    /// <summary>
+    /// used to bail early in case user does not exist in other modules
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<bool> IsUserExistent(Guid id, CancellationToken cancellationToken = default)
+    {
+        return DbContext.Set<User>().AnyAsync(u => u.Id == id, cancellationToken);
+    }
+
+    /// <summary>
+    /// retrives the roles from the database to track it, since the roles are staticly made and not tracked
+    /// an alt is to seed the roles on run, get them from the database in a readonly collection and inject them for usage
+    /// instead of using the static members (look at how I made country)
+    /// </summary>
+    /// <param name="roleId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<Role?> FindRoleAsync(int roleId, CancellationToken cancellationToken = default)
+    {
+        return DbContext.Set<Role>().FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
+    }
 }

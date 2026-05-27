@@ -20,4 +20,3 @@ public record SuspendOrganizationRequest(
     string Reason,
     string Notes);
 
-public record UpdateLogoRequest(Guid MediaId);

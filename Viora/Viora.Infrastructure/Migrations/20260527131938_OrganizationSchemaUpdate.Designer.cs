@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viora.Infrastructure;
 
@@ -12,9 +13,11 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260527131938_OrganizationSchemaUpdate")]
+    partial class OrganizationSchemaUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -918,11 +921,6 @@ namespace Viora.Infrastructure.Migrations
                         {
                             Id = 1,
                             Name = "Registered"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Owner"
                         });
                 });
 
@@ -1110,7 +1108,7 @@ namespace Viora.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Viora.Domain.Users.Identity.User", null)
+                    b.HasOne("Viora.Domain.Users.Owners.Owner", null)
                         .WithOne()
                         .HasForeignKey("Viora.Domain.Organizations.OnBoardings.OrganizationApplication", "OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)

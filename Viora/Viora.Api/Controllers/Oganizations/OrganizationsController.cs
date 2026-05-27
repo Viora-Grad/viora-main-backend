@@ -85,9 +85,11 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{organizationId:guid}/logo")]
-    public async Task<IActionResult> UpdateLogo(Guid organizationId, [FromBody] UpdateLogoRequest request, CancellationToken cancellationToken)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateLogo(Guid organizationId, IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UpdateLogoCommand(organizationId, request.MediaId);
+        await using var stream = file.OpenReadStream();
+        var command = new UpdateLogoCommand(organizationId, stream, file.FileName, file.ContentType, file.Length);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }

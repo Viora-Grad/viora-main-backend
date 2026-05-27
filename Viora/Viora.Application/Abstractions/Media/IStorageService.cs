@@ -2,5 +2,6 @@
 
 public interface IStorageService
 {
-    public Task<Stream> GetFileStreamAsync(string key);
+    Task<Stream> GetFileStreamAsync(string key);
+    Task SaveFileAsync(Stream stream, string key, CancellationToken cancellationToken = default);
 }

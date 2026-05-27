@@ -57,12 +57,17 @@ internal class SearchOrganizationsQueryHandler(
             if (org.LogoId.HasValue)
                 logoDict.TryGetValue(org.LogoId.Value, out logo);
 
-            MediaResponse? logoResponse = logo is not null
-                ? new MediaResponse(
-                    await storageService.GetFileStreamAsync(logo.Key),
+            MediaResponse? logoResponse = null;
+            if (logo is not null)
+            {
+                await using var stream = await storageService.GetFileStreamAsync(logo.Key);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms, cancellationToken);
+                logoResponse = new MediaResponse(
+                    Convert.ToBase64String(ms.ToArray()),
                     logo.MimeType,
-                    logo.Name)
-                : null;
+                    logo.Name);
+            }
 
             return new OrganizationsResponse(
                 org.Id,

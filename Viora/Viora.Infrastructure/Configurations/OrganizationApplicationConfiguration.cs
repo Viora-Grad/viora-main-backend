@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Shared;
-using Viora.Domain.Users.Owners;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -94,7 +94,7 @@ internal sealed class OrganizationApplicationConfiguration : IEntityTypeConfigur
         builder.Property(a => a.RejectedBy);
 
 
-        builder.HasOne<Owner>()
+        builder.HasOne<User>()
             .WithOne()
             .HasForeignKey<OrganizationApplication>(o => o.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);

@@ -1,8 +1,9 @@
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
+using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Medias;
-using Viora.Domain.Medias.Internals;
 using Viora.Domain.Organizations.OrganizationDetails;
 
 namespace Viora.Application.Organizations.UpdateLogo;
@@ -10,6 +11,9 @@ namespace Viora.Application.Organizations.UpdateLogo;
 internal class UpdateLogoCommandHandler(
     IOrganizationRepository organizationRepository,
     IMediaRepository mediaRepository,
+    IStorageSettings storageSettings,
+    IStorageService storageService,
+    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork) : ICommandHandler<UpdateLogoCommand>
 {
     public async Task<Result> Handle(UpdateLogoCommand request, CancellationToken cancellationToken)
@@ -17,15 +21,28 @@ internal class UpdateLogoCommandHandler(
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"Organization with Id {request.OrganizationId} was not found.");
 
-        var media = await mediaRepository.GetByIdAsync(request.MediaId, cancellationToken)
-            ?? throw new NotFoundException($"Media with Id {request.MediaId} was not found.");
+        var extension = Path.GetExtension(request.FileName);
+        var storageKey = $"logos/{request.OrganizationId}/{Guid.NewGuid()}{extension}";
 
-        if (media.CategoryType != MediaType.Image)
-            return Result.Failure(OrganizationErrors.LogoMustBeAnImage);
+        await storageService.SaveFileAsync(request.FileStream, storageKey, cancellationToken);
 
-        var result = organization.UpdateLogo(request.MediaId);
-        if (result.IsFailure)
-            return result;
+        var mediaResult = MediaFile.Create(
+            request.FileName,
+            request.SizeInBytes,
+            storageKey,
+            request.MimeType,
+            dateTimeProvider.UtcNow,
+            storageSettings.MaxFileSizeBytes);
+
+        if (mediaResult.IsFailure)
+            return Result.Failure(mediaResult.Error);
+
+        var media = mediaResult.Value;
+        mediaRepository.Add(media);
+
+        var updateResult = organization.UpdateLogo(media.Id);
+        if (updateResult.IsFailure)
+            return updateResult;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();

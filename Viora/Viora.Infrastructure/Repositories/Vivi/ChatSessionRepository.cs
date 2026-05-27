@@ -6,6 +6,10 @@ namespace Viora.Infrastructure.Repositories.Vivi;
 
 internal sealed class ChatSessionRepository(ApplicationDbContext dbContext) : IChatSessionRepository
 {
+    public Task<int> GetCountSessionsByUserIdAsync(Guid userId, Persona persona, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 
     public async Task<IEnumerable<ChatSessionSummary>> GetSessionsByUserIdAsync(Guid userId, Persona persona, int page, int pageSize, CancellationToken cancellationToken = default)
     {

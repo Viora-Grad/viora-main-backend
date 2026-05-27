@@ -1,15 +1,19 @@
-﻿using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Users.Identity;
+using Viora.Domain.Users.Owners;
 
 namespace Viora.Application.Organizations.ApproveOnboardRequest;
 
 internal class ApproveOnboardRequestCommandHandler(
     IOrganizationApplicationRepository applicationRepository,
     IOrganizationRepository organizationRepository,
+    IOwnerRepository ownerRepository,
+    IUserRepository userRepository,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<ApproveOnboardRequestCommand, Guid>
 {
@@ -19,11 +23,28 @@ internal class ApproveOnboardRequestCommandHandler(
             ?? throw new NotFoundException($"Organization application with ID {request.RequestId} not found.");
 
         var markResult = application.MarkAccepted(dateTimeProvider.UtcNow);
-
         if (markResult.IsFailure)
             return Result.Failure<Guid>(markResult.Error);
 
-        var result = Organization.Create(
+        var user = await userRepository.GetByIdAsync(application.OwnerId, cancellationToken)
+            ?? throw new NotFoundException($"User with ID {application.OwnerId} not found.");
+
+        var existingOwner = await ownerRepository.GetByIdAsync(application.OwnerId, cancellationToken);
+        if (existingOwner is not null)
+            return Result.Failure<Guid>(UserErrors.AlreadyOwner);
+
+        var ownerRole = await userRepository.FindRoleAsync(Role.Owner.Id, cancellationToken)
+            ?? throw new InvalidOperationException("Owner role is not seeded in the database.");
+
+        var promoteResult = user.PromoteToOwner(ownerRole);
+        if (promoteResult.IsFailure)
+            return Result.Failure<Guid>(promoteResult.Error);
+
+        // NationalityId is sourced from the application's CountryId until a dedicated field is introduced
+        var owner = Owner.Create(user.Id, application.CountryId, user.PersonalInfo, dateTimeProvider.UtcNow);
+        ownerRepository.Add(owner);
+
+        var orgResult = Organization.Create(
             application.OwnerId,
             application.CountryId,
             application.ProposedName,
@@ -35,13 +56,13 @@ internal class ApproveOnboardRequestCommandHandler(
             application.BillingEmail,
             application.SupportEmail);
 
-        if (result.IsFailure)
-            return Result.Failure<Guid>(result.Error);
+        if (orgResult.IsFailure)
+            return Result.Failure<Guid>(orgResult.Error);
 
-        organizationRepository.Add(result.Value);
+        organizationRepository.Add(orgResult.Value);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(result.Value.Id);
+        return Result.Success(orgResult.Value.Id);
     }
 }
