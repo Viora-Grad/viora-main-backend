@@ -69,8 +69,8 @@ internal class SearchOrganizationsQueryHandler(
                 logoResponse!,
                 org.Name,
                 countries.First(c => c.Id == org.CountryId).Name,
-                org.ServiceSpecification.Description,
-                org.ServiceSpecification.Type.ToString(),
+                org.ServiceDescription,
+                org.ServicesProvided.Select(s => s.ToString()),
                 org.Rating.Count,
                 org.Rating.AverageOutOfTen);
         });

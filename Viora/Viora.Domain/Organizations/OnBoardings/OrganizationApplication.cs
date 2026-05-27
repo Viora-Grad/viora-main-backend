@@ -11,8 +11,9 @@ public sealed class OrganizationApplication : Entity
     public Guid CountryId { get; private set; }
     public Name ProposedName { get; set; } = default!;
     public Letter ApplicationLetter { get; private set; } = default!;
+    public About About { get; private set; } = default!;
 
-    public ServiceType ProposedServiceType { get; private set; } = default!;
+    public HashSet<ServiceType> ProposedServicesType { get; private set; } = [];
     public ServiceDescription ServiceDescription { get; private set; } = default!;
 
     public DateTime SubmittedOnUtc { get; private set; }
@@ -30,7 +31,8 @@ public sealed class OrganizationApplication : Entity
         Guid countryId,
         Name proposedName,
         Letter applicationLetter,
-        ServiceType proposedServiceType,
+        About about,
+        ICollection<ServiceType> proposedServiceType,
         ServiceDescription serviceDescription,
         ReferralSource referralSource,
         BillingEmail billingEmail,
@@ -44,7 +46,8 @@ public sealed class OrganizationApplication : Entity
             CountryId = countryId,
             ProposedName = proposedName,
             ApplicationLetter = applicationLetter,
-            ProposedServiceType = proposedServiceType,
+            About = about,
+            ProposedServicesType = [.. proposedServiceType],
             ServiceDescription = serviceDescription,
             ReferralSource = referralSource,
             BillingEmail = billingEmail,

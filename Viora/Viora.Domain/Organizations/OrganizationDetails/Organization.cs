@@ -5,15 +5,17 @@ using Viora.Domain.Organizations.Shared.Enums;
 
 namespace Viora.Domain.Organizations.OrganizationDetails;
 
-// TODO add multi service resgistery option instead of just one :))))))
 public sealed class Organization : Entity
 {
     public Guid OwnerId { get; private set; }
     public Guid CountryId { get; private set; }
     public Guid? LogoId { get; private set; }
     public Name Name { get; private set; } = default!;
-    public ServiceSpecification ServiceSpecification { get; private set; } = default!;
-    public DateOnly JoinedOnUtc { get; private set; }
+    public About About { get; private set; } = default!;
+
+    public HashSet<ServiceType> ServicesProvided { get; private set; } = [];
+    public ServiceDescription ServiceDescription { get; private set; } = default!;
+    public DateTime JoinedOnUtc { get; private set; }
     public OrganizationStatus Status { get; private set; }
     public ReferralSource ReferralSource { get; private set; }
     public OrganizationRating Rating { get; private set; } = default!;
@@ -26,8 +28,10 @@ public sealed class Organization : Entity
         Guid ownerId,
         Guid countryId,
         Name name,
-        ServiceSpecification serviceSpecification,
-        DateOnly joinedOnUtc,
+        About about,
+        ServiceDescription description,
+        ICollection<ServiceType> serviceTypes,
+        DateTime joinedOnUtc,
         ReferralSource referralSource,
         BillingEmail billingEmail,
         SupportEmail supportEmail) : base(id)
@@ -35,7 +39,9 @@ public sealed class Organization : Entity
         OwnerId = ownerId;
         CountryId = countryId;
         Name = name;
-        ServiceSpecification = serviceSpecification;
+        About = about;
+        ServiceDescription = description;
+        ServicesProvided = [.. serviceTypes];
         JoinedOnUtc = joinedOnUtc;
         ReferralSource = referralSource;
         BillingEmail = billingEmail;
@@ -47,14 +53,15 @@ public sealed class Organization : Entity
         Guid ownerId,
         Guid countryId,
         string name,
+        string about,
         string serviceDescription,
-        ServiceType serviceType,
-        DateOnly joinedOnUtc,
+        ICollection<ServiceType> serviceTypes,
+        DateTime joinedOnUtc,
         ReferralSource referralSource,
         string billingEmail,
         string supportEmail)
     {
-        var organization = new Organization(Guid.NewGuid(), ownerId, countryId, name, new(serviceDescription, serviceType), joinedOnUtc, referralSource, billingEmail, supportEmail)
+        var organization = new Organization(Guid.NewGuid(), ownerId, countryId, name, about, serviceDescription, serviceTypes, joinedOnUtc, referralSource, billingEmail, supportEmail)
         {
             Status = OrganizationStatus.Active
         };

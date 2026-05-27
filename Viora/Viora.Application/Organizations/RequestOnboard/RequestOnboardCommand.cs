@@ -7,9 +7,10 @@ public record RequestOnboardCommand(
     Guid OwnerId,
     Guid CountryId,
     string ProposedName,
+    string About,
     string ServiceDescription,
     string Letter,
-    ServiceType ServiceType,
+    ICollection<ServiceType> ServiceTypes,
     ReferralSource ReferralSource,
     string BillingEmail,
     string SupportEmail) : ICommand<Guid>;

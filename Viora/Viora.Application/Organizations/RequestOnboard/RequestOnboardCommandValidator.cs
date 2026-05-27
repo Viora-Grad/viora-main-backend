@@ -18,11 +18,18 @@ public class RequestOnboardCommandValidator : AbstractValidator<RequestOnboardCo
             .NotEmpty()
             .MaximumLength(50);
 
-        RuleFor(x => x.ServiceDescription).
-            NotEmpty().
-            MaximumLength(1000);
+        RuleFor(x => x.About)
+            .NotEmpty()
+            .MaximumLength(500);
 
-        RuleFor(x => x.ServiceType)
+        RuleFor(x => x.ServiceDescription)
+            .NotEmpty()
+            .MaximumLength(1000);
+
+        RuleFor(x => x.ServiceTypes)
+            .NotEmpty().WithMessage("At least one service type is required.");
+
+        RuleForEach(x => x.ServiceTypes)
             .IsInEnum();
 
         RuleFor(x => x.ReferralSource)

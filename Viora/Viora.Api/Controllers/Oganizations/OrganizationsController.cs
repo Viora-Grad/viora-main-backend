@@ -48,9 +48,10 @@ public class OrganizationsController(ISender sender) : ControllerBase
             request.OwnerId,
             request.CountryId,
             request.ProposedName,
+            request.About,
             request.ServiceDescription,
             request.Letter,
-            request.ServiceType,
+            request.ServiceTypes,
             request.ReferralSource,
             request.BillingEmail,
             request.SupportEmail);

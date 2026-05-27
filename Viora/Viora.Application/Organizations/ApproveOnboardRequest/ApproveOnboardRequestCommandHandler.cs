@@ -27,9 +27,10 @@ internal class ApproveOnboardRequestCommandHandler(
             application.OwnerId,
             application.CountryId,
             application.ProposedName,
+            application.About,
             application.ServiceDescription,
-            application.ProposedServiceType,
-            DateOnly.FromDateTime(dateTimeProvider.UtcNow),
+            application.ProposedServicesType,
+            dateTimeProvider.UtcNow,
             application.ReferralSource,
             application.BillingEmail,
             application.SupportEmail);

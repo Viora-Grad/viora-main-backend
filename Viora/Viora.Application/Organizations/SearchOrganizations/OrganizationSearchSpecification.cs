@@ -21,12 +21,12 @@ internal class OrganizationSearchSpecification : BaseSpecification<Organization>
             AddCriteria(o => o.Rating.AverageOutOfTen >= p.MinRating.Value);
 
         if (p.ServiceType.HasValue)
-            AddCriteria(o => o.ServiceSpecification.Type == p.ServiceType.Value);
+            AddCriteria(o => o.ServicesProvided.Contains(p.ServiceType.Value));
 
         switch (p.SortBy?.ToLower())
         {
             case nameof(Organization.Rating):
-                ApplyOrderByDescending(o => o.Rating);
+                ApplyOrderByDescending(o => o.Rating.AverageOutOfTen);
                 break;
             case nameof(Organization.Name):
                 ApplyOrderBy(o => o.Name);

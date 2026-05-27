@@ -3,12 +3,13 @@
 public record OrganizationDetailsResponse(
     Guid Id,
     string Name,
+    string About,
     string Country,
     string CountryCode,
-    string ServiceType,
+    IEnumerable<string> ServicesProvided,
     string ServiceDescription,
     string ContactEmail,
-    DateOnly JoinedOnUtc,
+    DateTime JoinedOnUtc,
     IEnumerable<Branch> Branches
     );
 

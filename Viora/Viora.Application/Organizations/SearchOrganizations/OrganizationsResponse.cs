@@ -9,6 +9,6 @@ public record OrganizationsResponse(
     string Name,
     string Country,
     string ServiceDescription,
-    string ServiceType,
+    IEnumerable<string> ServicesProvided,
     int RatingsCount,
     double RatingOutOfTen);

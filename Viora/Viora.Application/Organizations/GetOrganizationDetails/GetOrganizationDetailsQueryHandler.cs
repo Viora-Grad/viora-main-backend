@@ -22,10 +22,11 @@ internal class GetOrganizationDetailsQueryHandler(
         var response = new OrganizationDetailsResponse(
             organization.Id,
             organization.Name,
+            organization.About,
             country.Name,
             country.IsoAlphaThree,
-            organization.ServiceSpecification.Type.ToString(),
-            organization.ServiceSpecification.Description,
+            organization.ServicesProvided.Select(s => s.ToString()),
+            organization.ServiceDescription,
             organization.SupportEmail,
             organization.JoinedOnUtc,
             []);
