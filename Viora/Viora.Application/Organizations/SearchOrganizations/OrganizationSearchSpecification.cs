@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
-using Viora.Domain.Organizations.Shared.Enums;
+using Viora.Domain.Shared.Enums;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
 
