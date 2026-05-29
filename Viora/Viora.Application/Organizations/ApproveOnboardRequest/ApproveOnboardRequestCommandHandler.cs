@@ -40,7 +40,6 @@ internal class ApproveOnboardRequestCommandHandler(
         if (promoteResult.IsFailure)
             return Result.Failure<Guid>(promoteResult.Error);
 
-        // NationalityId is sourced from the application's CountryId until a dedicated field is introduced
         var owner = Owner.Create(user.Id, application.CountryId, user.PersonalInfo, dateTimeProvider.UtcNow);
         ownerRepository.Add(owner);
 
