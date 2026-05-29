@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Organizations.Shared.Enums;
+﻿namespace Viora.Domain.Shared.Enums;
 
 public enum ServiceType
 {

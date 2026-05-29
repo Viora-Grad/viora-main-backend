@@ -1,5 +1,6 @@
 ﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Organizations.Shared.Enums;
+using Viora.Domain.Shared.Enums;
 
 namespace Viora.Application.Organizations.RequestOnboard;
 

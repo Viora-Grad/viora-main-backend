@@ -2,6 +2,7 @@
 using Viora.Domain.Organizations.OnBoardings.Internals;
 using Viora.Domain.Organizations.Shared;
 using Viora.Domain.Organizations.Shared.Enums;
+using Viora.Domain.Shared.Enums;
 
 namespace Viora.Domain.Organizations.OnBoardings;
 
