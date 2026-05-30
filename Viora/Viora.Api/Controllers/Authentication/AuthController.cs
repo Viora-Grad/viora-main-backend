@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Viora.Application.Authentication.ConsumeRefreshToken;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.OAuthValidateToken;
 using Viora.Application.Users.RegisterUser;
@@ -65,7 +66,16 @@ public class AuthController : ControllerBase
     [Route("refresh")]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var command = new ConsumeRefreshTokenCommand(request.RefreshToken);
+        var result = await _sender.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            return BadRequest(result.Error);
+        }
     }
     [HttpPost]
     [Route("oauth/{provider=google}/login")]

@@ -1,5 +1,4 @@
 ﻿namespace Viora.Api.Controllers.Authentication;
 
-public class RefreshTokenRequest
-{
-}
+public sealed record RefreshTokenRequest(string RefreshToken);
+

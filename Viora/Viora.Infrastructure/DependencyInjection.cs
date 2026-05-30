@@ -59,16 +59,19 @@ public static class DependencyInjection
 
         // register services here
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
         services.AddScoped<ITokenValidator, TokenValidator>();
+        services.AddScoped<RefreshTokenService>();
+
 
         // register repositories here
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOwnerRepository, OwnerRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<LocalCredentialRepository>();
+        services.AddScoped<RefreshTokenRepository>();
 
         // http context accessor
         services.AddHttpContextAccessor();
