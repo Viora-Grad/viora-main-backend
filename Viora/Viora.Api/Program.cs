@@ -6,6 +6,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
+using Viora.Domain.Services;
 using Viora.Infrastructure;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
@@ -34,6 +35,8 @@ builder.Services.AddInterfacedOptions<IOnboardingSettings, OnboardingSettings>(
     builder.Configuration, "Onboarding");
 builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
     builder.Configuration, "Suspension");
+builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
+    builder.Configuration, "Service");
 #endregion Settings
 
 var app = builder.Build();

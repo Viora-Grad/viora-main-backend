@@ -4,8 +4,8 @@ using Viora.Application.Abstractions.Pagination;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
-using Viora.Domain.Organizations.Shared.Enums;
 using Viora.Domain.Shared;
+using Viora.Domain.Shared.Enums;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
 
@@ -46,7 +46,7 @@ internal class SearchOrganizationsQueryHandler(
             .Distinct()
             .ToList();
 
-        var logos = await mediaRepository.GetByIdsAsync(logoIds,cancellationToken);
+        var logos = await mediaRepository.GetByIdsAsync(logoIds, cancellationToken);
 
         // Convert to Dictionary for O(1) lookup speed during mapping
         var logoDict = logos.ToDictionary(m => m.Id);
