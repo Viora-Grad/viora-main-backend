@@ -1,4 +1,6 @@
 using DotNetEnv;
+using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using Viora.Api.Middleware;
 using Viora.Application;
 using Viora.Application.Abstractions.Media;
@@ -45,9 +47,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 
-    /*using var scope = app.Services.CreateScope(); // apply pending migrations on startup
+    using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();*/
+    await dbContext.Database.MigrateAsync();
 
     var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
     await seeder.SeedAsync();
