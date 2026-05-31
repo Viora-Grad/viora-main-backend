@@ -1,4 +1,5 @@
 using DotNetEnv;
+using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Viora.Api.Middleware;
 using Viora.Application;
@@ -44,10 +45,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "Viora API v1");
-    });
+    app.MapScalarApiReference();
 
     using var scope = app.Services.CreateScope(); // apply pending migrations on startup
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
