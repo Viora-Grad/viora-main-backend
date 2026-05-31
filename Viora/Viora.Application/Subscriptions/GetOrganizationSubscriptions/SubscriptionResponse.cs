@@ -2,7 +2,7 @@
 
 namespace Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 
-public class SubscriptionDto
+public class SubscriptionResponse
 {
     public Guid Id { get; set; }
     public Guid PlanId { get; set; }
@@ -10,9 +10,9 @@ public class SubscriptionDto
     public string Status { get; set; }
     public DateTime SubscriptionStartTime { get; set; }
     public DateTime SubscriptionEndTime { get; set; }
-    public List<SubscriptionAddonDto>? SubscriptionAddonDtos { get; set; }
+    public List<SubscriptionAddonResponse>? SubscriptionAddonDtos { get; set; }
 
-    private SubscriptionDto(Guid id, Guid planId, Guid organizationId, string status, DateTime starTime, DateTime EndTime, List<SubscriptionAddonDto> addon)
+    private SubscriptionResponse(Guid id, Guid planId, Guid organizationId, string status, DateTime starTime, DateTime EndTime, List<SubscriptionAddonResponse> addon)
     {
         Id = id;
         PlanId = planId;
@@ -23,16 +23,16 @@ public class SubscriptionDto
         SubscriptionAddonDtos = addon;
     }
 
-    public static SubscriptionDto MapToDto(Subscription subscription)
+    public static SubscriptionResponse MapToDto(Subscription subscription)
     {
-        var dto = new SubscriptionDto(
+        var dto = new SubscriptionResponse(
                subscription.Id,
                subscription.PlanId,
                subscription.OrganizationId,
                subscription.Status.Value,
                subscription.SubscriptionsStartTime,
                subscription.SubscriptionsEndTime,
-               SubscriptionAddonDto.MapToDto(subscription.GetAddons())
+               SubscriptionAddonResponse.MapToDto(subscription.GetAddons())
                );
 
         return dto;

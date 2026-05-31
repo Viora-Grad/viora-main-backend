@@ -8,9 +8,9 @@ namespace Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 
 public class GetOrganizationSubscriptionsQueryHandler(
     ISubscriptionRepository subscriptionRepository,
-    IOrganizationRepository organizationRepository) : IQueryHandler<GetOrganizationSubscriptionsQuery, List<SubscriptionDto>>
+    IOrganizationRepository organizationRepository) : IQueryHandler<GetOrganizationSubscriptionsQuery, List<SubscriptionResponse>>
 {
-    public async Task<Result<List<SubscriptionDto>>> Handle(GetOrganizationSubscriptionsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SubscriptionResponse>>> Handle(GetOrganizationSubscriptionsQuery request, CancellationToken cancellationToken)
     {
         var organizations = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"the organization with id {request.OrganizationId} not found");
@@ -18,7 +18,7 @@ public class GetOrganizationSubscriptionsQueryHandler(
         var subscriptions = await subscriptionRepository.GetAllByOrganizationIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"the organization with id {request.OrganizationId} doesn't have subscriptions");
 
-        var result = subscriptions.Select(s => SubscriptionDto.MapToDto(s)).ToList();
+        var result = subscriptions.Select(s => SubscriptionResponse.MapToDto(s)).ToList();
 
         return Result.Success(result);
     }

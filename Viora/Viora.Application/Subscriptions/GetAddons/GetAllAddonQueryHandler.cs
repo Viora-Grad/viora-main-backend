@@ -1,6 +1,6 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Plans.DTO;
+using Viora.Application.Subscriptions.GetAddons;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Subscriptions.Addons;
 
@@ -18,14 +18,14 @@ namespace Viora.Application.Subscriptions.GetFeatureAddon;
 /// </summary>
 
 public class GetAllAddonQueryHandler(
-    ILimitedFeatureAddonRepository limitedFeatureAddonRepository) : IQueryHandler<GetAllAddonsQuery, List<FeatureAddonDTO>>
+    ILimitedFeatureAddonRepository limitedFeatureAddonRepository) : IQueryHandler<GetAllAddonsQuery, List<FeatureAddonResponse>>
 {
-    public async Task<Result<List<FeatureAddonDTO>>> Handle(GetAllAddonsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FeatureAddonResponse>>> Handle(GetAllAddonsQuery request, CancellationToken cancellationToken)
     {
         var addons = await limitedFeatureAddonRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (addons is null || !addons.Any())
             throw new NotFoundException("there are not addons");
-        var addonsDto = addons.Select(a => FeatureAddonDTO.MapToDto(a)).ToList();
+        var addonsDto = addons.Select(a => FeatureAddonResponse.MapToDto(a)).ToList();
         return Result.Success(addonsDto);
     }
 }
