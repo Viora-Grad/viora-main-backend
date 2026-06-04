@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Viora.Application.Plans.GetPlanById;
 using Viora.Application.Plans.GetPlans;
+using Viora.Application.Subscriptions.GetFeatureAddon;
 
 namespace Viora.Api.Controllers.Plans;
 
@@ -44,4 +45,16 @@ public class PlanController : ControllerBase
             return NotFound(result.Error);
     }
 
+
+    [HttpGet]
+    [Route("api/addon/get")]
+    public async Task<IActionResult> GetAddons(
+        CancellationToken cancellationToken)
+    {
+        var query = new GetAllAddonsQuery();
+        var result = await _sender.Send(query, cancellationToken);
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+        return Ok(result.Value);
+    }
 }
