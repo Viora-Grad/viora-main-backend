@@ -18,7 +18,7 @@ public class ScheduleDelays : Entity
         // For EF Core
     }
 
-    private ScheduleDelays(Guid id, Guid appointmentId, TimeSpan delayDuration, string reason, DateTime occurrenceTime, InitiatorType initiator) : base(id)
+    private ScheduleDelays(Guid id, Guid appointmentId, TimeOnly delayDuration, string reason, DateTime occurrenceTime, InitiatorType initiator) : base(id)
     {
         AppointmentId = appointmentId;
         DelayDuration = delayDuration;
