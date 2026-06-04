@@ -1,8 +1,8 @@
 ﻿using Viora.Domain.Plans.Features;
 
-namespace Viora.Application.Plans.DTO;
+namespace Viora.Application.Plans.Shared;
 
-public class LimitedFeatureDTO
+public class LimitedFeatureResponse
 {
     public Guid Id { get; set; }
     public string Key { get; set; } = default!;
@@ -11,7 +11,7 @@ public class LimitedFeatureDTO
 
 
 
-    public LimitedFeatureDTO(Guid id, string key, string description, int limit)
+    public LimitedFeatureResponse(Guid id, string key, string description, int limit)
     {
         Id = id;
         Key = key;
@@ -19,9 +19,9 @@ public class LimitedFeatureDTO
         Limit = limit;
     }
 
-    public static LimitedFeatureDTO MapToDTO(LimitedFeature limitedFeature)
+    public static LimitedFeatureResponse MapToDTO(LimitedFeature limitedFeature)
     {
-        var limitedFeatureDTO = new LimitedFeatureDTO(
+        var limitedFeatureDTO = new LimitedFeatureResponse(
             limitedFeature.Id,
             limitedFeature.Key.value,
             limitedFeature.Description.value,

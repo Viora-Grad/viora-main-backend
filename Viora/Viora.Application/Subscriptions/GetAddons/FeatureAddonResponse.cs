@@ -1,8 +1,8 @@
 ﻿using Viora.Domain.Subscriptions.Addons;
 
-namespace Viora.Application.Plans.DTO;
+namespace Viora.Application.Subscriptions.GetAddons;
 
-public class FeatureAddonDTO
+public class FeatureAddonResponse
 {
     public Guid id { get; set; }
     public Guid LimitedFeatureId { get; set; }
@@ -10,9 +10,9 @@ public class FeatureAddonDTO
     public double Price { get; set; }
 
 
-    public static FeatureAddonDTO MapToDto(LimitedFeatureAddon featureAddon)
+    public static FeatureAddonResponse MapToDto(LimitedFeatureAddon featureAddon)
     {
-        return new FeatureAddonDTO
+        return new FeatureAddonResponse
         {
             id = featureAddon.Id,
             LimitedFeatureId = featureAddon.LimitedFeatureId,
