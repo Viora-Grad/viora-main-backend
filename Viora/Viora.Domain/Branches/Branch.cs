@@ -25,13 +25,13 @@ public sealed class Branch : Entity
     public IReadOnlyCollection<BusinessHour> BusinessHours => _businessHours.AsReadOnly();
     private readonly List<BusinessHour> _businessHours = [];
 
-    public string TimeZoneId { get; private set; } = "UTC";
+    public TimeZoneId TimeZone { get; set; } = "UTC";
 
     private Branch() { }    // for EfCore
 
-    //fail safe if time could not be found resort to UTC
+    //fail safe if time could not be found to fall back to UTC
     private TimeZoneInfo ResolveTimeZone() =>
-        TimeZoneInfo.TryFindSystemTimeZoneById(TimeZoneId, out var tz) ? tz : TimeZoneInfo.Utc;
+        TimeZoneInfo.TryFindSystemTimeZoneById(TimeZone, out var tz) ? tz : TimeZoneInfo.Utc;
 
     public Result SetBusinessHours(DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)
     {
