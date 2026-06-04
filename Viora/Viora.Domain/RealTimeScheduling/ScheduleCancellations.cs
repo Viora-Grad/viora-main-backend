@@ -10,8 +10,8 @@ public class ScheduleCancellations : Entity
     public DateTime ReservationDate { get; private set; }
     public DateTime CancellationDate { get; private set; }
     public string Reason { get; private set; }
-    public virtual Customer Customer { get; private set; }
-    //public virtual Appointment Appointment { get; private set; }
+    public Customer Customer { get; private set; }
+    //public Appointment Appointment { get; private set; }
 
     public ScheduleCancellations()
     {

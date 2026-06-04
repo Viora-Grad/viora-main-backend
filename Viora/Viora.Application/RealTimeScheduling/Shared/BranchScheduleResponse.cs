@@ -4,7 +4,7 @@ namespace Viora.Application.RealTimeScheduling.Shared;
 
 public class BranchScheduleResponse
 {
-    public string? Day { get; set; }
+    public string Day { get; set; }
 
     public List<ShiftResponse> Shifts { get; set; }
 

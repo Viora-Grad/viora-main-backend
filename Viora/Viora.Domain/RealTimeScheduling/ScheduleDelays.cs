@@ -6,7 +6,7 @@ namespace Viora.Domain.RealTimeScheduling;
 public class ScheduleDelays : Entity
 {
     public Guid AppointmentId { get; private set; }
-    public TimeSpan DelayDuration { get; private set; }
+    public TimeOnly DelayDuration { get; private set; }
     public string Reason { get; private set; }
     public DateTime OccurrenceTime { get; private set; }
     public InitiatorType Initiator { get; private set; }
