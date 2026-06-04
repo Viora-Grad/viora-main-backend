@@ -7,6 +7,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
+using Viora.Application.Abstractions.Email;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
 using Viora.Infrastructure.Seeding;
@@ -38,6 +39,8 @@ builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
     builder.Configuration, "Suspension");
 builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
     builder.Configuration, "Service");
+builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
+    builder.Configuration, "Email");
 #endregion Settings
 
 var app = builder.Build();

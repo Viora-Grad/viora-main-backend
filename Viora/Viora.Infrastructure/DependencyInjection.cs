@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Abstractions.Email;
+using Viora.Infrastructure.Email;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Media;
@@ -86,6 +88,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        services.AddScoped<IEmailSender, EmailService>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
