@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Abstractions.Email;
+﻿namespace Viora.Application.Abstractions.Mail;
 
 public interface IEmailSettings
 {

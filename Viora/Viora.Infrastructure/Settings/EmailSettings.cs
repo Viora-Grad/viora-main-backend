@@ -1,4 +1,4 @@
-using Viora.Application.Abstractions.Email;
+using Viora.Application.Abstractions.Mail;
 
 namespace Viora.Infrastructure.Settings;
 

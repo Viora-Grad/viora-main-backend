@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Mail;
-using Viora.Application.Abstractions.Email;
+using Viora.Application.Abstractions.Mail;
 
 namespace Viora.Infrastructure.Mail;
 
