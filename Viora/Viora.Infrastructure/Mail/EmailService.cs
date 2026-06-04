@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using Viora.Application.Abstractions.Email;
 
-namespace Viora.Infrastructure.Email;
+namespace Viora.Infrastructure.Mail;
 
 internal sealed class EmailService(IEmailSettings emailSettings) : IEmailSender
 {

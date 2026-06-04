@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Email;
-using Viora.Infrastructure.Email;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Media;
@@ -39,6 +38,7 @@ using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Seeding;
+using Viora.Infrastructure.Mail;
 
 namespace Viora.Infrastructure;
 
