@@ -106,7 +106,8 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.AdminOnly, policy => policy.RequireRole("Admin"))
             .AddPolicy(AuthorizationPolicies.OwnerOnly, policy => policy.RequireRole("Owner"))
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
-            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")); // For tenant-scoping lat
+            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")) // For tenant-scoping lat
+            .AddPermissionPolicies();
         return services;
     }
 }

@@ -4,6 +4,9 @@ public sealed class Role
 {
     public static readonly Role None = new(0, "None");
     public static readonly Role Registered = new(1, "Registered");
+    public static readonly Role Owner = new(2, "Owner");
+    public static readonly Role Admin = new(3, "Admin");
+    public static readonly Role Customer = new(4, "Customer");
 
     public Role(int id, string name)
     {
