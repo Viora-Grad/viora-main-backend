@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Viora.Domain.Plans.Features;
 using Viora.Domain.Shared;
 using Viora.Infrastructure.Seeding.Data;
 
@@ -34,5 +35,26 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
 
         logger.LogInformation("Country seed: inserted {Count} new countries.", missing.Count);
         #endregion Country
+
+        #region LimitedFeatures
+        var existingFeatureIds = await db.Set<LimitedFeature>()
+            .Select(f => f.Id)
+            .ToListAsync(cancellationToken);
+
+        var missingFeatures = LimitedFeaturesData.All
+            .Where(f => !existingFeatureIds.Contains(f.Id))
+            .ToList();
+
+        if (missingFeatures.Count == 0)
+        {
+            logger.LogInformation("LimitedFeature seed: all {Count} features already present.", LimitedFeaturesData.All.Count);
+        }
+        else
+        {
+            await db.Set<LimitedFeature>().AddRangeAsync(missingFeatures, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("LimitedFeature seed: inserted {Count} new features.", missingFeatures.Count);
+        }
+        #endregion LimitedFeatures
     }
 }

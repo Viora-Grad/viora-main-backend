@@ -28,5 +28,7 @@ internal sealed class FeatureUsageConfiguration : IEntityTypeConfiguration<Featu
         builder.Property(x => x.PeriodEnd)
             .IsRequired();
 
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

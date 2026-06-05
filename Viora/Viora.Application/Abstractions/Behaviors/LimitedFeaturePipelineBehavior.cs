@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
-using Viora.Application.Abstractions.Interfaces;
+using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans.Services;
 
@@ -26,32 +26,34 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
     IOrganizationRepository organizationRepository,
     ILimitedFeatureUsageService limitedFeatureUsageService) :
     IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : notnull, IBaseLimitedFeatureCommand
 {
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (request is not ILimitedFeature limitedFeatureRequest)
-        {
-            return await next();
-        }
-        var organization = await organizationRepository.GetByIdAsync(limitedFeatureRequest.OrganizationId, cancellationToken)
-            ?? throw new NotFoundException($"Organization with id {limitedFeatureRequest.OrganizationId} not found.");
+        if (await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken) is null)
+            throw new NotFoundException($"Organization with id {request.OrganizationId} not found.");
+
         var checkResult = await limitedFeatureUsageService.CheckLimitAsync(
-            limitedFeatureRequest.OrganizationId,
-            limitedFeatureRequest.LimitedFeatureId,
+            request.OrganizationId,
+            request.LimitedFeatureId,
+            request.DeltaChange,
             cancellationToken);
+
         if (checkResult.IsFailure)
             throw new
                 QuotaExceededException(
                 $"Organization with id " +
-                $"{limitedFeatureRequest.OrganizationId} " +
-                $"has exceeded its quota for feature {limitedFeatureRequest.LimitedFeatureId}.");
+                $"{request.OrganizationId} " +
+                $"has exceeded its quota for feature {request.LimitedFeatureId}.");
+
         var result = await limitedFeatureUsageService.ConsumeLimit(
-            limitedFeatureRequest.OrganizationId,
-            limitedFeatureRequest.LimitedFeatureId,
+            request.OrganizationId,
+            request.LimitedFeatureId,
+            request.DeltaChange,
             cancellationToken
             );
+
         if (result.IsFailure)
             throw new NotFoundException("this organization does not have this feature");
         return await next();

@@ -12,6 +12,7 @@ using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Medias;
+using Viora.Domain.Plans.Features;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
@@ -107,6 +108,15 @@ public static class DependencyInjection
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             return db.Set<Country>()
+                .AsNoTracking()
+                .ToList();
+        });
+
+        services.AddSingleton<IReadOnlyList<LimitedFeature>>(sp =>
+        {
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return db.Set<LimitedFeature>()
                 .AsNoTracking()
                 .ToList();
         });
