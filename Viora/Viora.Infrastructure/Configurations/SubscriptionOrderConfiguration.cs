@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Orders;
 using Viora.Domain.Orders.Internal;
+using Viora.Domain.Plans;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -26,5 +27,10 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
             .HasConversion(
             x => x.Value,
             x => SubscriptionOrderType.FromValue(x).Value);
+
+        builder.HasOne<Plan>()
+            .WithMany()
+            .HasForeignKey(s => s.PlanId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

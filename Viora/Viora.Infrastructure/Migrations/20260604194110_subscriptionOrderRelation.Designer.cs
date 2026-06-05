@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Viora.Infrastructure;
 
 #nullable disable
@@ -13,9 +13,11 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604194110_subscriptionOrderRelation")]
+    partial class subscriptionOrderRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,25 +25,6 @@ namespace Viora.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ServiceGallery", b =>
-                {
-                    b.Property<Guid>("MediaFileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("MediaFileId", "ServiceId");
-
-                    b.HasIndex("MediaFileId")
-                        .HasDatabaseName("IX_ServiceGallery_MediaFileId");
-
-                    b.HasIndex("ServiceId")
-                        .HasDatabaseName("IX_ServiceGallery_ServiceId");
-
-                    b.ToTable("ServiceGallery", (string)null);
-                });
 
             modelBuilder.Entity("UserRole", b =>
                 {
@@ -56,182 +39,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRole");
-                });
-
-            modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Point>("Location")
-                        .IsRequired()
-                        .HasColumnType("geography");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.PrimitiveCollection<string>("_services")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Services");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Address", "Viora.Domain.Branches.Branch.Address#Address", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("City")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("AddressCity");
-
-                            b1.Property<Guid>("CountryId")
-                                .HasColumnType("uniqueidentifier")
-                                .HasColumnName("AddressCountryId");
-
-                            b1.Property<int>("Number")
-                                .HasColumnType("int")
-                                .HasColumnName("AddressNumber");
-
-                            b1.Property<int>("PostalCode")
-                                .HasColumnType("int")
-                                .HasColumnName("AddressPostalCode");
-
-                            b1.Property<string>("State")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("AddressState");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
-                                .HasColumnName("AddressStreet");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "ContactEmail", "Viora.Domain.Branches.Branch.ContactEmail#Email", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
-                                .HasColumnName("ContactEmail");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "TimeZone", "Viora.Domain.Branches.Branch.TimeZone#TimeZoneId", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("Branch", (string)null);
-                });
-
-            modelBuilder.Entity("Viora.Domain.Feedbacks.Feedback", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Ratings", "Viora.Domain.Feedbacks.Feedback.Ratings#Ratings", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<int>("BranchOutOfTen")
-                                .HasColumnType("int")
-                                .HasColumnName("RatingBranch");
-
-                            b1.Property<int>("ServiceOutOfTen")
-                                .HasColumnType("int")
-                                .HasColumnName("RatingService");
-
-                            b1.Property<int>("SystemOutOfTen")
-                                .HasColumnType("int")
-                                .HasColumnName("RatingSystem");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Feedback", (string)null);
-                });
-
-            modelBuilder.Entity("Viora.Domain.Inventory.InventoryItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ItemImageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "MinimumThreshold", "Viora.Domain.Inventory.InventoryItem.MinimumThreshold#MinimumThreshold", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<int>("Value")
-                                .HasColumnType("int")
-                                .HasColumnName("MinimumThreshold");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Viora.Domain.Inventory.InventoryItem.Name#ItemName", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("Name");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Quantity", "Viora.Domain.Inventory.InventoryItem.Quantity#Quantity", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<int>("Value")
-                                .HasColumnType("int")
-                                .HasColumnName("Quantity");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("ItemImageId");
-
-                    b.ToTable("InventoryItem", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_InventoryItem_MinimumThreshold_NonNegative", "[MinimumThreshold] >= 0");
-
-                            t.HasCheckConstraint("CK_InventoryItem_Quantity_NonNegative", "[Quantity] >= 0");
-                        });
                 });
 
             modelBuilder.Entity("Viora.Domain.Medias.MediaFile", b =>
@@ -760,12 +567,6 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<int>("Quota")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizationId");
@@ -892,77 +693,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasFilter("[ProcessedOn] IS NULL");
 
                     b.ToTable("ScheduledDomainEvents", (string)null);
-                });
-
-            modelBuilder.Entity("Viora.Domain.Services.Service", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<TimeSpan>("Duration")
-                        .HasColumnType("time");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Cost", "Viora.Domain.Services.Service.Cost#Money", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(18, 2)
-                                .HasColumnType("decimal(18,2)")
-                                .HasColumnName("CostAmount");
-
-                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Services.Service.Cost#Money.Currency#Currency", b2 =>
-                                {
-                                    b2.IsRequired();
-
-                                    b2.Property<string>("Code")
-                                        .IsRequired()
-                                        .HasMaxLength(3)
-                                        .HasColumnType("nvarchar(3)")
-                                        .HasColumnName("CostCurrency");
-                                });
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Description", "Viora.Domain.Services.Service.Description#ServiceDescription", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)")
-                                .HasColumnName("Description");
-                        });
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Viora.Domain.Services.Service.Name#ServiceName", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("Name");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.ToTable("Service", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Shared.Country", b =>
@@ -1298,21 +1028,6 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("LocalCredential");
                 });
 
-            modelBuilder.Entity("ServiceGallery", b =>
-                {
-                    b.HasOne("Viora.Domain.Medias.MediaFile", null)
-                        .WithMany()
-                        .HasForeignKey("MediaFileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Viora.Domain.Services.Service", null)
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("UserRole", b =>
                 {
                     b.HasOne("Viora.Domain.Users.Identity.Role", null)
@@ -1326,139 +1041,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
-                {
-                    b.HasOne("Viora.Domain.Organizations.OrganizationDetails.Organization", null)
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("Viora.Domain.Branches.Internals.BusinessHour", "_businessHours", b1 =>
-                        {
-                            b1.Property<Guid>("BranchId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Day")
-                                .HasColumnType("int");
-
-                            b1.Property<TimeSpan>("CloseTime")
-                                .HasColumnType("time");
-
-                            b1.Property<TimeSpan>("OpenTime")
-                                .HasColumnType("time");
-
-                            b1.HasKey("BranchId", "Day");
-
-                            b1.HasIndex("BranchId");
-
-                            b1.ToTable("BranchBusinessHour", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("BranchId");
-                        });
-
-                    b.OwnsMany("Viora.Domain.Shared.Internal.PhoneNumber", "_phoneNumbers", b1 =>
-                        {
-                            b1.Property<Guid>("BranchId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
-                                .HasColumnName("PhoneNumber");
-
-                            b1.HasKey("BranchId", "Id");
-
-                            b1.ToTable("BranchPhoneNumber", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("BranchId");
-                        });
-
-                    b.Navigation("_businessHours");
-
-                    b.Navigation("_phoneNumbers");
-                });
-
-            modelBuilder.Entity("Viora.Domain.Feedbacks.Feedback", b =>
-                {
-                    b.HasOne("Viora.Domain.Branches.Branch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Viora.Domain.Users.Identity.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("Viora.Domain.Feedbacks.Internals.Comment", "Comment", b1 =>
-                        {
-                            b1.Property<Guid>("FeedbackId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(1000)
-                                .HasColumnType("nvarchar(1000)")
-                                .HasColumnName("Comment");
-
-                            b1.HasKey("FeedbackId");
-
-                            b1.ToTable("Feedback");
-
-                            b1.WithOwner()
-                                .HasForeignKey("FeedbackId");
-                        });
-
-                    b.Navigation("Comment");
-                });
-
-            modelBuilder.Entity("Viora.Domain.Inventory.InventoryItem", b =>
-                {
-                    b.HasOne("Viora.Domain.Branches.Branch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Viora.Domain.Medias.MediaFile", null)
-                        .WithMany()
-                        .HasForeignKey("ItemImageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.OwnsOne("Viora.Domain.Inventory.Internals.Notes", "Notes", b1 =>
-                        {
-                            b1.Property<Guid>("InventoryItemId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)")
-                                .HasColumnName("Notes");
-
-                            b1.HasKey("InventoryItemId");
-
-                            b1.ToTable("InventoryItem");
-
-                            b1.WithOwner()
-                                .HasForeignKey("InventoryItemId");
-                        });
-
-                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("Viora.Domain.MedicalRecords.MedicalRecord", b =>
@@ -1611,15 +1193,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasOne("Viora.Domain.Plans.Plan", null)
                         .WithMany()
                         .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Viora.Domain.Services.Service", b =>
-                {
-                    b.HasOne("Viora.Domain.Branches.Branch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Viora.Application.Subscriptions.GetFeatureAddon;
 using Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 using Viora.Application.Subscriptions.RemoveAddon;
 
@@ -28,18 +27,6 @@ public class SubscriptionController : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpGet]
-    [Route("api/addon/get")]
-
-    public async Task<IActionResult> GetAddons(
-        CancellationToken cancellationToken)
-    {
-        var query = new GetAllAddonsQuery();
-        var result = await _sender.Send(query, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok(result.Value);
-    }
 
     [HttpDelete]
     [Route("api/addon/remove")]
