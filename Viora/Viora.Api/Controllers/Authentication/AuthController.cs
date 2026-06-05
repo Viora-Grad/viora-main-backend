@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Application.Authentication.ConsumeRefreshToken;
+using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.OAuthValidateToken;
 using Viora.Application.Users.RegisterUser;
@@ -103,6 +105,22 @@ public class AuthController : ControllerBase
         else
         {
             return BadRequest(result.Error);
+        }
+    }
+    [HttpGet]
+    [Route("me")]
+    [Authorize(Policy = "users:read")]
+    public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken = default)
+    {
+        var query = new GetLoggedInUserQuery();
+        var result = await _sender.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            return Unauthorized(result.Error);
         }
     }
 }
