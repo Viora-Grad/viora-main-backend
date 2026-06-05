@@ -28,7 +28,6 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
     IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull, IBaseLimitedFeatureCommand
 {
-
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if (await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken) is null)
@@ -56,6 +55,6 @@ public sealed class LimitedFeaturePipelineBehavior<TRequest, TResponse>(
 
         if (result.IsFailure)
             throw new NotFoundException("this organization does not have this feature");
-        return await next();
+        return await next(cancellationToken);
     }
 }
