@@ -1,6 +1,53 @@
 services:
   viora.api:
-    image: ${DOCKER_REGISTRY-}vioraapi
+    image: ${DOCKER_REGISTRY:-}vioraapi
     build:
       context: .
       dockerfile: Viora.Api/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Default=Server=sql,1433;Database=Viora;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__Secret=${JWT_SECRET}
+      - AI__Modules__ClientChat__ApiKey=${GEMINI_API_KEY_CLIENT}
+      - AI__Modules__HealthChat__ApiKey=${GEMINI_API_KEY_HEALTH}
+      - AI__Modules__Marketing__ApiKey=${GEMINI_API_KEY_MARKETING}
+    depends_on:
+      sql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - viora-net
+
+  sql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -No -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - viora-net
+
+volumes:
+  sql-data:
+
+networks:
+  viora-net:

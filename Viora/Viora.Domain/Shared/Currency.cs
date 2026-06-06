@@ -16,8 +16,5 @@ public record Currency
             ?? throw new ArgumentException($"Unsupported currency code: {code}");
     }
 
-    // TODO: better to use a dictionary for O(1) lookup if the list grows significantly (also it might be loaded from a config file or database in the future)
-    public static IReadOnlyCollection<Currency> SupportedCurrencies() => new[] { Usd, Egp };
-
-
+    public static IReadOnlyCollection<Currency> SupportedCurrencies() => [Usd, Egp];
 }

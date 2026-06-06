@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Viora.Domain.Organizations;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans.Features;
 
 namespace Viora.Infrastructure.Configurations;

@@ -67,6 +67,16 @@ public class User : Entity
     {
         LastLoginAt = utcNow;
     }
+    // TODO use this in an event handler instead of in the org module
+    public Result PromoteToOwner(Role ownerRole)
+    {
+        if (_roles.Any(r => r.Id == Role.Owner.Id))
+            return Result.Failure(UserErrors.AlreadyOwner);
+
+        _roles.Add(ownerRole);
+        return Result.Success();
+    }
+
     public static User Create(PersonalInfo personalInfo, Email email, DateTime utcNow)
     {
         var user = new User(Guid.NewGuid(), personalInfo, email, utcNow, AccountStatus.Active);

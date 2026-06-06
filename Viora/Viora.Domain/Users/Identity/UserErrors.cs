@@ -11,6 +11,7 @@ public static class UserErrors
     public static readonly Error EmptyField = new("User.EmptyField", "One or more required fields are empty", ErrorCategory.Validation);
     public static readonly Error RegistrationFailed = new("User.RegistrationFailed", "User registration failed due to an internal error", ErrorCategory.Internal);
     public static readonly Error IdentityLinked = new("User.IdentityLinked", "The provided identity is already linked before", ErrorCategory.Conflict);
+    public static readonly Error AlreadyOwner = new("User.AlreadyOwner", "The user is already an owner", ErrorCategory.Conflict);
 
 
 }

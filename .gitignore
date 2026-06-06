@@ -12,6 +12,8 @@
 .vs/
 # env
 .env
+# Media file storage
+Viora/Viora.Api/Media/*
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -58,3 +60,4 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 /Viora/.env
+/Viora/viora-d7020-firebase-adminsdk-fbsvc-1f8db5bf05.json

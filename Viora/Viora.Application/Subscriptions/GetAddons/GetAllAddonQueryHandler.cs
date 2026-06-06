@@ -22,7 +22,7 @@ public class GetAllAddonQueryHandler(
 {
     public async Task<Result<List<FeatureAddonResponse>>> Handle(GetAllAddonsQuery request, CancellationToken cancellationToken)
     {
-        var addons = await limitedFeatureAddonRepository.GetAllAsync(cancellationToken);
+        var addons = await limitedFeatureAddonRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (addons is null || !addons.Any())
             throw new NotFoundException("there are not addons");
         var addonsDto = addons.Select(a => FeatureAddonResponse.MapToDto(a)).ToList();
