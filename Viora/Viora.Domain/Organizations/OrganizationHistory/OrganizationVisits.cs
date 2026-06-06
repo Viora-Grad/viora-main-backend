@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Users.Customers;
 
 namespace Viora.Domain.Organizations.OrganizationHistory;

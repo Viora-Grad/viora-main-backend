@@ -18,8 +18,11 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     {
         return await DbContext.Set<T>().FindAsync([id], cancellationToken);
     }
-
-    public async Task<List<T>> GetAllAsync(CancellationToken cancellationToken)
+    public IQueryable<T> GetByIds(IEnumerable<Guid> ids)
+    {
+        return DbContext.Set<T>().Where(entity => ids.Contains(entity.Id));
+    }
+    public async Task<List<T>> GetAllAsNoTrackingAsync(CancellationToken cancellationToken)
     {
         return await DbContext.Set<T>()
             .AsNoTracking()
@@ -28,8 +31,8 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
 
     public async Task<List<T>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken)
     {
-        if (ids is null || !ids.Any())
-            return new List<T>();
+        if (ids is null || ids.Count == 0)
+            return [];
 
         var idList = ids.Distinct().ToList();
 
