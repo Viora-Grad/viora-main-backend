@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using DotNetEnv;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -9,8 +10,15 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
+        var env = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+        if (File.Exists(env))
+        {
+            Env.Load(env);
+        }
+        var password = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "YourSecurePassword123!";
+        var connectionString = $"Server=localhost,1433;Database=Viora;User Id=sa;Password={password};TrustServerCertificate=True;";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer("Server=localhost,1433;Database=Viora;User Id=sa;Password=YoWassup123!PASS;TrustServerCertificate=True;")
+            .UseSqlServer(connectionString)
             .Options;
         return new ApplicationDbContext(options, new NullPublisher());
     }
