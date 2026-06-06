@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Caching;
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
@@ -26,6 +26,7 @@ using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
 using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
+using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
@@ -35,7 +36,6 @@ using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
-using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Seeding;
 
 namespace Viora.Infrastructure;
@@ -116,7 +116,7 @@ public static class DependencyInjection
         services.AddScoped<IOwnerRepository, OwnerRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<LocalCredentialRepository>();
-        ervices.AddScoped<RefreshTokenRepository>();
+        services.AddScoped<RefreshTokenRepository>();
 
         services.AddDistributedMemoryCache();
 

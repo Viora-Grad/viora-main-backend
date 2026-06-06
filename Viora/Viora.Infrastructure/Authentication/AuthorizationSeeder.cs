@@ -22,8 +22,9 @@ public static class AuthorizationSeeder
     public static void SeedRoles(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>().HasData(
+            //Role.None,
             //Role.Registered,
-            Role.Owner,
+            //Role.Owner,
             Role.Admin,
             Role.Customer
         );

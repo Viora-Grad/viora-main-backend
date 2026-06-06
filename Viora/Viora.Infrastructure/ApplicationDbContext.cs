@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Data;
-using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
 using Viora.Infrastructure.Authentication;
@@ -41,9 +40,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 else if (property.ClrType == typeof(DateTime?))
                     property.SetValueConverter(utcNullableConverter);
             }
-   
+
 
         #endregion UtcEntityTypeConverter
+        }
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
