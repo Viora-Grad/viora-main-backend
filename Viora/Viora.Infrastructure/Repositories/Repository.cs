@@ -41,6 +41,11 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<T>().AnyAsync(x => x.Id == id, cancellationToken);
+    }
     #endregion  
 
     #region Addition ops

@@ -5,14 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Caching;
+using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Branches;
 using Viora.Domain.Medias;
-using Viora.Domain.Plans.Features;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
@@ -27,7 +28,9 @@ using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
 using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
+using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
@@ -36,10 +39,7 @@ using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
-using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Seeding;
-using Viora.Infrastructure.Mail;
-using Viora.Application.Abstractions.Mail;
 
 namespace Viora.Infrastructure;
 
@@ -73,6 +73,10 @@ public static class DependencyInjection
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<LocalCredentialRepository>();
         #endregion UsersRepos
+
+        #region Branches
+        services.AddScoped<IBranchRepository, BranchRepository>();
+        #endregion Branches
 
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();

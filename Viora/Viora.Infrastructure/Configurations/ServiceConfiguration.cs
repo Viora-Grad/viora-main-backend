@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Branches;
 using Viora.Domain.Medias;
 using Viora.Domain.Services;
+using Viora.Domain.Shared;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -21,8 +23,10 @@ internal class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .IsRequired();
 
         builder.Property(s => s.Type)
-            .HasConversion<string>()
-            .HasMaxLength(50)
+            .HasConversion(
+                (ServiceType s) => s.Value,
+                v => ServiceType.FromValue(v))
+            .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(s => s.Status)

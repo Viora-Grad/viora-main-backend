@@ -1,7 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches.Internals;
-using Viora.Domain.Shared.Enums;
+using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 
 namespace Viora.Domain.Branches;
@@ -29,9 +29,37 @@ public sealed class Branch : Entity
 
     private Branch() { }    // for EfCore
 
+    public static Branch Create(
+        Guid organizationId,
+        Address address,
+        Point location,
+        Email contactEmail,
+        ICollection<ServiceType> servicesProvided,
+        string timeZoneId = "UTC")
+    {
+        var branch = new Branch
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = organizationId,
+            Address = address,
+            Location = location,
+            ContactEmail = contactEmail,
+            Status = BranchStatus.Active,
+            TimeZone = timeZoneId
+        };
+        branch._services.AddRange(servicesProvided.Distinct());
+        return branch;
+    }
+
     //fail safe if time could not be found to fall back to UTC
     private TimeZoneInfo ResolveTimeZone() =>
         TimeZoneInfo.TryFindSystemTimeZoneById(TimeZone, out var tz) ? tz : TimeZoneInfo.Utc;
+
+    public void UpdatePhoneNumbers(IEnumerable<PhoneNumber> phoneNumbers)
+    {
+        _phoneNumbers.Clear();
+        _phoneNumbers.AddRange(phoneNumbers.Distinct());
+    }
 
     public Result SetBusinessHours(DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)
     {

@@ -1,6 +1,5 @@
 ﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Organizations.Shared.Enums;
-using Viora.Domain.Shared.Enums;
 
 namespace Viora.Application.Organizations.RequestOnboard;
 
@@ -11,7 +10,7 @@ public record RequestOnboardCommand(
     string About,
     string ServiceDescription,
     string Letter,
-    ICollection<ServiceType> ServiceTypes,
+    ICollection<string> ServiceTypes,
     ReferralSource ReferralSource,
     string BillingEmail,
     string SupportEmail) : ICommand<Guid>;

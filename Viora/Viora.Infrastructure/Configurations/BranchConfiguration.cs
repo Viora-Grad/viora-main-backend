@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Branches;
 using Viora.Domain.Branches.Internals;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 
 namespace Viora.Infrastructure.Configurations;
@@ -57,8 +59,11 @@ internal class BranchConfiguration : IEntityTypeConfiguration<Branch>
 
         builder.PrimitiveCollection("_services")
             .HasColumnName("Services")
-            .ElementType(e => e.HasConversion<string>()
-            .HasMaxLength(50));
+            .ElementType(e => e
+                .HasConversion(new ValueConverter<ServiceType, string>(
+                    s => s.Value,
+                    v => ServiceType.FromValue(v)))
+                .HasMaxLength(100));
 
         // private properties are accessed through reflection not expressions thus the string names
 

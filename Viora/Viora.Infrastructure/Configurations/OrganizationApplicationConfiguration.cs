@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Shared;
@@ -73,7 +74,11 @@ internal sealed class OrganizationApplicationConfiguration : IEntityTypeConfigur
 
         builder.PrimitiveCollection(a => a.ProposedServicesType)
             .HasColumnName("ProposedServicesType")
-            .ElementType(b => b.HasConversion<string>().HasMaxLength(50));
+            .ElementType(e => e
+                .HasConversion(new ValueConverter<ServiceType, string>(
+                    s => s.Value,
+                    v => ServiceType.FromValue(v)))
+                .HasMaxLength(100));
 
         builder.Property(a => a.Status)
             .HasConversion<string>()

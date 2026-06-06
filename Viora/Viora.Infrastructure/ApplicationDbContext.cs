@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Data;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Shared;
 
 namespace Viora.Infrastructure;
 
@@ -14,6 +15,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
+
+        modelBuilder.Ignore<ServiceType>();
 
         // Makes sure that the value of DateTime type is UTC and if not
         // transforms it to the equivalent counter part
