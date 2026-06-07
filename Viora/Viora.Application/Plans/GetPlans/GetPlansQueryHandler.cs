@@ -1,6 +1,6 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Plans.DTO;
+using Viora.Application.Plans.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
@@ -23,12 +23,12 @@ public class GetPlansQueryHandler(
     IPlanFeatureRepository planFeatureRepository,
     IPlanRepository planRepository,
     IFeatureRepository featureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlansQuery, List<PlanDTO>>
+    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlansQuery, List<PlanResponse>>
 {
-    public async Task<Result<List<PlanDTO>>> Handle(GetPlansQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlanResponse>>> Handle(GetPlansQuery request, CancellationToken cancellationToken)
     {
         // 1. Fetch all data upfront — 4 DB calls total, not N*M
-        var plans = await planRepository.GetAllAsync(cancellationToken);
+        var plans = await planRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (!plans.Any())
             throw new NotFoundException("No plans found.");
 
@@ -53,14 +53,14 @@ public class GetPlansQueryHandler(
             var features = planFeatureLookup.GetValueOrDefault(plan.Id, []);
             var featureDtos = features
                                     .Where(pf => pf.FeatureId.HasValue && featureLookup.ContainsKey(pf.FeatureId.Value))
-                                    .Select(pf => FeatureDTO.MapToDTO(featureLookup[pf.FeatureId.Value]))
+                                    .Select(pf => FeatureResponse.MapToDTO(featureLookup[pf.FeatureId.Value]))
                                     .ToList();
             var limitedFeatureDtos = features
                                     .Where(pf => pf.LimitedFeatureId.HasValue && limitedFeatureLookup.ContainsKey(pf.LimitedFeatureId.Value))
-                                    .Select(pf => LimitedFeatureDTO.MapToDTO(limitedFeatureLookup[pf.LimitedFeatureId.Value]))
+                                    .Select(pf => LimitedFeatureResponse.MapToDTO(limitedFeatureLookup[pf.LimitedFeatureId.Value]))
                                     .ToList();
 
-            return PlanDTO.MapToDTO(plan, featureDtos, limitedFeatureDtos);
+            return PlanResponse.MapToDTO(plan, featureDtos, limitedFeatureDtos);
         }).ToList();
 
         return Result.Success(planDtos);

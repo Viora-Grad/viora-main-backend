@@ -1,35 +1,49 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Viora.Application.Abstractions.Clock;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Data;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
-
+using Viora.Infrastructure.Authentication;
 
 namespace Viora.Infrastructure;
 
-public sealed class ApplicationDbContext : DbContext, IUnitOfWork
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IPublisher publisher) : DbContext(options), IUnitOfWork
 {
-
-    private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IPublisher _publisher;
-
-    public ApplicationDbContext(
-        DbContextOptions<ApplicationDbContext> options,
-        IDateTimeProvider dateTimeProvider,
-        IPublisher publisher
-        ) : base(options)
-    {
-        _publisher = publisher;
-        _dateTimeProvider = dateTimeProvider;
-    }
-
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
+        modelBuilder.SeedPermissions();
+        modelBuilder.SeedRoles();
+        modelBuilder.SeedRolePermissions();
         base.OnModelCreating(modelBuilder);
+
+        // Makes sure that the value of DateTime type is UTC and if not
+        // transforms it to the equivalent counter part
+        #region UtcEntityTypeConverter
+
+        var utcConverter = new ValueConverter<DateTime, DateTime>(
+        v => v.ToUniversalTime(),
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+        var utcNullableConverter = new ValueConverter<DateTime?, DateTime?>(
+            v => v.HasValue ? v.Value.ToUniversalTime() : v,
+            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                    property.SetValueConverter(utcConverter);
+
+                else if (property.ClrType == typeof(DateTime?))
+                    property.SetValueConverter(utcNullableConverter);
+            }
+
+
+        #endregion UtcEntityTypeConverter
+        }
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -37,10 +51,7 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
         try
         {
             await PuplishDomainEventAsync(cancellationToken);
-
             var result = await base.SaveChangesAsync(cancellationToken);
-
-
             return result;
         }
         catch (DbUpdateConcurrencyException ex)
@@ -53,7 +64,7 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
     public async Task PuplishDomainEventAsync(CancellationToken cancellationToken)
     {
         var domainEntities = ChangeTracker.Entries<Entity>()
-            .Where(e => e.Entity.DomainEvents != null && e.Entity.DomainEvents.Any())
+            .Where(e => e.Entity.DomainEvents != null && e.Entity.DomainEvents.Count != 0)
             .Select(e => e.Entity)
             .ToList();
         var domainEvents = domainEntities
@@ -64,7 +75,7 @@ public sealed class ApplicationDbContext : DbContext, IUnitOfWork
         .ForEach(e => e.Entity.ClearDomainEvents());
         foreach (var domainEvent in domainEvents)
         {
-            await _publisher.Publish(domainEvent, cancellationToken);
+            await publisher.Publish(domainEvent, cancellationToken);
         }
 
     }
