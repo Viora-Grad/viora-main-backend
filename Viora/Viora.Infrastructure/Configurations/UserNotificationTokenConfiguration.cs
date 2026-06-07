@@ -1,10 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Viora.Infrastructure.NotificationService;
+﻿namespace Viora.Infrastructure.Configurations;
 
-namespace Viora.Infrastructure.Configurations;
-
-internal class UserNotificationTokenConfiguration : IEntityTypeConfiguration<UserNotificationToken>
+/*internal class UserNotificationTokenConfiguration : IEntityTypeConfiguration<UserNotificationToken>
 {
     public void Configure(EntityTypeBuilder<UserNotificationToken> builder)
     {
@@ -16,4 +12,4 @@ internal class UserNotificationTokenConfiguration : IEntityTypeConfiguration<Use
             .IsRequired()
             .HasMaxLength(255);
     }
-}
+}*/

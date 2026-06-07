@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using Viora.Application.Abstractions.Behaviors;
+using Viora.Application.Subscriptions.AddAddon;
+using Viora.Application.Subscriptions.ChangeSubscription;
+using Viora.Application.Subscriptions.CreateSubscriptions;
+using Viora.Application.Subscriptions.RenewSubscriptions;
 using Viora.Domain.Plans.Services;
 
 namespace Viora.Application;

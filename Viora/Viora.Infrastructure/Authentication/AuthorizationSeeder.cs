@@ -8,7 +8,7 @@ public static class AuthorizationSeeder
     public static void SeedPermissions(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Permission>().HasData(
-            //Permission.UsersRead,
+            Permission.UsersRead,
             new { Id = 2, Name = "users:write" },
             new { Id = 10, Name = "roles:read" },
             new { Id = 11, Name = "roles:write" },
@@ -33,7 +33,7 @@ public static class AuthorizationSeeder
     {
 
         modelBuilder.Entity<RolePermission>().HasData(
-            //new { RoleId = Role.Registered.Id, PermissionId = Permission.UsersRead.Id },
+            new { RoleId = Role.Registered.Id, PermissionId = Permission.UsersRead.Id },
             new { RoleId = Role.Owner.Id, PermissionId = Permission.UsersRead.Id },
             new { RoleId = Role.Owner.Id, PermissionId = 10 },
             new { RoleId = Role.Owner.Id, PermissionId = 20 },
