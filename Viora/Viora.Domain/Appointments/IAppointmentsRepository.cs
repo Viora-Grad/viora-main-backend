@@ -6,7 +6,7 @@ public interface IAppointmentsRepository
     Task<IEnumerable<Appointment>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Appointment>> GetByServiceIdAsync(Guid serviceId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Appointment>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
-    Task<bool> OverlapsAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
+    Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
     Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     void Add(Appointment appointment);
     void Remove(Appointment appointment);

@@ -1,6 +1,4 @@
-﻿using FirebaseAdmin.Messaging;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +19,7 @@ using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Users;
@@ -64,15 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
-        services.AddSingleton<FirebaseMessaging>(sp =>
-        {
-            var app = FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions()
-            {
-                Credential = GoogleCredential.FromFile(configuration["Firebase:Path"]!)
-            });
-            return FirebaseMessaging.GetMessaging(app);
 
-        });
 
 
         // register repositories here
@@ -114,7 +105,11 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.AdminOnly, policy => policy.RequireRole("Admin"))
             .AddPolicy(AuthorizationPolicies.OwnerOnly, policy => policy.RequireRole("Owner"))
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
-            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")); // For tenant-scoping lat
+            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")); // For tenant-scoping
+
+        // Firebase configuration
+        services.AddFirebase(configuration);
+        services.AddFirebaseMessaging();
         return services;
     }
 }
