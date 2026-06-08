@@ -2,48 +2,39 @@
 
 namespace Viora.Infrastructure.Seeding.Data;
 
-public static class AuthorizationData
+internal static class AuthorizationData
 {
-    public static IReadOnlyList<Permission> Permissions => new[]
-     {
+    public static IReadOnlyList<Role> Roles => Role.All;
+
+    public static IReadOnlyList<Permission> Permissions =>
+    [
+        // TODO please register the presmissions in the Permission class and fetch them from there do not define them here
         Permission.UsersRead,
-        Permission.Create(2, "users:write"),
+        Permission.Create(2,  "users:write"),
         Permission.Create(10, "roles:read"),
         Permission.Create(11, "roles:write"),
         Permission.Create(20, "plans:read"),
         Permission.Create(21, "plans:write"),
         Permission.Create(30, "subscriptions:manage"),
         Permission.Create(40, "features:read"),
-        Permission.Create(41, "features:write")
-     };
-    public static IReadOnlyList<Role> Roles => new[]
-    {
-        Role.None,
-        Role.Registered,
-        Role.Owner,
-        Role.Admin,
-        Role.Customer
-    };
+        Permission.Create(41, "features:write"),
+    ];
 
-    public static IReadOnlyList<RolePermission> RolePermissions => new[]
-    {
-        new RolePermission(Role.Registered.Id, Permission.UsersRead.Id),
-        new RolePermission(Role.Owner.Id, Permission.UsersRead.Id),
-        new RolePermission(Role.Owner.Id, 10),
-        new RolePermission(Role.Owner.Id, 20),
-        new RolePermission(Role.Owner.Id, 30),
-        new RolePermission(Role.Owner.Id, 40),
-        new RolePermission(Role.Admin.Id, Permission.UsersRead.Id),
-        new RolePermission(Role.Admin.Id, 2),
-        new RolePermission(Role.Admin.Id, 10),
-        new RolePermission(Role.Admin.Id, 11),
-        new RolePermission(Role.Admin.Id, 20),
-        new RolePermission(Role.Admin.Id, 21),
-        new RolePermission(Role.Admin.Id, 30),
-        new RolePermission(Role.Admin.Id, 40),
-        new RolePermission(Role.Admin.Id, 41)
-            // Customer role intentionally left without permissions, can be assigned permissions as needed
-    };
-
-
+    public static IReadOnlyList<RolePermission> RolePermissions =>
+    [
+        new() { RoleId = Role.Owner.Id, PermissionId = Permission.UsersRead.Id },
+        new() { RoleId = Role.Owner.Id, PermissionId = 10 },
+        new() { RoleId = Role.Owner.Id, PermissionId = 20 },
+        new() { RoleId = Role.Owner.Id, PermissionId = 30 },
+        new() { RoleId = Role.Owner.Id, PermissionId = 40 },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.UsersRead.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = 2  },
+        new() { RoleId = Role.Admin.Id, PermissionId = 10 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 11 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 20 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 21 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 30 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 40 },
+        new() { RoleId = Role.Admin.Id, PermissionId = 41 },
+    ];
 }

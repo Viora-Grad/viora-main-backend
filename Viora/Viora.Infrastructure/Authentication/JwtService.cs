@@ -12,7 +12,7 @@ internal class JwtService(IConfiguration configuration, IDateTimeProvider dateTi
 {
     public string GenerateToken(Guid userId, IEnumerable<Claim> claims)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var subjectClaims = new List<Claim>
         {
@@ -28,11 +28,11 @@ internal class JwtService(IConfiguration configuration, IDateTimeProvider dateTi
 
         // Create the JWT token
         var token = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: configuration["Jwt:Audience"],
+            issuer: configuration["JWT:ISSUER"],
+            audience: configuration["JWT:AUDIENCE"],
             claims: subjectClaims,
             notBefore: dateTimeProvider.UtcNow,
-            expires: dateTimeProvider.UtcNow.AddMinutes(int.Parse(configuration["Jwt:Expiration_Minutes"])),
+            expires: dateTimeProvider.UtcNow.AddMinutes(int.Parse(configuration["JWT_EXPIRATION_MINUTES"]!)),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

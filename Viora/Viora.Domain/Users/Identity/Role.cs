@@ -21,4 +21,6 @@ public sealed class Role
     public ICollection<User> Users { get; init; } = new List<User>();
 
     public ICollection<Permission> Permissions { get; init; } = new List<Permission>();
+
+    public static IReadOnlyList<Role> All => [None, Registered, Owner, Admin, Customer];    // no need to reflect it unlike in service type (if more roles are to be added use reflection)
 }

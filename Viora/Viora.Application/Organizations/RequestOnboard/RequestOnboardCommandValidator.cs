@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Viora.Domain.Shared;
 
 namespace Viora.Application.Organizations.RequestOnboard;
 
@@ -30,7 +31,8 @@ public class RequestOnboardCommandValidator : AbstractValidator<RequestOnboardCo
             .NotEmpty().WithMessage("At least one service type is required.");
 
         RuleForEach(x => x.ServiceTypes)
-            .IsInEnum();
+            .Must(s => ServiceType.All.Any(t => t.Value.Equals(s, StringComparison.OrdinalIgnoreCase)))
+            .WithMessage("One or more service types are invalid.");
 
         RuleFor(x => x.ReferralSource)
             .IsInEnum();

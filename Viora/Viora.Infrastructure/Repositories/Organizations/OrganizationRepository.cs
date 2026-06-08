@@ -7,15 +7,6 @@ namespace Viora.Infrastructure.Repositories.Organizations;
 
 internal sealed class OrganziationRepository(ApplicationDbContext context) : Repository<Organization>(context), IOrganizationRepository
 {
-    public async Task<long> CountAsync(
-          ISpecification<Organization> spec,
-          CancellationToken cancellationToken = default)
-    {
-        return await SpecificationEvaluator<Organization>
-            .GetQueryForCount(DbContext.Set<Organization>().AsQueryable(), spec)
-            .LongCountAsync(cancellationToken);
-    }
-
     public async Task<Organization?> GetByNameAsync(
         string name,
         CancellationToken cancellationToken = default)
