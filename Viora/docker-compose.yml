@@ -16,14 +16,13 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__Secret=${JWT_SECRET}
-      - AI__Modules__ClientChat__ApiKey=${GEMINI_API_KEY_CLIENT}
-      - AI__Modules__HealthChat__ApiKey=${GEMINI_API_KEY_HEALTH}
+      - AI__Modules__RagChat__ApiKey=${GEMINI_API_KEY_RAG}
       - AI__Modules__Marketing__ApiKey=${GEMINI_API_KEY_MARKETING}
     depends_on:
       sql:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     networks:
       - viora-net
