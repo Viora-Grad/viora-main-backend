@@ -4,14 +4,14 @@ namespace Viora.Infrastructure.Security;
 
 internal class Hasher : IHasher
 {
-    public string Hash(string password)
+    public string Hash(string input)
     {
-        var hashed = BCrypt.Net.BCrypt.HashPassword(password);
+        var hashed = BCrypt.Net.BCrypt.HashPassword(input);
         return hashed;
     }
 
-    public bool Verify(string password, string hashedPassword)
+    public bool Verify(string provided, string hash)
     {
-        return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+        return BCrypt.Net.BCrypt.Verify(provided, hash);
     }
 }

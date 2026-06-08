@@ -87,8 +87,11 @@ public static class DependencyInjection
         services.AddTransient<ICipher, Cipher>();
         services.AddTransient<IHasher, Hasher>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();
+        services.AddScoped<ITokenValidator, TokenValidator>();
+        services.AddScoped<RefreshTokenService>();
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
@@ -124,6 +127,12 @@ public static class DependencyInjection
                 .AsNoTracking()
                 .ToList();
         });
+        // register repositories here
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IOwnerRepository, OwnerRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<LocalCredentialRepository>();
+        services.AddScoped<RefreshTokenRepository>();
 
         services.AddDistributedMemoryCache();
 
@@ -156,7 +165,8 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.AdminOnly, policy => policy.RequireRole("Admin"))
             .AddPolicy(AuthorizationPolicies.OwnerOnly, policy => policy.RequireRole("Owner"))
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
-            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")); // For tenant-scoping lat
+            .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")) // For tenant-scoping lat
+            .AddPermissionPolicies();
         return services;
     }
 }

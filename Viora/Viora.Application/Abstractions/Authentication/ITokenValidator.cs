@@ -2,13 +2,14 @@
 
 namespace Viora.Application.Abstractions.Authentication;
 
-public sealed record SocialTokenValidationResult(
-    string Provider,
-    string ProviderKey,   // external subject id (e.g., "sub")
-    string? Email,
-    string? FirstName,
-    string? LastName,
-    bool EmailVerified);
+public sealed record SocialTokenValidationResult
+{
+    public string Provider { get; set; } = null!;
+    public string ProviderKey { get; set; } = null!;   // external subject id (e.g., "sub")
+    public string Email { get; set; } = null!;
+    public bool EmailVerified { get; set; }
+
+}
 
 public sealed record SocialInput(
     string? Email,
