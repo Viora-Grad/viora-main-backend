@@ -29,17 +29,17 @@ namespace Viora.Infrastructure.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.InsertData(
-                table: "Role",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 0, "None" },
-                    { 1, "Registered" },
-                    { 2, "Owner" }
-                });
-        }
+        // protected override void Down(MigrationBuilder migrationBuilder)
+        // {
+        //     migrationBuilder.InsertData(
+        //         table: "Role",
+        //         columns: new[] { "Id", "Name" },
+        //         values: new object[,]
+        //         {
+        //             { 0, "None" },
+        //             { 1, "Registered" },
+        //             { 2, "Owner" }
+        //         });
+        // }
     }
 }
