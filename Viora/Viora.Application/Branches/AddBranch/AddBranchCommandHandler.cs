@@ -41,9 +41,12 @@ internal sealed class AddBranchCommandHandler(
             dateTime.UtcNow,
             request.TimeZoneId);
 
-        branchRepository.Add(branch);
+        if (branch.IsFailure)
+            return Result.Failure<Guid>(branch.Error);
+
+        branchRepository.Add(branch.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(branch.Id);
+        return Result.Success(branch.Value.Id);
     }
 }

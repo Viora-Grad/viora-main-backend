@@ -7,59 +7,10 @@
 namespace Viora.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class RolePermissionSeeder : Migration
+    public partial class UserRoleFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.InsertData(
-                table: "Role",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 3, "Admin" },
-                    { 4, "Customer" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "permissions",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 2, "users:write" },
-                    { 10, "roles:read" },
-                    { 11, "roles:write" },
-                    { 20, "plans:read" },
-                    { 21, "plans:write" },
-                    { 30, "subscriptions:manage" },
-                    { 40, "features:read" },
-                    { 41, "features:write" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "RolePermissions",
-                columns: new[] { "PermissionId", "RoleId" },
-                values: new object[,]
-                {
-                    { 1, 2 },
-                    { 10, 2 },
-                    { 20, 2 },
-                    { 30, 2 },
-                    { 40, 2 },
-                    { 1, 3 },
-                    { 2, 3 },
-                    { 10, 3 },
-                    { 11, 3 },
-                    { 20, 3 },
-                    { 21, 3 },
-                    { 30, 3 },
-                    { 40, 3 },
-                    { 41, 3 }
-                });
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
                 table: "Role",
@@ -139,11 +90,6 @@ namespace Viora.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "Role",
                 keyColumn: "Id",
-                keyValue: 2);
-
-            migrationBuilder.DeleteData(
-                table: "Role",
-                keyColumn: "Id",
                 keyValue: 3);
 
             migrationBuilder.DeleteData(
@@ -185,6 +131,59 @@ namespace Viora.Infrastructure.Migrations
                 table: "permissions",
                 keyColumn: "Id",
                 keyValue: 41);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.InsertData(
+                table: "Role",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 3, "Admin" },
+                    { 4, "Customer" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RolePermissions",
+                columns: new[] { "PermissionId", "RoleId" },
+                values: new object[] { 1, 2 });
+
+            migrationBuilder.InsertData(
+                table: "permissions",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 2, "users:write" },
+                    { 10, "roles:read" },
+                    { 11, "roles:write" },
+                    { 20, "plans:read" },
+                    { 21, "plans:write" },
+                    { 30, "subscriptions:manage" },
+                    { 40, "features:read" },
+                    { 41, "features:write" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RolePermissions",
+                columns: new[] { "PermissionId", "RoleId" },
+                values: new object[,]
+                {
+                    { 10, 2 },
+                    { 20, 2 },
+                    { 30, 2 },
+                    { 40, 2 },
+                    { 1, 3 },
+                    { 2, 3 },
+                    { 10, 3 },
+                    { 11, 3 },
+                    { 20, 3 },
+                    { 21, 3 },
+                    { 30, 3 },
+                    { 40, 3 },
+                    { 41, 3 }
+                });
         }
     }
 }
