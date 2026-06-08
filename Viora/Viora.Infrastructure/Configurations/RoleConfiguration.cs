@@ -19,6 +19,8 @@ internal class RoleConfiguration : IEntityTypeConfiguration<Role>
             .WithMany()
             .UsingEntity<RolePermission>();
 
+        builder.HasData(Role.None, Role.Registered, Role.Owner, Role.Admin, Role.Customer);
+
 
     }
 }

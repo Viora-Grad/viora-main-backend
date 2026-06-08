@@ -893,46 +893,6 @@ namespace Viora.Infrastructure.Migrations
                         {
                             Id = 1,
                             Name = "users:read"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "users:write"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "roles:read"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "roles:write"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Name = "plans:read"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Name = "plans:write"
-                        },
-                        new
-                        {
-                            Id = 30,
-                            Name = "subscriptions:manage"
-                        },
-                        new
-                        {
-                            Id = 40,
-                            Name = "features:read"
-                        },
-                        new
-                        {
-                            Id = 41,
-                            Name = "features:write"
                         });
                 });
 
@@ -951,6 +911,21 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Role");
 
                     b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Name = "None"
+                        },
+                        new
+                        {
+                            Id = 1,
+                            Name = "Registered"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Owner"
+                        },
                         new
                         {
                             Id = 3,
@@ -982,76 +957,6 @@ namespace Viora.Infrastructure.Migrations
                         {
                             RoleId = 1,
                             PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 10
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 30
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 40
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 10
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 11
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 20
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 21
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 30
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 40
-                        },
-                        new
-                        {
-                            RoleId = 3,
-                            PermissionId = 41
                         });
                 });
 

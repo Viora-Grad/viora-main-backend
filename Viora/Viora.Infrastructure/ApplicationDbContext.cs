@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Data;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Abstractions;
-using Viora.Infrastructure.Authentication;
 
 namespace Viora.Infrastructure;
 
@@ -13,9 +12,6 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DependencyInjection).Assembly);
-        modelBuilder.SeedPermissions();
-        modelBuilder.SeedRoles();
-        modelBuilder.SeedRolePermissions();
         base.OnModelCreating(modelBuilder);
 
         // Makes sure that the value of DateTime type is UTC and if not
