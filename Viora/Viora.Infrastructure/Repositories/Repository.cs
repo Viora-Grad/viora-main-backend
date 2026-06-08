@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Abstractions;
+using Viora.Infrastructure.Presistance;
 
 
 namespace Viora.Infrastructure.Repositories;
@@ -45,6 +46,14 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken)
     {
         return await DbContext.Set<T>().AnyAsync(x => x.Id == id, cancellationToken);
+    }
+    public async Task<long> CountAsync(
+      ISpecification<T> spec,
+      CancellationToken cancellationToken = default)
+    {
+        return await SpecificationEvaluator<T>
+            .GetQueryForCount(DbContext.Set<T>().AsQueryable(), spec)
+            .LongCountAsync(cancellationToken);
     }
     #endregion  
 

@@ -1,4 +1,5 @@
 using NetTopologySuite.Geometries;
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
@@ -13,6 +14,7 @@ namespace Viora.Application.Branches.AddBranch;
 internal sealed class AddBranchCommandHandler(
     IOrganizationRepository organizationRepository,
     IBranchRepository branchRepository,
+    IDateTimeProvider dateTime,
     IUnitOfWork unitOfWork) : ICommandHandler<AddBranchCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(AddBranchCommand request, CancellationToken cancellationToken)
@@ -36,6 +38,7 @@ internal sealed class AddBranchCommandHandler(
             location,
             new Email(request.ContactEmail),
             request.ServicesProvided.Select(ServiceType.FromValue).ToList(),
+            dateTime.UtcNow,
             request.TimeZoneId);
 
         branchRepository.Add(branch);

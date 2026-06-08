@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Medias;
 using Viora.Domain.Medias.Internals;
+using Viora.Domain.Organizations.OrganizationDetails;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -45,9 +46,15 @@ internal class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
 
         builder.Ignore(m => m.CategoryType);
 
+        builder.HasOne<Organization>()
+            .WithMany()
+            .HasForeignKey(m => m.OrganizationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasIndex(m => m.Key)
             .IsUnique();
 
         builder.HasIndex(m => m.UploadedAtUtc);
+        builder.HasIndex(m => m.OrganizationId);
     }
 }

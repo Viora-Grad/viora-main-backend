@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viora.Domain.Branches;
 using Viora.Domain.Branches.Internals;
+using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
@@ -96,5 +97,20 @@ internal class BranchConfiguration : IEntityTypeConfiguration<Branch>
             .WithMany()
             .HasForeignKey(b => b.OrganizationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Ignore(x => x.Gallery);
+
+        builder.HasMany<MediaFile>("_gallery")
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "BranchGallery",
+                r => r.HasOne<MediaFile>().WithMany().HasForeignKey("MediaFileId").OnDelete(DeleteBehavior.Cascade),
+                l => l.HasOne<Branch>().WithMany().HasForeignKey("BranchId"),
+                j =>
+                {
+                    j.ToTable("BranchGallery");
+                    j.HasIndex("BranchId").HasDatabaseName("IX_BranchGallery_BranchId");
+                    j.HasIndex("MediaFileId").HasDatabaseName("IX_BranchGallery_MediaFileId");
+                });
     }
 }

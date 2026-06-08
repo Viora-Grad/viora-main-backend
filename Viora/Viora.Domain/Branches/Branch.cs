@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches.Internals;
+using Viora.Domain.Medias;
 using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 
@@ -25,16 +26,22 @@ public sealed class Branch : Entity
     public IReadOnlyCollection<BusinessHour> BusinessHours => _businessHours.AsReadOnly();
     private readonly List<BusinessHour> _businessHours = [];
 
-    public TimeZoneId TimeZone { get; set; } = "UTC";
+    public TimeZoneId TimeZone { get; private set; } = "UTC";
+
+    public DateTime OpenedAtUtc { get; private set; }
+
+    public IReadOnlyCollection<MediaFile> Gallery => _gallery.AsReadOnly();
+    private readonly List<MediaFile> _gallery = [];
 
     private Branch() { }    // for EfCore
 
-    public static Branch Create(
+    public static Result<Branch> Create(
         Guid organizationId,
         Address address,
         Point location,
         Email contactEmail,
         ICollection<ServiceType> servicesProvided,
+        DateTime currentDateTime,
         string timeZoneId = "UTC")
     {
         var branch = new Branch
@@ -45,20 +52,23 @@ public sealed class Branch : Entity
             Location = location,
             ContactEmail = contactEmail,
             Status = BranchStatus.Active,
+            OpenedAtUtc = currentDateTime,
             TimeZone = timeZoneId
         };
         branch._services.AddRange(servicesProvided.Distinct());
-        return branch;
+
+        return Result.Success(branch);
     }
 
     //fail safe if time could not be found to fall back to UTC
     private TimeZoneInfo ResolveTimeZone() =>
         TimeZoneInfo.TryFindSystemTimeZoneById(TimeZone, out var tz) ? tz : TimeZoneInfo.Utc;
 
-    public void UpdatePhoneNumbers(IEnumerable<PhoneNumber> phoneNumbers)
+    public Result UpdatePhoneNumbers(IEnumerable<PhoneNumber> phoneNumbers)
     {
         _phoneNumbers.Clear();
         _phoneNumbers.AddRange(phoneNumbers.Distinct());
+        return Result.Success();
     }
 
     public Result SetBusinessHours(DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)

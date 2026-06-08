@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Branches;
 using Viora.Domain.Medias;
@@ -80,7 +79,7 @@ internal class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .WithMany()
             .UsingEntity<Dictionary<string, object>>(
                 "ServiceGallery",
-                r => r.HasOne<MediaFile>().WithMany().HasForeignKey("MediaFileId").OnDelete(DeleteBehavior.Restrict),
+                r => r.HasOne<MediaFile>().WithMany().HasForeignKey("MediaFileId").OnDelete(DeleteBehavior.Cascade),
                 l => l.HasOne<Service>().WithMany().HasForeignKey("ServiceId"),
                 j =>
                 {

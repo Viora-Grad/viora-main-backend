@@ -32,7 +32,8 @@ internal class UpdateLogoCommandHandler(
             storageKey,
             request.MimeType,
             dateTimeProvider.UtcNow,
-            storageSettings.MaxFileSizeBytes);
+            storageSettings.MaxFileSizeBytes,
+            organization.Id);
 
         if (mediaResult.IsFailure)
             return Result.Failure(mediaResult.Error);

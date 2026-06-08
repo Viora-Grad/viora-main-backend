@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Viora.Infrastructure;
@@ -13,9 +14,11 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260607143157_AddDateTimeForBranchOpen")]
+    partial class AddDateTimeForBranchOpen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,25 +26,6 @@ namespace Viora.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("BranchGallery", b =>
-                {
-                    b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MediaFileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("BranchId", "MediaFileId");
-
-                    b.HasIndex("BranchId")
-                        .HasDatabaseName("IX_BranchGallery_BranchId");
-
-                    b.HasIndex("MediaFileId")
-                        .HasDatabaseName("IX_BranchGallery_MediaFileId");
-
-                    b.ToTable("BranchGallery", (string)null);
-                });
 
             modelBuilder.Entity("ServiceGallery", b =>
                 {
@@ -307,9 +291,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid?>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<long>("SizeInBytes")
                         .HasColumnType("bigint");
 
@@ -320,8 +301,6 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasIndex("Key")
                         .IsUnique();
-
-                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UploadedAtUtc");
 
@@ -1356,27 +1335,12 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("LocalCredential");
                 });
 
-            modelBuilder.Entity("BranchGallery", b =>
-                {
-                    b.HasOne("Viora.Domain.Branches.Branch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Viora.Domain.Medias.MediaFile", null)
-                        .WithMany()
-                        .HasForeignKey("MediaFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ServiceGallery", b =>
                 {
                     b.HasOne("Viora.Domain.Medias.MediaFile", null)
                         .WithMany()
                         .HasForeignKey("MediaFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Viora.Domain.Services.Service", null)
@@ -1541,14 +1505,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasForeignKey("InventoryItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Viora.Domain.Medias.MediaFile", b =>
-                {
-                    b.HasOne("Viora.Domain.Organizations.OrganizationDetails.Organization", null)
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Viora.Domain.MedicalRecords.MedicalRecord", b =>
