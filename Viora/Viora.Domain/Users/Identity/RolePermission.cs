@@ -1,7 +1,8 @@
 ﻿namespace Viora.Domain.Users.Identity;
 
-public sealed class RolePermission(int roleId, int permissionId)
+public sealed class RolePermission
 {
-    public int RoleId { get; set; } = roleId;
-    public int PermissionId { get; set; } = permissionId;
+    public int RoleId { get; set; }
+    public int PermissionId { get; set; }
+
 }
