@@ -14,4 +14,5 @@ public static class SubscriptionError
     public static readonly Error InvalidAddonList = new Error("invalidAddonList", "The provided list of addons is invalid.", ErrorCategory.Validation);
     public static readonly Error InvalidPlan = new Error("invalidPlan", "organization already subscribed to this plan", ErrorCategory.Validation);
     public static readonly Error InvalidData = new Error("InvalidData", "the subscription organization does not match with organizationId", ErrorCategory.Validation);
+    public static readonly Error FeatureUsageNotFound = new Error("featureUsageNotFound", "No usage record found for this feature on the organization.", ErrorCategory.Validation);
 }

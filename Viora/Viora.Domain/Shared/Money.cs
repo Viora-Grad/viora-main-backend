@@ -1,8 +1,8 @@
-﻿
-namespace Viora.Domain.Shared;
+﻿namespace Viora.Domain.Shared;
 
 public record Money(decimal Amount, Currency Currency)
 {
+    private Money() : this(0m, default!) { } // for EF Core
     public static Money Zero(Currency currency)
     {
         return new Money(0m, currency);

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Viora.Domain.Shared.Enums;
+using Viora.Domain.Shared;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
 
@@ -8,7 +8,7 @@ internal class SearchOrganizationQueryValidator : AbstractValidator<SearchOrgani
     public SearchOrganizationQueryValidator()
     {
         RuleFor(x => x.ServiceType)
-            .Must(s => Enum.TryParse<ServiceType>(s, ignoreCase: true, out _))
+            .Must(s => ServiceType.All.Any(t => t.Value.Equals(s, StringComparison.OrdinalIgnoreCase)))
             .WithMessage("Invalid service type.")
             .When(x => x.ServiceType != null);
 

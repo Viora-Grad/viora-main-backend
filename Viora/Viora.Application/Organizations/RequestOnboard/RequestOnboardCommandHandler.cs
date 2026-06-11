@@ -4,6 +4,7 @@ using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Shared;
 using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Organizations.RequestOnboard;
@@ -51,7 +52,7 @@ internal class RequestOnboardCommandHandler(
             request.ProposedName,
             request.Letter,
             request.About,
-            request.ServiceTypes,
+            request.ServiceTypes.Select(ServiceType.FromValue).ToList(),
             request.ServiceDescription,
             request.ReferralSource,
             request.BillingEmail,

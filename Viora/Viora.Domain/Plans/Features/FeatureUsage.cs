@@ -9,6 +9,7 @@ public class FeatureUsage : Entity
     public int Quota { get; private set; }
     public DateTime PeriodStart { get; private set; }
     public DateTime PeriodEnd { get; private set; }
+    public byte[] RowVersion { get; private set; } = default!;
 
     private FeatureUsage(Guid Id, Guid organizationId, Guid limitedFeatureId, int quota, DateTime periodStart, DateTime periodEnd) : base(Id)
     {
@@ -19,9 +20,9 @@ public class FeatureUsage : Entity
         this.PeriodEnd = periodEnd;
     }
 
-    public void Consume()
+    public void Consume(int delta)
     {
-        Quota--;
+        Quota += delta;
     }
 
     public static Result<FeatureUsage> Create(Guid organizationId, LimitedFeature limitedFeature, DateTime periodStart, DateTime periodEnd)

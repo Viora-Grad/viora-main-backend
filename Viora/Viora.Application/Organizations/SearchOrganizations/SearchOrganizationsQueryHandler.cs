@@ -5,7 +5,6 @@ using Viora.Domain.Abstractions;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Shared;
-using Viora.Domain.Shared.Enums;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
 
@@ -21,7 +20,7 @@ internal class SearchOrganizationsQueryHandler(
         var country = countries.FirstOrDefault(c =>
             c.Name.Equals(request.Country, StringComparison.OrdinalIgnoreCase));
 
-        ServiceType? serviceType = request.ServiceType != null ? Enum.Parse<ServiceType>(request.ServiceType, ignoreCase: true) : null;
+        ServiceType? serviceType = request.ServiceType != null ? ServiceType.FromValue(request.ServiceType) : null;
 
         OrganizationSearchParameters specificationParameters = new(
             request.Id,
@@ -75,7 +74,7 @@ internal class SearchOrganizationsQueryHandler(
                 org.Name,
                 countries.First(c => c.Id == org.CountryId).Name,
                 org.ServiceDescription,
-                org.ServicesProvided.Select(s => s.ToString()),
+                org.ServicesProvided.Select(s => s.Value),
                 org.Rating.Count,
                 org.Rating.AverageOutOfTen);
         });

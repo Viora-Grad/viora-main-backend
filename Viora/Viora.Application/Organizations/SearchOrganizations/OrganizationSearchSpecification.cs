@@ -1,6 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
-using Viora.Domain.Shared.Enums;
+using Viora.Domain.Shared;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
 
@@ -20,8 +20,8 @@ internal class OrganizationSearchSpecification : BaseSpecification<Organization>
         if (p.MinRating.HasValue)
             AddCriteria(o => o.Rating.AverageOutOfTen >= p.MinRating.Value);
 
-        if (p.ServiceType.HasValue)
-            AddCriteria(o => o.ServicesProvided.Contains(p.ServiceType.Value));
+        if (p.ServiceType != null)
+            AddCriteria(o => o.ServicesProvided.Contains(p.ServiceType));
 
         switch (p.SortBy?.ToLower())
         {

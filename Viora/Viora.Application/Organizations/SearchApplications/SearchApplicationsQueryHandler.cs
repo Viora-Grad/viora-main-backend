@@ -35,7 +35,7 @@ internal class SearchApplicationsQueryHandler(
                 a.About,
                 a.ApplicationLetter,
                 a.ServiceDescription,
-                a.ProposedServicesType.Select(s => s.ToString()),
+                a.ProposedServicesType.Select(s => s.Value),
                 a.SubmittedOnUtc,
                 a.Status.ToString(),
                 a.ReferralSource.ToString(),
