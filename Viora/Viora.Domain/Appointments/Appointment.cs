@@ -14,6 +14,7 @@ public sealed class Appointment : Entity
     public Guid CustomerId { get; private set; }
     public Guid ServiceId { get; private set; }
     public Guid StaffId { get; private set; }
+    public Guid? PaymentId { get; private set; }
     public DateTime ReservationDate { get; private set; }
     public CustomerStatus Status { get; private set; }
     public bool IsCheckedIn { get; private set; } = false;
@@ -31,6 +32,7 @@ public sealed class Appointment : Entity
         Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus status,
         Creator createdBy,
@@ -41,6 +43,7 @@ public sealed class Appointment : Entity
         CustomerId = customerId;
         ServiceId = serviceId;
         StaffId = staffId;
+        PaymentId = paymentId;
         ReservationDate = reservationDate;
         Status = status;
         CreatedBy = createdBy;
@@ -52,6 +55,7 @@ public sealed class Appointment : Entity
     public static Appointment Book(Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus? status,
         Creator createdBy,
@@ -64,6 +68,7 @@ public sealed class Appointment : Entity
             customerId,
             serviceId,
             staffId,
+            paymentId,
             reservationDate,
             appointmentStatus,
             createdBy,

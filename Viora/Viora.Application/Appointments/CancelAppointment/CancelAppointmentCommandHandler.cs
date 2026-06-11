@@ -1,6 +1,11 @@
-﻿namespace Viora.Application.Appointments.CancelAppointment;
+﻿using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Messaging;
+using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 
-/*internal class CancelAppointmentCommandHandler(
+namespace Viora.Application.Appointments.CancelAppointment;
+
+internal class CancelAppointmentCommandHandler(
     IAppointmentsRepository appointmentsRepository,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CancelAppointmentCommand>
@@ -22,4 +27,4 @@
         }
         return Result.Failure(AppointmentErrors.CancellationProhibited);
     }
-}*/
+}

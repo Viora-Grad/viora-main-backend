@@ -4,9 +4,9 @@ using Viora.Domain.Appointments.Internal;
 namespace Viora.Application.Appointments.CreateAppointment;
 
 public sealed record CreateAppointmentCommand(
-    Guid CustomerId,
     Guid ServiceId,
     Guid StaffId,
+    Guid? PaymentId,
     DateTime ReservationDate,
     CustomerStatus? Status,
     Creator CreatedBy,
