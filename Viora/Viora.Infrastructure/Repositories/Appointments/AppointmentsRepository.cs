@@ -1,4 +1,5 @@
-﻿using Viora.Domain.Appointments;
+﻿using Microsoft.EntityFrameworkCore;
+using Viora.Domain.Appointments;
 
 namespace Viora.Infrastructure.Repositories.Appointments;
 
@@ -7,28 +8,43 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
     public AppointmentsRepository(ApplicationDbContext dbContext) : base(dbContext)
     {
     }
-    public Task<IEnumerable<Appointment>> GetAllAsync()
+    public Task<IEnumerable<Appointment>> GetAllAsync() // should be an aggregate of appointments to the services the branch/org offers
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Appointment>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Appointment>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await DbContext.Set<Appointment>()
+            .Where(appointment => appointment.CustomerId == customerId)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<Appointment>> GetByDateRangeAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Appointment>> GetByDateRangeAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await DbContext.Set<Appointment>()
+            .Where(appointment => appointment.ServiceId == serviceId && appointment.StaffId == staffId && appointment.ReservationDate >= startDate && appointment.EndTime <= endDate)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<Appointment>> GetByServiceIdAsync(Guid serviceId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Appointment>> GetByServiceIdAsync(Guid serviceId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await DbContext.Set<Appointment>()
+            .Where(appointment => appointment.ServiceId == serviceId)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+    public async Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var overlappingAppointments = await DbContext.Set<Appointment>()
+            .Where(appointment => appointment.ServiceId == serviceId && appointment.StaffId == staffId && appointment.ReservationDate < endDate && appointment.EndTime > startDate)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return overlappingAppointments.Count != 0;
     }
+
 }

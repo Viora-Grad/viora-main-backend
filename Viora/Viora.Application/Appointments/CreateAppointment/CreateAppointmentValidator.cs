@@ -9,7 +9,6 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentCom
     public CreateAppointmentValidator(IDateTimeProvider dateTimeProvider)
     {
         _dateTimeProvider = dateTimeProvider;
-        RuleFor(x => x.CustomerId).NotEmpty().WithMessage("Customer ID is required.");
         RuleFor(x => x.ServiceId).NotEmpty().WithMessage("Service ID is required.");
         RuleFor(x => x.StaffId).NotEmpty().WithMessage("Staff ID is required.");
         RuleFor(x => x.CreatedBy).IsInEnum().WithMessage("CreatedBy is required.");
