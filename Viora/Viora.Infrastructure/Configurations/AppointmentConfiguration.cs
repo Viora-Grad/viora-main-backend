@@ -57,6 +57,11 @@ internal class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 
         builder.Property(a => a.LastUpdatedAt);
 
+        builder.Property<byte[]>("RowVersion")
+               .IsRowVersion()
+               .IsConcurrencyToken()
+               .HasColumnName("RowVersion");
+
         builder.HasIndex(a => a.CustomerId);
         builder.HasIndex(a => a.ServiceId);
         builder.HasIndex(a => a.StaffId);
