@@ -12,6 +12,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
@@ -30,10 +31,11 @@ using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
-using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Firebase;
+using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
+using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Users;
@@ -74,6 +76,10 @@ public static class DependencyInjection
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<LocalCredentialRepository>();
         #endregion UsersRepos
+
+        #region AppointmentsRepos
+        services.AddScoped<IAppointmentsRepository, AppointmentsRepository>();
+        #endregion AppointmentsRepos
 
         #region Branches
         services.AddScoped<IBranchRepository, BranchRepository>();

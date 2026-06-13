@@ -1,6 +1,8 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments.Events;
 using Viora.Domain.Appointments.Internal;
+using Viora.Domain.Services;
+using Viora.Domain.Staffs;
 using Viora.Domain.Users.Customers;
 
 namespace Viora.Domain.Appointments;
@@ -27,6 +29,8 @@ public sealed class Appointment : Entity
     public DateTime? LastUpdatedAt { get; private set; }
 
     public Customer Customer { get; private set; } = null!; // Navigation property
+    public Service Service { get; private set; } = null!; // Navigation property
+    public Staff Staff { get; private set; } = null!; // Navigation property
     private Appointment() { } // For EF Core
     private Appointment(Guid id,
         Guid customerId,
@@ -149,11 +153,3 @@ public sealed class Appointment : Entity
         return Result.Success();
     }
 }
-
-
-/*
- * builder.Property<byte[]>("RowVersion")
-               .IsRowVersion()
-               .IsConcurrencyToken()
-               .HasColumnName("RowVersion");
-*/
