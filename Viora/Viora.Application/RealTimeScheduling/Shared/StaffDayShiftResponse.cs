@@ -3,12 +3,12 @@
 public class StaffDayShiftResponse
 {
     public Guid StaffId { get; set; }
-    public TimeSpan StartTime { get; set; }
-    public TimeSpan EndTime { get; set; }
-    public List<TimeSpan> TimeReserved { get; set; } = new List<TimeSpan>();
+    public TimeOnly StartTime { get; set; }
+    public TimeOnly EndTime { get; set; }
+    public List<SlotResponse> TimeReserved { get; set; } = new List<SlotResponse>();
 
 
-    public StaffDayShiftResponse(Guid staffId, TimeSpan startTime, TimeSpan endTime, List<TimeSpan> timeReserved)
+    public StaffDayShiftResponse(Guid staffId, TimeOnly startTime, TimeOnly endTime, List<SlotResponse> timeReserved)
     {
         StaffId = staffId;
         StartTime = startTime;

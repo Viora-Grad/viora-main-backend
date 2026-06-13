@@ -1,4 +1,6 @@
-﻿namespace Viora.Domain.Appointments;
+﻿using Viora.Domain.Abstractions;
+
+namespace Viora.Domain.Appointments;
 
 public interface IAppointmentsRepository
 {
@@ -10,5 +12,7 @@ public interface IAppointmentsRepository
     Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     void Add(Appointment appointment);
     void Remove(Appointment appointment);
+
+    Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default);
 }
 // TODO: Consider using a specification pattern for more complex queries, e.g., GetAppointmentsByCriteriaAsync(AppointmentQueryCriteria criteria)

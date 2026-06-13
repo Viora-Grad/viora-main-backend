@@ -9,8 +9,6 @@ public class Shift : Entity
     public TimeOnly StartTime { get; private set; }
     public TimeOnly EndTime { get; private set; }
 
-    //private readonly List<Appointment> _Appointments;
-    //public IReadOnlyCollection<Appointment> Appointments=_Appointment.AsReadOnly();
 
     public Shift()
     {

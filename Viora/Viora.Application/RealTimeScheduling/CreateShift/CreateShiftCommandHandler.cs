@@ -31,11 +31,11 @@ public class CreateShiftCommandHandler(
         if (branchSchedule is null)
             return Result.Failure<Guid>(ScheduleError.NotFoundForDay);
 
-        var staffshift = branchSchedule.Intervals
+        var staffshifts = branchSchedule.Intervals
             .Where(x => x.StaffId == request.StaffId)
             .ToList();
 
-        var hasOverLap = staffshift.Any(
+        var hasOverLap = staffshifts.Any(
             x => x.StartTime == request.StartTime &&
             x.EndTime == request.EndTime
             );

@@ -2,4 +2,5 @@
 
 public interface IBranchRepository
 {
+    Task<Branch?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }
