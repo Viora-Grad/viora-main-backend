@@ -17,7 +17,6 @@ namespace Viora.Infrastructure.Migrations
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { 2, "Owner" },
                     { 3, "Admin" },
                     { 4, "Customer" }
                 });

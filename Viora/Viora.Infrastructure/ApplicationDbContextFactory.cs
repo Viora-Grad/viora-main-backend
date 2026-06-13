@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Viora.Infrastructure;
 
-// used as areference in design time during migration to run the env and check the model, is over written in design time with docker env's
+// used as a reference in design time during migration to run the env and check the model, is over written in update time with docker env's
 public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
     public ApplicationDbContext CreateDbContext(string[] args)
@@ -18,7 +18,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         var password = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "YourSecurePassword123!";
         var connectionString = $"Server=localhost,1433;Database=Viora;User Id=sa;Password={password};TrustServerCertificate=True;";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer(connectionString)
+            .UseSqlServer(connectionString,
+                x => x.UseNetTopologySuite())
             .Options;
         return new ApplicationDbContext(options, new NullPublisher());
     }

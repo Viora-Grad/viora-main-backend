@@ -15,10 +15,22 @@ public static class SpecificationEvaluator<T> where T : class
 
         query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
 
-        if (spec.OrderBy is not null)
-            query = query.OrderBy(spec.OrderBy);
-        else if (spec.OrderByDescending is not null)
-            query = query.OrderByDescending(spec.OrderByDescending);
+        if (spec.OrderByClauses.Count > 0)
+        {
+            var first = spec.OrderByClauses[0];
+            var ordered = first.Descending
+                ? query.OrderByDescending(first.KeySelector)
+                : query.OrderBy(first.KeySelector);
+
+            foreach (var clause in spec.OrderByClauses.Skip(1))
+            {
+                ordered = clause.Descending
+                    ? ordered.ThenByDescending(clause.KeySelector)
+                    : ordered.ThenBy(clause.KeySelector);
+            }
+
+            query = ordered;
+        }
 
         if (spec.IsPagingEnabled && spec.Skip is not null && spec.Take is not null)
             query = query.Skip((int)spec.Skip).Take((int)spec.Take);

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Viora.Api.Middleware;
 using Viora.Application;
+using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
@@ -38,6 +39,8 @@ builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
     builder.Configuration, "Suspension");
 builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
     builder.Configuration, "Service");
+builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
+    builder.Configuration, "Email");
 #endregion Settings
 
 var app = builder.Build();
