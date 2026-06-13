@@ -1,48 +1,47 @@
-﻿using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Exceptions;
+using Viora.Application.Abstractions.Messaging;
 using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Staff;
 
 namespace Viora.Application.RealTimeScheduling.GetStaffShiftQuery;
 
 public class GetStaffShiftQeuryHandler(
-    /*IBranchRepository branchRepository,
-    IStaffRepository staffRepository,*/
+    IBranchRepository branchRepository,
+    IStaffRepository staffRepository,
     IScheduleRepository scheduleRepository
     ) : IQueryHandler<GetStaffShiftQuery, List<StaffShiftResponse>>
 {
     public async Task<Result<List<StaffShiftResponse>>> Handle(GetStaffShiftQuery request, CancellationToken cancellationToken)
     {
-        /*var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
+        var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
             ?? throw new NotFoundException($"Staff with id {request.StaffId} not Found");
-        var branch = await branchRepository.GetByIdAsync(staff.BranchId, cancellationToken)
-            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");*//*
-        var branchSchedule = await scheduleRepository.getByBranchIdAndDayAsync(branch.Id, request.Date.DayOfWeek, cancellationToken)
-            ?? throw new NotFoundException($"branch with Id {branchSchedule.Id} does not havve schedule");
-        var staffShifts = branchSchedule
-            .Select(
-            bs => bs.Intervals.Select(
-                s => s.StaffId == request.StaffId
-                ).ToList()
-            ).ToList();
 
-        if (staffShifts is null || !staffShifts.Any())
+        var branch = await branchRepository.GetByIdAsync(staff.BranchId, cancellationToken)
+            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");
+
+        var branchSchedules = await scheduleRepository.getByBranchIdAsync(branch.Id, cancellationToken)
+            ?? throw new NotFoundException($"branch with Id {branch.Id} does not havve schedule");
+
+        var staffShiftsResponse = branchSchedules
+                .SelectMany(
+                            bs => bs.Intervals
+                    .Where(i => i.StaffId == request.StaffId)
+                    .Select(i => new StaffShiftResponse(
+                        Guid.NewGuid(),
+                        i.StaffId,
+                        i.StartTime,
+                        i.EndTime,
+                        bs.DayOfWeek.ToString()
+                    ))).ToList();
+
+        if (staffShiftsResponse is null || !staffShiftsResponse.Any())
             return Result.Failure<List<StaffShiftResponse>>(ScheduleError.ShiftsNotFound);
 
-        var shiftResponses = staffShifts.Select(
-            staffShifts => staffShifts.Intervals.Select(
-                i => new StaffShiftResponse(
-                    i.Id,
-                    i.StaffId,
-                    i.StartTime,
-                    i.EndTime,
-                    staffShifts.DayOfWeek.ToString()
-                    )
-                ).ToList()
-            ).ToList();
 
-        return Result.Success(shiftResponses);*/
-        throw new NotImplementedException();
+        return Result.Success(staffShiftsResponse);
     }
 }
 
