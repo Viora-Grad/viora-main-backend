@@ -1,19 +1,21 @@
-﻿using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Exceptions;
+using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
 
 namespace Viora.Application.RealTimeScheduling.CreateSchedule;
 
 public class CreateScheduleCommandHandler(
-    //IBranchRepository branchRepository
+    IBranchRepository branchRepository,
     IScheduleRepository scheduleRepository,
     IUnitOfWork unitOfWork
     ) : ICommandHandler<CreateScheduleCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(CreateScheduleCommand request, CancellationToken cancellationToken)
-    {/*
+    {
         var branch = await branchRepository.GetByIdAsync(request.BranchId, cancellationToken)
-            ?? throw new NotFoundException($"Branch with id {request.BranchId} not found");*/
+            ?? throw new NotFoundException($"Branch with id {request.BranchId} not found");
         var day = Enum.Parse<DayOfWeek>(request.DayOfWeek);
 
         var branchSchedule = await scheduleRepository.getByBranchIdAndDayAsync(request.BranchId, day, cancellationToken);
