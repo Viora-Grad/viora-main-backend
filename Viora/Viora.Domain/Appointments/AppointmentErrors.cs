@@ -11,7 +11,7 @@ public static class AppointmentErrors
     public static Error CompleteProhibited =>
         new("Appointment.CompleteProhibited", "Appointment cannot be completed because it is not in progress.", ErrorCategory.Validation);
     public static Error DelayProhibited =>
-        new("Appointment.DelayProhibited", "Cannot delay a completed appointment.", ErrorCategory.Validation);
+        new("Appointment.DelayProhibited", "Cannot delay an appointment that is in progress or completed.", ErrorCategory.Validation);
     public static Error CancellationProhibited =>
         new("Appointment.CancellationProhibited", "Cannot cancel the appointment", ErrorCategory.Validation);
     public static Error NoShowProhibited =>
@@ -24,4 +24,6 @@ public static class AppointmentErrors
         new("Appointment.AppointmentTimeConflict", "The requested appointment time conflicts with an existing appointment.", ErrorCategory.Conflict);
     public static Error AppointmentNotFound =>
         new("Appointment.AppointmentNotFound", "The specified appointment was not found.", ErrorCategory.NotFound);
+    public static Error NoShowTimeInvalid =>
+        new("Appointment.NoShowTimeInvalid", "The no-show time must be after the appointment time.", ErrorCategory.Validation);
 }

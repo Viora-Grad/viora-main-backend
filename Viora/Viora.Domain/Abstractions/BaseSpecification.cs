@@ -2,12 +2,13 @@
 
 namespace Viora.Domain.Abstractions;
 
+public record OrderByClause<T>(Expression<Func<T, object>> KeySelector, bool Descending);
+
 public interface ISpecification<T>
 {
     Expression<Func<T, bool>>? Criteria { get; }
     List<Expression<Func<T, object>>> Includes { get; }
-    Expression<Func<T, object>>? OrderBy { get; }
-    Expression<Func<T, object>>? OrderByDescending { get; }
+    List<OrderByClause<T>> OrderByClauses { get; }
     int? Take { get; }
     int? Skip { get; }
     bool IsPagingEnabled { get; }
@@ -24,8 +25,7 @@ public abstract class BaseSpecification<TEntity> : ISpecification<TEntity>
 
     public Expression<Func<TEntity, bool>>? Criteria { get; private set; }
     public List<Expression<Func<TEntity, object>>> Includes { get; } = [];
-    public Expression<Func<TEntity, object>>? OrderBy { get; private set; }
-    public Expression<Func<TEntity, object>>? OrderByDescending { get; private set; }
+    public List<OrderByClause<TEntity>> OrderByClauses { get; } = [];
     public int? Take { get; private set; }
     public int? Skip { get; private set; }
     public bool IsPagingEnabled { get; private set; }
@@ -44,11 +44,11 @@ public abstract class BaseSpecification<TEntity> : ISpecification<TEntity>
         IsPagingEnabled = true;
     }
 
-    protected void ApplyOrderBy(Expression<Func<TEntity, object>> orderByExpression)
-        => OrderBy = orderByExpression;
+    protected void ApplyOrderBy(Expression<Func<TEntity, object>> keySelector)
+        => OrderByClauses.Add(new OrderByClause<TEntity>(keySelector, Descending: false));
 
-    protected void ApplyOrderByDescending(Expression<Func<TEntity, object>> orderByDescExpression)
-        => OrderByDescending = orderByDescExpression;
+    protected void ApplyOrderByDescending(Expression<Func<TEntity, object>> keySelector)
+        => OrderByClauses.Add(new OrderByClause<TEntity>(keySelector, Descending: true));
 
     protected void AddCriteria(Expression<Func<TEntity, bool>> criteria)
     {

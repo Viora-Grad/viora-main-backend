@@ -19,6 +19,5 @@ internal class RoleConfiguration : IEntityTypeConfiguration<Role>
             .WithMany()
             .UsingEntity<RolePermission>();
 
-
     }
 }

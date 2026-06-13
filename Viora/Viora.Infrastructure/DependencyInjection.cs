@@ -7,10 +7,12 @@ using System.Text;
 using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Branches;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.OnBoardings;
@@ -28,6 +30,8 @@ using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Mail;
+using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
@@ -71,6 +75,10 @@ public static class DependencyInjection
         services.AddScoped<LocalCredentialRepository>();
         #endregion UsersRepos
 
+        #region Branches
+        services.AddScoped<IBranchRepository, BranchRepository>();
+        #endregion Branches
+
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
@@ -89,6 +97,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        services.AddScoped<IEmailSender, EmailService>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
@@ -107,6 +116,15 @@ public static class DependencyInjection
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             return db.Set<Country>()
+                .AsNoTracking()
+                .ToList();
+        });
+
+        services.AddSingleton<IReadOnlyList<LimitedFeature>>(sp =>
+        {
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return db.Set<LimitedFeature>()
                 .AsNoTracking()
                 .ToList();
         });
@@ -151,6 +169,10 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
             .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")) // For tenant-scoping lat
             .AddPermissionPolicies();
+
+        // Firebase configuration
+        services.AddFirebase(configuration);
+        services.AddFirebaseMessaging();
         return services;
     }
 }
