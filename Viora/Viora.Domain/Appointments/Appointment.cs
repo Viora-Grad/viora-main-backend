@@ -1,7 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments.Events;
 using Viora.Domain.Appointments.Internal;
-using Viora.Domain.MedicalRecords;
 using Viora.Domain.Users.Customers;
 
 namespace Viora.Domain.Appointments;
@@ -15,6 +14,7 @@ public sealed class Appointment : Entity
     public Guid CustomerId { get; private set; }
     public Guid ServiceId { get; private set; }
     public Guid StaffId { get; private set; }
+    public Guid? PaymentId { get; private set; }
     public DateTime ReservationDate { get; private set; }
     public CustomerStatus Status { get; private set; }
     public bool IsCheckedIn { get; private set; } = false;
@@ -23,53 +23,63 @@ public sealed class Appointment : Entity
     public TimeSpan EstimatedDuration { get; private set; }
     public DateTime EndTime => ReservationDate.Add(EstimatedDuration); // Convenience property to calculate the end time of the appointment
 
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? LastUpdatedAt { get; private set; }
+
     public Customer Customer { get; private set; } = null!; // Navigation property
-    public MedicalRecord? MedicalRecord => Customer.MedicalRecord; // Convenience property to access the customer's medical record (should it be used like this ?)
     private Appointment() { } // For EF Core
     private Appointment(Guid id,
         Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus status,
         Creator createdBy,
         Platform requestPlatform,
-        TimeSpan estimatedDuration) : base(id)
+        TimeSpan estimatedDuration,
+        DateTime createdAt) : base(id)
     {
         CustomerId = customerId;
         ServiceId = serviceId;
         StaffId = staffId;
+        PaymentId = paymentId;
         ReservationDate = reservationDate;
         Status = status;
         CreatedBy = createdBy;
         RequestPlatform = requestPlatform;
         EstimatedDuration = estimatedDuration;
+        CreatedAt = createdAt;
     }
 
     public static Appointment Book(Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus? status,
         Creator createdBy,
         Platform requestPlatform,
-        TimeSpan estimatedDuration)
+        TimeSpan estimatedDuration,
+        DateTime createdAt)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
         var appointment = new Appointment(Guid.NewGuid(),
             customerId,
             serviceId,
             staffId,
+            paymentId,
             reservationDate,
             appointmentStatus,
             createdBy,
             requestPlatform,
-            estimatedDuration);
+            estimatedDuration,
+            createdAt);
 
         appointment.RaiseDomainEvent(new AppointmentBookedEvent(appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
         return appointment;
     }
-    public Result CheckIn()
+    public Result CheckIn(DateTime checkInTime)
     {
         // Only allow check-in if the customer has not arrived yet
         // TODO: Publish an event when the customer checks in
@@ -78,22 +88,29 @@ public sealed class Appointment : Entity
 
         IsCheckedIn = true;
         Status = CustomerStatus.Waiting;
+        LastUpdatedAt = checkInTime;
+
+        RaiseDomainEvent(new AppointmentCheckedInEvent(Id, checkInTime)); // triggers the background job to send a notification to the staff about the customer check-in
         return Result.Success();
     }
-    public Result Start()
+    public Result Start(DateTime startTime)
     {
         // Only allow starting the appointment if the customer is waiting
         if (Status != CustomerStatus.Waiting)
             return Result.Failure(AppointmentErrors.StartProhibited);
         Status = CustomerStatus.InProgress;
+        LastUpdatedAt = startTime;
         return Result.Success();
     }
-    public Result Complete()
+    public Result Complete(DateTime completeTime)
     {
         // Only allow completing the appointment if it is in progress
         if (Status != CustomerStatus.InProgress)
             return Result.Failure(AppointmentErrors.CompleteProhibited);
         Status = CustomerStatus.Completed;
+        LastUpdatedAt = completeTime;
+
+        RaiseDomainEvent(new AppointmentCompletedEvent(Id, completeTime)); // triggers the background job to send a notification to the customer about the appointment completion and request feedback
         return Result.Success();
     }
     public Result Delay(TimeSpan delay)
@@ -107,13 +124,36 @@ public sealed class Appointment : Entity
         RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay));
         return Result.Success();
     }
-    public Result NoShow()
+    public Result NoShow(DateTime noShowTime)
     {
         // Only allow marking as no-show if the customer has not arrived yet
         if (Status != CustomerStatus.NotArrived)
             return Result.Failure(AppointmentErrors.NoShowProhibited);
+
+        if (noShowTime < ReservationDate)
+            return Result.Failure(AppointmentErrors.NoShowTimeInvalid);
+
         Status = CustomerStatus.NoShow;
+        LastUpdatedAt = noShowTime;
         RaiseDomainEvent(new AppointmentNoShowEvent(Id, ReservationDate));
         return Result.Success();
     }
+    public Result Cancel(DateTime cancelTime)
+    {
+        // Only allow canceling the appointment if it is not completed
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
+            return Result.Failure(AppointmentErrors.CancellationProhibited);
+        Status = CustomerStatus.Canceled;
+        LastUpdatedAt = cancelTime;
+        RaiseDomainEvent(new AppointmentCanceledEvent(Id, ReservationDate));
+        return Result.Success();
+    }
 }
+
+
+/*
+ * builder.Property<byte[]>("RowVersion")
+               .IsRowVersion()
+               .IsConcurrencyToken()
+               .HasColumnName("RowVersion");
+*/

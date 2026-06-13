@@ -7,4 +7,5 @@ public enum CustomerStatus
     InProgress,
     Completed,
     NoShow,
+    Canceled,
 }

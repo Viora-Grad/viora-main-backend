@@ -31,6 +31,7 @@ using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Mail;
+using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
@@ -127,6 +128,7 @@ public static class DependencyInjection
                 .AsNoTracking()
                 .ToList();
         });
+
         // register repositories here
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOwnerRepository, OwnerRepository>();
@@ -167,6 +169,10 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
             .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")) // For tenant-scoping lat
             .AddPermissionPolicies();
+
+        // Firebase configuration
+        services.AddFirebase(configuration);
+        services.AddFirebaseMessaging();
         return services;
     }
 }
