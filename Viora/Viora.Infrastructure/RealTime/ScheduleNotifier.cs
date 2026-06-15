@@ -1,21 +1,44 @@
-﻿using Viora.Application.Abstractions.Notification;
+﻿using Microsoft.AspNetCore.SignalR;
+using Viora.Application.Abstractions.Notification;
+using Viora.Infrastructure.RealTime.Hubs;
 
 namespace Viora.Infrastructure.RealTime;
 
 public class ScheduleNotifier : IScheduleNotifier
 {
-    public Task NotifyAppointmentUpdatedAsync(Guid appointmentId, string newStatus, int totalDelayMinutes, CancellationToken ct)
+    private readonly IHubContext<ScheduleHub> _hubContext;
+
+    public ScheduleNotifier(IHubContext<ScheduleHub> hubContext) => _hubContext = hubContext;
+    public async Task NotifyAppointmentUpdatedAsync(Guid branchId, Guid appointmentId, string newStatus, DateTime newTime, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await _hubContext.Clients.Group(branchId.ToString()).SendAsync(
+           "AppointmentUpdated",
+           new
+           {
+               AppointmentId = appointmentId,
+               Status = newStatus,
+               TotalDelayMinutes = newTime
+           },
+           ct);
     }
 
-    public Task NotifySlotBookedAsync(Guid appointmentId, DateTime scheduledAt, CancellationToken ct)
+    public async Task NotifySlotBookedAsync(Guid branchId, Guid appointmentId, DateTime scheduledAt, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await _hubContext.Clients.Group(branchId.ToString()).SendAsync(
+            "SlotBooked",
+            new
+            {
+                AppointmentId = appointmentId,
+                ScheduledAt = scheduledAt
+            },
+            ct);
     }
 
-    public Task NotifySlotFreedAsync(Guid appointmentId, CancellationToken ct)
+    public async Task NotifySlotFreedAsync(Guid branchId, Guid appointmentId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        await _hubContext.Clients.Group(branchId.ToString()).SendAsync(
+            "SlotFreed",
+            appointmentId,
+            ct);
     }
 }

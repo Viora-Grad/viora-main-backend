@@ -3,18 +3,22 @@
 public interface IScheduleNotifier
 {
     Task NotifyAppointmentUpdatedAsync(
+        Guid branchId,
         Guid appointmentId,
         string newStatus,
-        int totalDelayMinutes,
+        DateTime newTime,
         CancellationToken ct);
 
     Task NotifySlotBookedAsync(
+        Guid branchId,
         Guid appointmentId,
-        DateTime scheduledAt,
+        DateTime ReservationDate,
         CancellationToken ct);
 
     Task NotifySlotFreedAsync(
+        Guid branchId,
         Guid appointmentId,
+        DateTime freeTime,
         CancellationToken ct);
 
 }
