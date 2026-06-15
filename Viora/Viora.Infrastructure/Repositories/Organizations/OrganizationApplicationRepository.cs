@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
-using Viora.Infrastructure.Presistance;
 
 namespace Viora.Infrastructure.Repositories.Organizations;
 
@@ -24,13 +22,5 @@ internal class OrganizationApplicationRepository(ApplicationDbContext dbContext)
     public async Task<bool> IsApplicationSubmittedForOwnerAsync(Guid id, CancellationToken cancellation = default)
     {
         return await DbContext.Set<OrganizationApplication>().AnyAsync(a => a.OwnerId == id, cancellation);
-    }
-
-    public async Task<IReadOnlyList<OrganizationApplication>> ListAsync(ISpecification<OrganizationApplication> spec, CancellationToken cancellationToken = default)
-    {
-        return await SpecificationEvaluator<OrganizationApplication>
-        .GetQuery(DbContext.Set<OrganizationApplication>().AsQueryable(), spec)
-        .AsNoTracking()
-        .ToListAsync(cancellationToken);
     }
 }

@@ -1,4 +1,6 @@
-﻿using Viora.Domain.Branches.Internals;
+﻿using Viora.Application.Abstractions.Media;
+using Viora.Application.Branches.SharedResponses;
+using Viora.Domain.Branches.Internals;
 
 namespace Viora.Application.Branches.SearchBranches;
 
@@ -11,9 +13,7 @@ public sealed record SearchBranchesResponse(
     float Rating,
     BranchStatus Status,
     string Address,
-    string CoverImageEncoded,   // represnets the first iamge added in the branch gallery
+    MediaResponse? CoverImageEncoded,
     string TimeLineId,
-    Coordination Coordinations
+    Coordinations Coordinations
     );
-
-public sealed record Coordination(double Latitude, double Longitude);

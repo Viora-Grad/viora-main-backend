@@ -10,14 +10,10 @@ public record OrganizationDetailsResponse(
     string ServiceDescription,
     string ContactEmail,
     DateTime JoinedOnUtc,
-    IEnumerable<Branch> Branches
-    );
+    IEnumerable<MinimalBranch> Branches);
 
-
-// TODO update when the branch module is completed this is just a placeholder for future reminder on the composition.
-public record Branch(
+public record MinimalBranch(
     Guid Id,
-    string Location,
+    Guid? ImageId,
     string Address,
-    string ContactNumber
-    );
+    DateTime OpenedSinceUtc);

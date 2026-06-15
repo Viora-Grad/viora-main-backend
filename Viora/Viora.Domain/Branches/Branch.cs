@@ -96,4 +96,10 @@ public sealed class Branch : Entity
             timeOfDay >= bh.OpenTime &&
             timeOfDay <= bh.CloseTime);
     }
+
+    public Result UpdateStatus(BranchStatus status)
+    {
+        Status = status;
+        return Result.Success();
+    }
 }

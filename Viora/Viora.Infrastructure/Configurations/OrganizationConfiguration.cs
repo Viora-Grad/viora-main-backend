@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.OrganizationDetails.Internal;

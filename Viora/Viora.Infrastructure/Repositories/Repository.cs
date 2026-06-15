@@ -55,6 +55,15 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
             .GetQueryForCount(DbContext.Set<T>().AsQueryable(), spec)
             .LongCountAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<T>> ListAsync(
+    ISpecification<T> spec,
+    CancellationToken cancellationToken = default)
+    {
+        return await SpecificationEvaluator<T>
+            .GetQuery(DbContext.Set<T>().AsQueryable(), spec)
+            .ToListAsync(cancellationToken);
+    }
     #endregion  
 
     #region Addition ops

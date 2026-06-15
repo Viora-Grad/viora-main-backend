@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.OnBoardings;
@@ -76,6 +77,7 @@ public static class DependencyInjection
 
         #region Branches
         services.AddScoped<IBranchRepository, BranchRepository>();
+        services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         #endregion Branches
 
         services.AddScoped<IMediaRepository, MediaRepository>();
