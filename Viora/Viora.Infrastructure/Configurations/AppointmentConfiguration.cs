@@ -21,14 +21,30 @@ internal class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .HasForeignKey(a => a.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
+
         builder.Property(a => a.ServiceId)
             .IsRequired();
+        builder.HasOne(a => a.Service)
+            .WithMany()
+            .HasForeignKey(a => a.ServiceId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(a => a.StaffId)
             .IsRequired();
+        builder.HasOne(a => a.Staff)
+            .WithMany()
+            .HasForeignKey(a => a.StaffId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(a => a.PaymentId)
+        builder.Property(a => a.BranchId)
             .IsRequired();
+        builder.HasOne(a => a.Branch)
+            .WithMany()
+            .HasForeignKey(a => a.BranchId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.Property(a => a.PaymentId);
 
         builder.Property(a => a.ReservationDate)
             .IsRequired();

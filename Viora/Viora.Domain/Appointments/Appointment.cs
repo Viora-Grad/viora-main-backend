@@ -1,6 +1,7 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments.Events;
 using Viora.Domain.Appointments.Internal;
+using Viora.Domain.Branches;
 using Viora.Domain.Services;
 using Viora.Domain.Staffs;
 using Viora.Domain.Users.Customers;
@@ -16,6 +17,7 @@ public sealed class Appointment : Entity
     public Guid CustomerId { get; private set; }
     public Guid ServiceId { get; private set; }
     public Guid StaffId { get; private set; }
+    public Guid BranchId { get; private set; }
     public Guid? PaymentId { get; private set; }
     public DateTime ReservationDate { get; private set; }
     public CustomerStatus Status { get; private set; }
@@ -31,11 +33,13 @@ public sealed class Appointment : Entity
     public Customer Customer { get; private set; } = null!; // Navigation property
     public Service Service { get; private set; } = null!; // Navigation property
     public Staff Staff { get; private set; } = null!; // Navigation property
+    public Branch Branch { get; private set; } = null!; // Navigation property
     private Appointment() { } // For EF Core
     private Appointment(Guid id,
         Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus status,
@@ -47,6 +51,7 @@ public sealed class Appointment : Entity
         CustomerId = customerId;
         ServiceId = serviceId;
         StaffId = staffId;
+        BranchId = branchId;
         PaymentId = paymentId;
         ReservationDate = reservationDate;
         Status = status;
@@ -59,6 +64,7 @@ public sealed class Appointment : Entity
     public static Appointment Book(Guid customerId,
         Guid serviceId,
         Guid staffId,
+        Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
         CustomerStatus? status,
@@ -72,6 +78,7 @@ public sealed class Appointment : Entity
             customerId,
             serviceId,
             staffId,
+            branchId,
             paymentId,
             reservationDate,
             appointmentStatus,
@@ -117,7 +124,7 @@ public sealed class Appointment : Entity
         RaiseDomainEvent(new AppointmentCompletedEvent(Id, completeTime)); // triggers the background job to send a notification to the customer about the appointment completion and request feedback
         return Result.Success();
     }
-    public Result Delay(TimeSpan delay)
+    public Result Delay(TimeSpan delay, string reason)
     {
         // Only allow delaying the appointment if it is not completed or in progress
         if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
@@ -125,7 +132,7 @@ public sealed class Appointment : Entity
 
         var originalDate = ReservationDate;
         ReservationDate = ReservationDate.Add(delay);
-        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay));
+        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay, reason));
         return Result.Success();
     }
     public Result NoShow(DateTime noShowTime)

@@ -16,7 +16,7 @@ internal class DelayAppointmentCommandHandler(
             return Result.Failure(AppointmentErrors.AppointmentNotFound);
         }
 
-        appointment.Delay(request.DelayDuration);
+        //appointment.Delay(request.DelayDuration);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
         throw new NotImplementedException();
