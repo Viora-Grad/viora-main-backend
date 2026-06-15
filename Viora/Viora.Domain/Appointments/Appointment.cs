@@ -61,7 +61,8 @@ public sealed class Appointment : Entity
         Creator createdBy,
         Platform requestPlatform,
         TimeSpan estimatedDuration,
-        DateTime createdAt)
+        DateTime createdAt,
+        Guid branchId)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
         var appointment = new Appointment(Guid.NewGuid(),
@@ -76,7 +77,7 @@ public sealed class Appointment : Entity
             estimatedDuration,
             createdAt);
 
-        appointment.RaiseDomainEvent(new AppointmentBookedEvent(appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
+        appointment.RaiseDomainEvent(new AppointmentBookedEvent(branchId, appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
         return appointment;
     }
     public Result CheckIn(DateTime checkInTime)
@@ -110,7 +111,7 @@ public sealed class Appointment : Entity
         Status = CustomerStatus.Completed;
         LastUpdatedAt = completeTime;
 
-        RaiseDomainEvent(new AppointmentCompletedEvent(Id, completeTime)); // triggers the background job to send a notification to the customer about the appointment completion and request feedback
+        RaiseDomainEvent(new AppointmentCompletedEvent(Id, completeTime, ReservationDate)); // triggers the background job to send a notification to the customer about the appointment completion and request feedback
         return Result.Success();
     }
     public Result Delay(TimeSpan delay)
@@ -121,7 +122,7 @@ public sealed class Appointment : Entity
 
         var originalDate = ReservationDate;
         ReservationDate = ReservationDate.Add(delay);
-        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay));
+        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay, StaffId, CustomerId, Status.ToString()));
         return Result.Success();
     }
     public Result NoShow(DateTime noShowTime)
@@ -138,16 +139,18 @@ public sealed class Appointment : Entity
         RaiseDomainEvent(new AppointmentNoShowEvent(Id, ReservationDate));
         return Result.Success();
     }
-    public Result Cancel(DateTime cancelTime)
+    public Result Cancel(DateTime cancelTime, Guid branchId)
     {
         // Only allow canceling the appointment if it is not completed
         if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
         Status = CustomerStatus.Canceled;
         LastUpdatedAt = cancelTime;
-        RaiseDomainEvent(new AppointmentCanceledEvent(Id, ReservationDate));
+        RaiseDomainEvent(new AppointmentCanceledEvent(branchId, Id, ReservationDate));
         return Result.Success();
     }
+
+
 }
 
 
