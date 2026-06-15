@@ -26,8 +26,8 @@ public class GetStaffShiftQeuryHandler(
             ?? throw new NotFoundException($"branch with Id {branch.Id} does not havve schedule");
 
         var staffShiftsResponse = branchSchedules
-                .SelectMany(
-                            bs => bs.Intervals
+            .SelectMany(
+            bs => bs.Intervals
                     .Where(i => i.StaffId == request.StaffId)
                     .Select(i => new StaffShiftResponse(
                         Guid.NewGuid(),
