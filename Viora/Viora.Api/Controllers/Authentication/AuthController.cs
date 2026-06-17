@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Authentication.ConsumeRefreshToken;
+using Viora.Application.Authentication.ValidateEmail;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.OAuthValidateToken;
@@ -35,10 +36,6 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-        if (!Enum.IsDefined(request.Gender))
-        {
-            return BadRequest("Invalid gender value.");
         }
         var command = new RegisterUserCommand(
             request.FirstName,
@@ -109,4 +106,13 @@ public class AuthController : ControllerBase
         var result = await _sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }
+    [HttpPost]
+    [Route("validate/email")]
+    public async Task<IActionResult> ValidateEmail(ValidateEmailRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new ValidateEmailCommand(request.Email);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
 }

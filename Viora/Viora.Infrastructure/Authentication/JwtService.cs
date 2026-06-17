@@ -10,9 +10,14 @@ namespace Viora.Infrastructure.Authentication;
 
 internal class JwtService(IConfiguration configuration, IDateTimeProvider dateTimeProvider) : IJwtService
 {
+    private readonly string Issuer = configuration["JWT:ISSUER"] ?? throw new ArgumentNullException("JWT:ISSUER configuration is missing");
+    private readonly string Audience = configuration["JWT:AUDIENCE"] ?? throw new ArgumentNullException("JWT:AUDIENCE configuration is missing");
+    private readonly string Secret = configuration["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret configuration is missing");
+    private readonly int ExpirationMinutes = int.Parse(configuration["JWT_EXPIRATION_MINUTES"] ?? throw new ArgumentNullException("JWT_EXPIRATION_MINUTES configuration is missing"));
+
     public string GenerateToken(Guid userId, IEnumerable<Claim> claims)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var subjectClaims = new List<Claim>
         {
@@ -28,11 +33,11 @@ internal class JwtService(IConfiguration configuration, IDateTimeProvider dateTi
 
         // Create the JWT token
         var token = new JwtSecurityToken(
-            issuer: configuration["JWT:ISSUER"],
-            audience: configuration["JWT:AUDIENCE"],
+            issuer: Issuer,
+            audience: Audience,
             claims: subjectClaims,
             notBefore: dateTimeProvider.UtcNow,
-            expires: dateTimeProvider.UtcNow.AddMinutes(int.Parse(configuration["JWT_EXPIRATION_MINUTES"]!)),
+            expires: dateTimeProvider.UtcNow.AddMinutes(ExpirationMinutes),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
