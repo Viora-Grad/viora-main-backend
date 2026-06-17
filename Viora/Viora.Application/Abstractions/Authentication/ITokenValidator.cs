@@ -8,6 +8,7 @@ public sealed record SocialTokenValidationResult
     public string ProviderKey { get; set; } = null!;   // external subject id (e.g., "sub")
     public string Email { get; set; } = null!;
     public bool EmailVerified { get; set; }
+    public bool IsUserExists { get; set; }
 
 }
 

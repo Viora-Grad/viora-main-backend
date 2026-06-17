@@ -97,6 +97,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
@@ -149,9 +150,9 @@ public static class DependencyInjection
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = configuration["Jwt:Issuer"],
                 ValidAudience = configuration["Jwt:Audience"],
