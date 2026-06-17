@@ -27,7 +27,6 @@ using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
-using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
@@ -37,7 +36,6 @@ using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Users;
-using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
@@ -81,7 +79,7 @@ public static class DependencyInjection
         #endregion Branches
 
         services.AddScoped<IMediaRepository, MediaRepository>();
-        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+        services.AddScoped<Domain.ChatSessions.IChatSessionRepository, Repositories.ChatSessionRepository>();
         #endregion ReposRegisters
 
         #region ServicesRegisters

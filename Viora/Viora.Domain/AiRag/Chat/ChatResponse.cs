@@ -5,6 +5,6 @@ namespace Viora.Domain.AiRag.Chat;
 public class ChatResponse
 {
     public string Message { get; set; } = string.Empty;
-    public List<ChatAction> Actions { get; set; } = new();
+    public string? SessionId { get; set; }
     public ChatIntent Intent { get; set; }
 }

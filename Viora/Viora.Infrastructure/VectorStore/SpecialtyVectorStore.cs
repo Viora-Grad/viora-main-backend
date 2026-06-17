@@ -1,11 +1,12 @@
 using Microsoft.SemanticKernel.Embeddings;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
+using Viora.Application.AiRag.Abstractions;
 using Viora.Domain.MedicalInquiries;
 
 namespace Viora.Infrastructure.VectorStore;
 
-public class SpecialtyVectorStore
+public class SpecialtyVectorStore : ISpecialtyVectorStore
 {
     private readonly QdrantClient _qdrant;
     private readonly ITextEmbeddingGenerationService _embedding;
@@ -18,9 +19,9 @@ public class SpecialtyVectorStore
         _embedding = embedding;
     }
 
-    public async Task IndexAsync(IEnumerable<MedicalInquiry> inquiries)
+    public async Task IndexAsync(IEnumerable<MedicalInquiry> inquiries, CancellationToken ct = default)
     {
-        var collections = await _qdrant.ListCollectionsAsync();
+        var collections = await _qdrant.ListCollectionsAsync(cancellationToken: ct);
         if (!collections.Any(c => c == QdrantCollections.Specialty))
         {
             await _qdrant.CreateCollectionAsync(
@@ -29,7 +30,8 @@ public class SpecialtyVectorStore
                 {
                     Size = QdrantCollections.VectorDimension,
                     Distance = Distance.Cosine,
-                });
+                },
+                cancellationToken: ct);
         }
 
         var list = inquiries.ToList();
@@ -48,10 +50,10 @@ public class SpecialtyVectorStore
             },
         }).ToList();
 
-        await _qdrant.UpsertAsync(QdrantCollections.Specialty, points);
+        await _qdrant.UpsertAsync(QdrantCollections.Specialty, points, cancellationToken: ct);
     }
 
-    public async Task<List<MedicalInquiry>> SearchAsync(string query, int topK = 10)
+    public async Task<List<MedicalInquiry>> SearchAsync(string query, int topK = 10, CancellationToken ct = default)
     {
         var queryEmbeddings = await _embedding.GenerateEmbeddingsAsync(new[] { query });
         var queryVector = queryEmbeddings[0].ToArray();
@@ -60,7 +62,8 @@ public class SpecialtyVectorStore
             QdrantCollections.Specialty,
             queryVector,
             limit: (ulong)topK,
-            scoreThreshold: 0.60f);
+            scoreThreshold: 0.60f,
+            cancellationToken: ct);
 
         return results.Select(r => new MedicalInquiry()
         {

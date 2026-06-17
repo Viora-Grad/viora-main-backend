@@ -10,6 +10,7 @@ using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
+using Viora.Infrastructure.AiRag;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
@@ -25,6 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAiRagServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -58,7 +60,8 @@ if (app.Environment.IsDevelopment())
     await seeder.SeedAsync();
 }
 
-app.UseHttpsRedirection();
+// Skipped in Docker — no dev cert available
+// app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication();

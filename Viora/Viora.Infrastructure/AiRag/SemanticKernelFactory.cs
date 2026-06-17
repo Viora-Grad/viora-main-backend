@@ -4,19 +4,14 @@ namespace Viora.Infrastructure.AiRag;
 
 public class SemanticKernelFactory
 {
-    public static Kernel Create(GeminiSettings settings)
+    public static Kernel Build(GroqSettings settings)
     {
         var builder = Kernel.CreateBuilder();
 
-        // Gemini chat completion — used by handlers via IChatCompletionService
-        builder.AddGoogleAIGeminiChatCompletion(
+        builder.AddOpenAIChatCompletion(
             modelId: settings.ChatModel,
-            apiKey:  settings.ApiKey);
-
-        // Gemini text embeddings — used by vector stores via ITextEmbeddingGenerationService
-        builder.AddGoogleAIEmbeddingGenerator(
-            modelId: settings.EmbeddingModel,
-            apiKey:  settings.ApiKey);
+            endpoint: new Uri("https://api.groq.com/openai/v1"),
+            apiKey: settings.ApiKey);
 
         return builder.Build();
     }

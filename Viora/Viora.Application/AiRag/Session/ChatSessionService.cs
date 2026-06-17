@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Viora.Application.AiRag.Session;
@@ -16,4 +17,22 @@ public class ChatSessionService
 
     public void AppendAssistant(string sessionId, string message) =>
         GetOrCreate(sessionId).AddAssistantMessage(message);
+
+    public string SerializeHistory(string sessionId)
+    {
+        if (_sessions.TryGetValue(sessionId, out var history))
+            return JsonSerializer.Serialize(history);
+        return "[]";
+    }
+
+    public bool IsLoaded(string sessionId) =>
+        _sessions.ContainsKey(sessionId);
+
+    public void DeserializeInto(string sessionId, string json)
+    {
+        if (string.IsNullOrWhiteSpace(json) || json == "[]") return;
+        var history = JsonSerializer.Deserialize<ChatHistory>(json);
+        if (history is not null)
+            _sessions[sessionId] = history;
+    }
 }
