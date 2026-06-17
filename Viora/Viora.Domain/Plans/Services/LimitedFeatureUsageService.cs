@@ -10,7 +10,7 @@ public class LimitedFeatureUsageService(
     IFeatureUsageRepository featureUsageRepository
     ) : ILimitedFeatureUsageService
 {
-    public async Task<Result> CheckLimitAsync(Guid organizationId, Guid limitedFeatureId, int delta, CancellationToken cancellationToken)
+    public async Task<Result> CheckLimitAsync(Guid organizationId, Guid limitedFeatureId, long delta, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetByOrganizationIdAsync(organizationId, cancellationToken);
 
@@ -30,7 +30,7 @@ public class LimitedFeatureUsageService(
         return Result.Success();
     }
 
-    public async Task<Result> ConsumeLimit(Guid organizationId, Guid limitedFeatureId, int delta, CancellationToken cancellationToken)
+    public async Task<Result> ConsumeLimit(Guid organizationId, Guid limitedFeatureId, long delta, CancellationToken cancellationToken)
     {
         var organizationFeatureUsage = await featureUsageRepository.GetByOrganizationIdAndFeatureIdAsync(organizationId, limitedFeatureId, cancellationToken);
         if (organizationFeatureUsage is null)

@@ -5,7 +5,7 @@ using Viora.Domain.Branches;
 
 namespace Viora.Application.Branches.UpdateSchedule;
 
-internal sealed class UpdateScheduleCommandHandler(IBranchRepository branchRepository) : ICommandHandler<UpdateScheduleCommand>
+internal sealed class UpdateScheduleCommandHandler(IBranchRepository branchRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateScheduleCommand>
 {
     public async Task<Result> Handle(UpdateScheduleCommand request, CancellationToken cancellationToken)
     {
@@ -18,6 +18,8 @@ internal sealed class UpdateScheduleCommandHandler(IBranchRepository branchRepos
             if (result.IsFailure)
                 return Result.Failure(result.Error);
         }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
 }

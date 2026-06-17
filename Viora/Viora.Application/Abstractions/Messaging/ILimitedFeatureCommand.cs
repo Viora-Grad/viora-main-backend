@@ -11,5 +11,5 @@ public interface IBaseLimitedFeatureCommand
     /// <summary>
     /// represents the amount to be added or removed the quota, +ve means add an amount (restore), negative means consume amount
     /// </summary>
-    public int DeltaChange { get; init; }
+    public long DeltaChange { get; init; }
 }

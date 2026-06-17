@@ -9,6 +9,7 @@ using Viora.Application.Organizations.SearchApplications;
 using Viora.Application.Organizations.SearchOrganizations;
 using Viora.Application.Organizations.SuspendOrganization;
 using Viora.Application.Organizations.UpdateLogo;
+using Viora.Domain.Organizations.OrganizationDetails.Internal;
 
 namespace Viora.Api.Controllers.Oganizations;
 
@@ -17,10 +18,10 @@ namespace Viora.Api.Controllers.Oganizations;
 public class OrganizationsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> SearchOrganizations(Guid? id, string? country, string? name, string? serviceType, double minimumRating = 0.0, int page = 1, int pageSize = 20,
+    public async Task<IActionResult> SearchOrganizations(Guid? id, string? country, string? name, string? serviceType, double minimumRating = 0.0, string? sortBy = null, int page = 1, int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var query = new SearchOrganizationsQuery(id, country, name, serviceType, minimumRating, page, pageSize);
+        var query = new SearchOrganizationsQuery(id, country, name, serviceType, sortBy, minimumRating, OrganizationStatus.Active, page, pageSize);
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }

@@ -7,10 +7,10 @@ public class LimitedFeature : Entity
 {
     public FeatureKey Key { get; private set; } = default!;
     public FeatureDescription Description { get; private set; } = default!;
-    public int Limit { get; private set; }
+    public long Limit { get; private set; }
 
     private LimitedFeature() { } // for EF Core
-    private LimitedFeature(Guid id, FeatureKey key, FeatureDescription description, int defaultLimit) : base(id)
+    private LimitedFeature(Guid id, FeatureKey key, FeatureDescription description, long defaultLimit) : base(id)
     {
         Key = key;
         Description = description;
@@ -35,12 +35,12 @@ public class LimitedFeature : Entity
         new FeatureDescription("Number of staff members the organization can have"),
         defaultLimit: 5);
 
-    public static readonly LimitedFeature StorageGb = new(
+    public static readonly LimitedFeature StorageBytes = new(
         new Guid("f1a2b3c4-0004-0000-0000-000000000004"),
         new FeatureKey("storage_gb"),
-        new FeatureDescription("Storage quota in GB"),
-        defaultLimit: 5);
+        new FeatureDescription("Storage quota in Bytes"),
+        defaultLimit: 5368709120);
 
     public static IReadOnlyList<LimitedFeature> All =>
-        [Branches, ServicesPerBranch, StaffMembers, StorageGb];
+        [Branches, ServicesPerBranch, StaffMembers, StorageBytes];
 }
