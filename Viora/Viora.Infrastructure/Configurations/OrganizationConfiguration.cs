@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.OrganizationDetails.Internal;
+using Viora.Domain.Shared;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -51,7 +53,11 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
 
         builder.PrimitiveCollection(o => o.ServicesProvided)
             .HasColumnName("ServicesProvided")
-            .ElementType(b => b.HasConversion<string>().HasMaxLength(50));
+            .ElementType(e => e
+                .HasConversion(new ValueConverter<ServiceType, string>(
+                    s => s.Value,
+                    v => ServiceType.FromValue(v)))
+                .HasMaxLength(100));
 
         builder.ComplexProperty(o => o.Rating, rating =>
         {

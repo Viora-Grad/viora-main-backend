@@ -4,7 +4,6 @@ using Viora.Domain.Inventory.Internals;
 
 namespace Viora.Domain.Inventory;
 
-// TODO add history to track inventory moves, no prio on it now though
 public sealed class InventoryItem : Entity
 {
     public Guid BranchId { get; private set; }
@@ -32,13 +31,14 @@ public sealed class InventoryItem : Entity
         };
     }
 
-    public Result Restock(int amount)
+    public Result Restock(int amount, Guid userId)
     {
         Quantity = Quantity.Value + amount;
+        RaiseDomainEvent(new InventoryQuantityChangeEvent(Id, userId, amount));
         return Result.Success();
     }
 
-    public Result Consume(int amount)
+    public Result Consume(int amount, Guid userId)
     {
         var newQuantity = Quantity.Value - amount;
 
@@ -47,6 +47,7 @@ public sealed class InventoryItem : Entity
         if (Quantity.Value <= MinimumThreshold.Value)
             RaiseDomainEvent(new MinimumThresholdReachedEvent(Id));
 
+        RaiseDomainEvent(new InventoryQuantityChangeEvent(Id, userId, -amount));
         return Result.Success();
     }
 }

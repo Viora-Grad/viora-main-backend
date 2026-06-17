@@ -1,10 +1,13 @@
 using Viora.Domain.Abstractions;
+using Viora.Domain.Medias;
 using Viora.Domain.Services.Internals;
 using Viora.Domain.Shared;
-using Viora.Domain.Shared.Enums;
 
 namespace Viora.Domain.Services;
 
+/// <summary>
+/// defines the service provided by branch and the related category this service is of type 
+/// </summary>
 public sealed class Service : Entity
 {
     public Guid BranchId { get; private set; }
@@ -17,8 +20,8 @@ public sealed class Service : Entity
     public Money Cost { get; private set; } = default!;
 
     // TODO for better UX add description per image for what this image represents, not prio now, done later (dunno when xd)
-    private readonly List<Guid> _gallery = [];
-    public IReadOnlyCollection<Guid> Gallery => _gallery.AsReadOnly();
+    private readonly List<MediaFile> _gallery = [];
+    public IReadOnlyCollection<MediaFile> Gallery => _gallery.AsReadOnly();
 
     private Service() { }
 
@@ -45,18 +48,18 @@ public sealed class Service : Entity
         });
     }
 
-    public Result AddToGallery(Guid MediaId, IServiceSettings serviceSettings)
+    public Result AddToGallery(MediaFile media, IServiceSettings serviceSettings)
     {
-        if (_gallery.Count + 1 > serviceSettings.MaxGallerySize)
+        if (_gallery.Count >= serviceSettings.MaxGallerySize)
             return Result.Failure<Service>(ServiceErrors.MaxGallerySizeReached);
 
-        _gallery.Add(MediaId);
-
+        _gallery.Add(media);
         return Result.Success();
     }
 
-    public Result<bool> RemoveFromGallery(Guid MediaId)
+    public Result<bool> RemoveFromGallery(Guid mediaId)
     {
-        return Result.Success(_gallery.Remove(MediaId));
+        var item = _gallery.FirstOrDefault(m => m.Id == mediaId);
+        return Result.Success(_gallery.Remove(item!));
     }
 }

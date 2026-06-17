@@ -6,4 +6,4 @@ namespace Viora.Domain.Feedbacks.Events;
 /// Used to update the overall organization rating related to the branch
 /// </summary>
 /// <param name="BranchId"></param>
-public sealed record FeedbackSubmittedEvent(Guid BranchId) : IDomainEvent;
+public sealed record FeedbackSubmittedEvent(Guid OrganizationId, int RatingOutOfTen) : IDomainEvent;
