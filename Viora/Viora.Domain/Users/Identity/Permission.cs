@@ -9,7 +9,7 @@ public sealed class Permission
         Id = id;
         Name = name;
     }
-    public static Permission Create(int id, string name) => new Permission(id, name);
+    public static Permission Create(int id, string name) => new(id, name);
 
     public int Id { get; init; }
 
