@@ -1,3 +1,3 @@
 ﻿namespace Viora.Api.Controllers.Authentication;
 
-public sealed record OAuthLoginRequest(string Token);
+public sealed record OAuthLoginRequest(string? Token, string? Code, string? RedirectUri);

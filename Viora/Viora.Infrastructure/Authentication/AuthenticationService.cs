@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
 using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Security;
@@ -14,6 +13,7 @@ internal class AuthenticationService(IUserRepository userRepository,
     IHasher Hasher,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
+    IIdentityRepository identityRepository,
     RefreshTokenService refreshTokenService,
     LocalCredentialRepository localCredentialRepository,
     RefreshTokenRepository refreshTokenRepository,
@@ -42,8 +42,6 @@ internal class AuthenticationService(IUserRepository userRepository,
         }
 
         localCredential.ResetFailedLoginAttempts();
-
-        //var roleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
         var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Select(p => new Claim("permission", p.Name));
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
@@ -65,7 +63,8 @@ internal class AuthenticationService(IUserRepository userRepository,
         );
         user.RecordLogin(dateTimeProvider.UtcNow);
         refreshTokenRepository.Add(refreshToken);
-
+        var userIdentity = user.Identities.FirstOrDefault(i => i.Provider == "local");
+        userIdentity?.RecordLogin(dateTimeProvider.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(authResult);
 
@@ -84,7 +83,7 @@ internal class AuthenticationService(IUserRepository userRepository,
             }
             existingToken.Revoke();
             var userId = existingToken.UserId;
-            var newRefreshTokenValue = GenerateRefreshToken();
+            var newRefreshTokenValue = refreshTokenService.GenerateRefreshToken();
             var hashedNewRefreshToken = refreshTokenService.HashToken(newRefreshTokenValue);
             var expiry = refreshTokenService.GetExpiryDate();
             var newRefreshToken = RefreshToken.Create(userId, hashedNewRefreshToken, expiry, dateTimeProvider.UtcNow);
@@ -129,6 +128,7 @@ internal class AuthenticationService(IUserRepository userRepository,
         var identity = AuthIdentity.Create("local", user.Id, user.Email.Value, dateTimeProvider.UtcNow);
         user.LinkIdentity(identity);
 
+        identityRepository.Add(identity);
         userRepository.Add(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -136,21 +136,40 @@ internal class AuthenticationService(IUserRepository userRepository,
 
     }
 
-    public Task<Result<AuthResult>> SocialLoginAsync(string provider,
-        string providerKey,
-        SocialInput input,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        identity.RecordLogin(dateTimeProvider.UtcNow);
+        var permissions = user.Roles.SelectMany(r => r.Permissions).Distinct().ToList();
+        var permissionClaims = permissions.Select(p => new Claim("permission", p.Name));
+
+        var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
+        var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
+        var refreshTokenExpiry = refreshTokenService.GetExpiryDate();
+        var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, refreshTokenExpiry, dateTimeProvider.UtcNow);
+
+        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
+        activeToken?.Revoke();
+
+
+        var authResult = new AuthResult(
+            UserId: user.Id,
+            AccessToken: jwtService.GenerateToken(user.Id, permissionClaims),
+            RefreshToken: refreshTokenValue,
+            Roles: user.Roles.Select(r => r.Name).ToList(),
+            Permissions: [.. permissions.Select(p => p.Name).Distinct()]
+        );
+
+        identity.RecordLogin(dateTimeProvider.UtcNow);
+        user.RecordLogin(dateTimeProvider.UtcNow);
+        refreshTokenRepository.Add(refreshToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success(authResult);
 
     }
-    private string GenerateRefreshToken()
+
+    public Task<Result<AuthResult>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
     {
-        var randomBytes = new byte[64];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
-        }
+        throw new NotImplementedException();
     }
 }

@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Viora.Api.Extensions;
 using Viora.Application.Authentication.ConsumeRefreshToken;
+using Viora.Application.Authentication.ValidateEmail;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.OAuthValidateToken;
@@ -25,14 +27,7 @@ public class AuthController : ControllerBase
         var command = new LocalLoginUserCommand(request.Email, request.Password);
 
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            return Unauthorized(result.Error);
-        }
+        return result.ToActionResult();
     }
     [HttpPost]
     [Route("register")]
@@ -41,10 +36,6 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-        if (!Enum.IsDefined(request.Gender))
-        {
-            return BadRequest("Invalid gender value.");
         }
         var command = new RegisterUserCommand(
             request.FirstName,
@@ -55,14 +46,7 @@ public class AuthController : ControllerBase
             request.Password);
 
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            return BadRequest(result.Error);
-        }
+        return result.ToActionResult();
     }
     [HttpPost]
     [Route("refresh")]
@@ -70,14 +54,7 @@ public class AuthController : ControllerBase
     {
         var command = new ConsumeRefreshTokenCommand(request.RefreshToken);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            return BadRequest(result.Error);
-        }
+        return result.ToActionResult();
     }
     [HttpPost]
     [Route("oauth/{provider=google}/login")]
@@ -95,18 +72,31 @@ public class AuthController : ControllerBase
     [Route("oauth/{provider=google}/validate")]
     public async Task<IActionResult> OAuthValidate(string provider, OAuthValidateRequest request, CancellationToken cancellationToken = default)
     {
-        var command = new OAuthValidateTokenCommand(provider, request.Token);
-        var result = await _sender.Send(command, cancellationToken);
-
-        if (result.IsSuccess)
+        if (!request.IsValid)
         {
-            return Ok(result.Value);
+            return BadRequest("Invalid request parameters.");
+        }
+        if (request.IsToken)
+        {
+            var token = request.Token;
+            var command = new OAuthValidateTokenCommand(provider, token, null, null);
+            var result = await _sender.Send(command, cancellationToken);
+            return result.ToActionResult();
+        }
+        else if (request.IsCode)
+        {
+            var code = request.Code;
+            var redirectUri = request.RedirectUri;
+            var command = new OAuthValidateTokenCommand(provider, null, code, redirectUri);
+            var result = await _sender.Send(command, cancellationToken);
+            return result.ToActionResult();
         }
         else
         {
-            return BadRequest(result.Error);
+            return BadRequest("Could not validate the request.");
         }
     }
+
     [HttpGet]
     [Route("me")]
     [Authorize(Policy = "users:read")]
@@ -114,13 +104,15 @@ public class AuthController : ControllerBase
     {
         var query = new GetLoggedInUserQuery();
         var result = await _sender.Send(query, cancellationToken);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            return Unauthorized(result.Error);
-        }
+        return result.ToActionResult();
     }
+    [HttpPost]
+    [Route("validate/email")]
+    public async Task<IActionResult> ValidateEmail(ValidateEmailRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new ValidateEmailCommand(request.Email);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
 }

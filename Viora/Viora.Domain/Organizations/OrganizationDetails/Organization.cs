@@ -93,4 +93,17 @@ public sealed class Organization : Entity
         LogoId = mediaId;
         return Result.Success();
     }
+
+    public Result UpdateRating(int ratingOutOfTen)
+    {
+        if (ratingOutOfTen > 10 || ratingOutOfTen < 0)
+            return Result.Failure(OrganizationErrors.RatingOutOfBound);
+
+        var count = Rating.Count + 1;
+        var newRating = ((Rating.AverageOutOfTen * Rating.Count) + ratingOutOfTen) / count;
+
+        Rating = new(count, newRating);
+        return Result.Success();
+    }
+
 }

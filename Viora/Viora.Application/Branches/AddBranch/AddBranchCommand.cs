@@ -18,5 +18,5 @@ public sealed record AddBranchCommand(
     string TimeZoneId) : ILimitedFeatureCommand<Guid>
 {
     public Guid LimitedFeatureId { get; init; } = LimitedFeature.Branches.Id;
-    public int DeltaChange { get; init; } = -1;
+    public long DeltaChange { get; init; } = -1;
 }

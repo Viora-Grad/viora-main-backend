@@ -16,10 +16,10 @@ public record BusinessHour
     }
     public static Result<BusinessHour> Create(DayOfWeek day, TimeSpan openTime, TimeSpan closeTime)
     {
-        if (openTime < TimeSpan.Zero || openTime >= TimeSpan.FromDays(1))
+        if (openTime < TimeSpan.Zero || openTime > TimeSpan.FromDays(1))
             return Result.Failure<BusinessHour>(BranchErrors.InvalidOpenTimeInterval);
 
-        if (closeTime < TimeSpan.Zero || closeTime >= TimeSpan.FromDays(1))
+        if (closeTime < TimeSpan.Zero || closeTime > TimeSpan.FromDays(1))
             return Result.Failure<BusinessHour>(BranchErrors.InvalidCloseTimeInterval);
 
         if (closeTime <= openTime)

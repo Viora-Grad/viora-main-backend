@@ -1,5 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Organizations.OrganizationDetails.Internal;
 using Viora.Domain.Shared;
 
 namespace Viora.Application.Organizations.SearchOrganizations;
@@ -23,14 +24,18 @@ internal class OrganizationSearchSpecification : BaseSpecification<Organization>
         if (p.ServiceType != null)
             AddCriteria(o => o.ServicesProvided.Contains(p.ServiceType));
 
+        AddCriteria(o => o.Status == p.Status);
+
         switch (p.SortBy?.ToLower())
         {
-            case nameof(Organization.Rating):
+            case string s when s.Equals(nameof(Organization.Rating), StringComparison.CurrentCultureIgnoreCase):
                 ApplyOrderByDescending(o => o.Rating.AverageOutOfTen);
                 break;
-            case nameof(Organization.Name):
+
+            case string s when s.Equals(nameof(Organization.Name), StringComparison.CurrentCultureIgnoreCase):
                 ApplyOrderBy(o => o.Name);
                 break;
+
             default:
                 ApplyOrderByDescending(o => o.JoinedOnUtc);
                 break;
@@ -46,6 +51,7 @@ internal record OrganizationSearchParameters(
     string? Name = null,
     double? MinRating = null,
     ServiceType? ServiceType = null,
+    OrganizationStatus Status = OrganizationStatus.Active,
     string? SortBy = null,
     int Page = 1,
     int PageSize = 20);

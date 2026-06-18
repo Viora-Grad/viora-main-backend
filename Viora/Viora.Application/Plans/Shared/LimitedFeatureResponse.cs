@@ -7,11 +7,11 @@ public class LimitedFeatureResponse
     public Guid Id { get; set; }
     public string Key { get; set; } = default!;
     public string Description { get; set; }
-    public int Limit { get; set; }
+    public long Limit { get; set; }
 
 
 
-    public LimitedFeatureResponse(Guid id, string key, string description, int limit)
+    public LimitedFeatureResponse(Guid id, string key, string description, long limit)
     {
         Id = id;
         Key = key;

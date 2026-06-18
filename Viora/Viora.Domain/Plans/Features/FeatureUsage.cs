@@ -6,12 +6,12 @@ public class FeatureUsage : Entity
 {
     public Guid OrganizationId { get; private set; }
     public Guid LimitedFeatureId { get; private set; }
-    public int Quota { get; private set; }
+    public long Quota { get; private set; }
     public DateTime PeriodStart { get; private set; }
     public DateTime PeriodEnd { get; private set; }
     public byte[] RowVersion { get; private set; } = default!;
 
-    private FeatureUsage(Guid Id, Guid organizationId, Guid limitedFeatureId, int quota, DateTime periodStart, DateTime periodEnd) : base(Id)
+    private FeatureUsage(Guid Id, Guid organizationId, Guid limitedFeatureId, long quota, DateTime periodStart, DateTime periodEnd) : base(Id)
     {
         this.OrganizationId = organizationId;
         this.LimitedFeatureId = limitedFeatureId;
@@ -20,7 +20,7 @@ public class FeatureUsage : Entity
         this.PeriodEnd = periodEnd;
     }
 
-    public void Consume(int delta)
+    public void Consume(long delta)
     {
         Quota += delta;
     }
@@ -45,13 +45,13 @@ public class FeatureUsage : Entity
         return Result.Success(featureUsages);
     }
 
-    public void Renew(int value, DateTime periodEnd, DateTime periodStart)
+    public void Renew(long value, DateTime periodEnd, DateTime periodStart)
     {
         Quota = value;
         PeriodEnd = periodEnd;
         PeriodStart = periodStart;
     }
-    public void RechargeQuota(int newQuota)
+    public void RechargeQuota(long newQuota)
     {
         Quota = newQuota;
     }

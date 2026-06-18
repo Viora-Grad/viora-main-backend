@@ -21,6 +21,9 @@ internal class UpdateLogoCommandHandler(
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"Organization with Id {request.OrganizationId} was not found.");
 
+        if (organization.LogoId != null)
+            await DeletePrviousMediaAsync((Guid)organization.LogoId, cancellationToken);
+
         var extension = Path.GetExtension(request.FileName);
         var storageKey = $"logos/{request.OrganizationId}/{Guid.NewGuid()}{extension}";
 
@@ -47,5 +50,12 @@ internal class UpdateLogoCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
+    }
+
+    private async Task DeletePrviousMediaAsync(Guid mediaId, CancellationToken cancellationToken)
+    {
+        var media = await mediaRepository.GetByIdAsync(mediaId, cancellationToken);
+        if (media != null)
+            storageService.DeleteFile(media.Key);
     }
 }

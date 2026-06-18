@@ -9,11 +9,11 @@ using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
-using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.OnBoardings;
@@ -21,7 +21,6 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
-using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Shared;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
@@ -32,14 +31,11 @@ using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
-using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
-using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
-using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
@@ -76,19 +72,15 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOwnerRepository, OwnerRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IIdentityRepository, IdentityRepository>();
         services.AddScoped<LocalCredentialRepository>();
+        services.AddScoped<RefreshTokenRepository>();
         #endregion UsersRepos
 
         #region Branches
         services.AddScoped<IBranchRepository, BranchRepository>();
+        services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         #endregion Branches
-
-        #region RealTimeSchedule
-        services.AddScoped<IScheduleRepository, ScheduleRepository>();
-        services.AddScoped<IShiftRepository, ShiftRepository>();
-        services.AddScoped<IScheduleDelayRepository, ScheduleDelayRepository>();
-        services.AddScoped<IScheduleCancellationRepository, ScheduleCancellationRepository>();
-        #endregion RealTimeSchedule
 
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
@@ -109,7 +101,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IEmailSender, EmailService>();
-        services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
+        services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
@@ -141,13 +133,6 @@ public static class DependencyInjection
                 .ToList();
         });
 
-        // register repositories here
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IOwnerRepository, OwnerRepository>();
-        services.AddScoped<ICustomerRepository, CustomerRepository>();
-        services.AddScoped<LocalCredentialRepository>();
-        services.AddScoped<RefreshTokenRepository>();
-
         services.AddDistributedMemoryCache();
 
         services.AddHttpContextAccessor();
@@ -163,14 +148,14 @@ public static class DependencyInjection
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
-                ValidAudience = configuration["Jwt:Audience"],
+                ValidIssuer = configuration["JWT:ISSUER"],
+                ValidAudience = configuration["JWT:AUDIENCE"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+                    Encoding.UTF8.GetBytes(configuration["JWT:SECRET"]!)),
                 ClockSkew = TimeSpan.Zero
             };
         });
@@ -181,10 +166,6 @@ public static class DependencyInjection
             .AddPolicy(AuthorizationPolicies.CustomerOnly, policy => policy.RequireRole("Customer"))
             .AddPolicy(AuthorizationPolicies.StaffOnly, policy => policy.RequireRole("Staff").RequireClaim("OrganizationId")) // For tenant-scoping lat
             .AddPermissionPolicies();
-
-        // Firebase configuration
-        services.AddFirebase(configuration);
-        services.AddFirebaseMessaging();
         return services;
     }
 }

@@ -875,8 +875,8 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<DateTime>("PeriodStart")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Quota")
-                        .HasColumnType("int");
+                    b.Property<long>("Quota")
+                        .HasColumnType("bigint");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -907,8 +907,8 @@ namespace Viora.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("Limit")
-                        .HasColumnType("int");
+                    b.Property<long>("Limit")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
