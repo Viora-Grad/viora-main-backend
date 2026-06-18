@@ -56,11 +56,21 @@ public class SubscriptionPlanChangeDomainEventHandler(
             .Select(plf => plf.LimitedFeature)
             .ToList();
 
-        var newFeatureUsages = FeatureUsage.CreateMany(organizationId, newLimitedFeatures, startTime, endTime);
+        var newFeatureUsages = newPlan.PlanLimitedFeatures.Select(plf =>
+        FeatureUsage.Create(
+            plf.LimitedFeatureId,
+            organizationId,
+            startTime,
+            endTime,
+            plf.LimitValue))
+            .ToList();
 
-        if (newFeatureUsages.IsFailure)
-            throw new InvalidOperationException($"Failed to create feature usages for the new plan: {newFeatureUsages.Error}");
+        foreach (var newFeatureUsage in newFeatureUsages)
+        {
+            if (newFeatureUsage.IsFailure)
+                throw new InvalidOperationException($"Failed to create feature usages for the new plan: {newFeatureUsage.Error}");
+        }
 
-        featureUsageRepository.AddRange(newFeatureUsages.Value);
+        newFeatureUsages.ForEach(fu => featureUsageRepository.Add(fu.Value));
     }
 }

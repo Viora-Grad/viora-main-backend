@@ -63,16 +63,21 @@ internal class SubscriptionCreatedDomainEventHandler(
             plf => plf.LimitedFeature
             ).ToList();
 
-        var featureUsages = FeatureUsage.CreateMany(
+        var newFeatureUsages = plan.PlanLimitedFeatures.Select(plf =>
+        FeatureUsage.Create(
+            plf.LimitedFeatureId,
             organizationId,
-            limitedFeatures,
             startDate,
-            endDate
-        );
+            endDate,
+            plf.LimitValue))
+            .ToList();
 
-        if (featureUsages.IsFailure)
-            throw new InvalidOperationException("Failed to create feature usages for the subscription.");
+        foreach (var newFeatureUsage in newFeatureUsages)
+        {
+            if (newFeatureUsage.IsFailure)
+                throw new InvalidOperationException($"Failed to create feature usages for the new plan: {newFeatureUsage.Error}");
+        }
 
-        featureUsageRepository.AddRange(featureUsages.Value);
+        newFeatureUsages.ForEach(fu => featureUsageRepository.Add(fu.Value));
     }
 }

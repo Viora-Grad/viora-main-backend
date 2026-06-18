@@ -25,23 +25,23 @@ public class FeatureUsage : Entity
         Quota += delta;
     }
 
-    public static Result<FeatureUsage> Create(Guid organizationId, LimitedFeature limitedFeature, DateTime periodStart, DateTime periodEnd)
+    public static Result<FeatureUsage> Create(Guid organizationId, Guid limitedFeatureId, DateTime periodStart, DateTime periodEnd, long quota)
     {
-        if (limitedFeature == null)
+        if (limitedFeatureId == Guid.Empty)
         {
             return Result.Failure<FeatureUsage>(PlanError.InvalidPlanFeature);
         }
-        var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeature.Id, limitedFeature.Limit, periodStart, periodEnd);
+        var featureUsage = new FeatureUsage(Guid.NewGuid(), organizationId, limitedFeatureId, quota, periodStart, periodEnd);
         return Result.Success(featureUsage);
     }
-    public static Result<List<FeatureUsage>> CreateMany(Guid organizationId, IEnumerable<LimitedFeature> limitedFeatures, DateTime periodStart, DateTime periodEnd)
+    public static Result<List<FeatureUsage>> CreateMany(Guid organizationId, List<Guid> limitedFeaturesId, DateTime periodStart, DateTime periodEnd, long quota)
     {
-        if (limitedFeatures == null || !limitedFeatures.Any())
+        if (limitedFeaturesId == null || !limitedFeaturesId.Any())
         {
             return Result.Failure<List<FeatureUsage>>(PlanError.InvalidPlanFeature);
         }
-        var featureUsages = limitedFeatures.
-            Select(feature => new FeatureUsage(Guid.NewGuid(), organizationId, feature.Id, feature.Limit, periodStart, periodEnd)).ToList();
+        var featureUsages = limitedFeaturesId
+            .Select(featureId => new FeatureUsage(Guid.NewGuid(), organizationId, featureId, quota, periodStart, periodEnd)).ToList();
         return Result.Success(featureUsages);
     }
 

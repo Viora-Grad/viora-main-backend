@@ -14,9 +14,9 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
     {
         return await DbContext.Set<Plan>()
             .Include(p => p.PlanFeatures)
-                .ThenInclude(pf => pf.features)
+                .ThenInclude(pf => pf.Feature)
             .Include(p => p.PlanLimitedFeatures)
-                .ThenInclude(plf => plf.LimitedFeatures)
+                .ThenInclude(plf => plf.LimitedFeature)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -24,9 +24,9 @@ internal sealed class PlanRepository : Repository<Plan>, IPlanRepository
     {
         return await DbContext.Set<Plan>()
             .Include(p => p.PlanFeatures)
-                .ThenInclude(pf => pf.features)
+                .ThenInclude(pf => pf.Feature)
             .Include(p => p.PlanLimitedFeatures)
-                .ThenInclude(plf => plf.LimitedFeatures)
+                .ThenInclude(plf => plf.LimitedFeature)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

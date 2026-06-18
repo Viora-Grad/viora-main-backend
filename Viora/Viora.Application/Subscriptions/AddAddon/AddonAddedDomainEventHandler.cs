@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
@@ -13,6 +14,7 @@ public class AddonAddedDomainEventHandler(
     IOrganizationRepository organizationRepository,
     ILimitedFeatureAddonRepository limitedFeatureAddonRepository,
     IFeatureUsageRepository featureUsageRepository,
+    IPlanLimitedFeatureRepository planLimitedFeatureRepository,
     ILimitedFeatureRepository limitedFeatureRepository
     ) : INotificationHandler<AddonAddedDomainEvent>
 {
@@ -52,13 +54,21 @@ public class AddonAddedDomainEventHandler(
             var limitedFeatureUsage = featureUsage.FirstOrDefault(fu => fu.LimitedFeatureId == addon.LimitedFeatureId);
             var limitedFeature = await limitedFeatureRepository.GetByIdAsync(addon.LimitedFeatureId, cancellationToken)
                 ?? throw new NotFoundException($"Limited feature with id {addon.LimitedFeatureId} not found.");
+            var planLimitedFeature = await planLimitedFeatureRepository
+                .GetPlanLimitedFeatureByLimitedFeatureIdAsync(subscription.PlanId, addon.LimitedFeatureId, cancellationToken)
+                ?? throw new NotFoundException($"Plan limited feature with limited feature id {addon.LimitedFeatureId} not found.");
 
             if (limitedFeatureUsage != null)
             {
                 limitedFeatureUsage.AddAddon(addon.RestoreValue);
                 continue;
             }
-            var limitedFeatureUsageResult = FeatureUsage.Create(organization.Id, limitedFeature, subscription.SubscriptionsStartTime, subscription.SubscriptionsEndTime);
+            var limitedFeatureUsageResult = FeatureUsage.Create(
+                organization.Id,
+                limitedFeature.Id,
+                subscription.SubscriptionsStartTime,
+                subscription.SubscriptionsEndTime,
+                planLimitedFeature.LimitValue);
 
             if (limitedFeatureUsageResult.IsFailure)
                 throw new InvalidOperationException("Failed to create feature usage for addon: " + limitedFeatureUsageResult.Error);
