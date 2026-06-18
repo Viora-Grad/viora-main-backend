@@ -11,7 +11,7 @@ public class GreetingHandler : IIntentHandler
     public Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history) =>
         Task.FromResult(new ChatResponse
             {
-                Message = "Hello! I'm Viora's AI assistant 👋\n\n" +
+                Message = "Hello! I'm Vivi 👋\n\n" +
                           "I can help you with:\n" +
                           "• Finding the right specialist based on your symptoms\n" +
                           "• Searching for providers\n" +

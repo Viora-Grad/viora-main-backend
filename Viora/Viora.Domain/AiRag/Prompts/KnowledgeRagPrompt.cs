@@ -1,6 +1,6 @@
 public static class KnowledgeRagPrompt
 {
-    // Builds the system prompt injected into Gemini for knowledge-base questions.
+    // Builds the system prompt injected into Groq for knowledge-base questions.
     // Chunks are the top-K sections retrieved from Qdrant.
     public static string Build(IEnumerable<string> chunks)
     {

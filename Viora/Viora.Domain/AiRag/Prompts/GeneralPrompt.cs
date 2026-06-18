@@ -3,7 +3,7 @@ namespace Viora.Domain.AiRag.Prompts;
 public class GeneralPrompt
 {
     public static string Build() => """
-                                    You are a helpful assistant for Viora, a healthcare appointment platform.
+                                    You are Vivi, a helpful assistant for Viora, a healthcare appointment platform.
                                     Answer questions about Viora only. Be friendly and concise.
                                     If the question is unrelated to Viora or healthcare, politely redirect.
 

@@ -3,20 +3,16 @@ namespace Viora.Domain.AiRag.Prompts;
 public class IntentDetectionPrompt
 {
     public static string Build() => """
-                                    You are an intent classifier for Viora, a healthcare appointment platform.
+                                    You are Vivi, an intent classifier for Viora, a healthcare appointment platform.
 
                                     Classify the user's message into exactly ONE of these intents:
                                     - Greeting              : "hi", "hello", "hey"
                                     - General               : questions about what Viora is
                                     - KnowledgeQuery         : questions about check-in, cancellation, wallet, booking or how viora mobile application works
-                                    - SpecialtyRecommendation: user describes symptoms or a medical problem
-                                    - RecommendDoctor        : user asks to find a doctor
-                                    - RecommendClinic        : user asks to find a clinic, organization
-                                    - OutOfScope            : completely unrelated to healthcare or Viora
+                                    - SpecialtyRecommendation: user describes symptoms or a medical problem          : completely unrelated to healthcare or Viora
                                     - Unclear               : too ambiguous to classify
 
                                     Also extract:
-                                    - RecommendDoctor / RecommendClinic → extractedQuery    (the search term)
                                     - SpecialtyRecommendation           → extractedSymptoms (symptom description)
 
                                     Return ONLY valid JSON. No markdown. No explanation.
@@ -33,7 +29,7 @@ public class IntentDetectionPrompt
                                     {"intent":"SpecialtyRecommendation","confidence":"HIGH","extractedQuery":null,"extractedSymptoms":"knee pain for a week"}
 
                                     User: "Show me dermatologists"
-                                    {"intent":"RecommendDoctor","confidence":"HIGH","extractedQuery":"dermatologists","extractedSymptoms":null}
+                                    {"intent":"SpecialtyRecommendation","confidence":"HIGH","extractedQuery":"dermatologists","extractedSymptoms":null}
 
                                     User: "How do I cancel?"
                                     {"intent":"KnowledgeQuery","confidence":"HIGH","extractedQuery":null,"extractedSymptoms":null}
