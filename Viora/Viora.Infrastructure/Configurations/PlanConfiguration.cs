@@ -43,5 +43,16 @@ internal sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
             .HasConversion(
                 content => content.Value,
                 value => new PlanContent(value));
+
+
+        builder.HasMany(p => p.PlanFeatures)
+            .WithOne()
+            .HasForeignKey(pf => pf.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.PlanLimitedFeatures)
+            .WithOne()
+            .HasForeignKey(plf => plf.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

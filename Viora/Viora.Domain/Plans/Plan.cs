@@ -11,6 +11,9 @@ public class Plan : Entity
     public double Price { get; private set; }
     public PlanPeriod PlanPeriod { get; private set; }
 
+    public IReadOnlyCollection<PlanFeature> PlanFeatures { get; private set; } = new List<PlanFeature>();
+    public IReadOnlyCollection<PlanLimitedFeature> PlanLimitedFeatures { get; private set; } = new List<PlanLimitedFeature>();
+
 
     private Plan(
         Guid Id,

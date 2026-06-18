@@ -93,4 +93,10 @@ public class Subscription : Entity
     {
         return _addons;
     }
+
+    public void Expire(DateTime now)
+    {
+        Status = SubscriptionStatus.Expired;
+        SubscriptionsEndTime = now;
+    }
 }
