@@ -29,25 +29,24 @@ public class GetPlanByIdQueryHandler(
     {
         var plan = await planRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Plan with ID {request.Id} not found.");
-        var planFeatures = await planFeatureRepository.GetByPlanIdAsync(request.Id, cancellationToken);
-        var featureIds = planFeatures.Select(pf => pf.FeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
-        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
-        var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
-        var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
 
-        var featureDTOs = features.Select(f => new FeatureResponse(
-               f.Id,
-               f.FeatureKey.value,
-               f.Description.value
-            )
-        ).ToList();
-        var limitedFeatureDTOs = limitedFeatures.Select(lf => new LimitedFeatureResponse(
-            lf.Id,
-            lf.Key.value,
-            lf.Description.value,
-            lf.Limit
-            )
-        ).ToList();
+        var featureDTOs = plan.PlanFeatures
+            .SelectMany(pf => pf.features)
+            .Select(f => new FeatureResponse(
+                f.Id,
+                f.FeatureKey.ToString(),
+                f.Description.ToString()
+            )).ToList();
+
+        var limitedFeatureDTOs = plan.PlanLimitedFeatures
+            .SelectMany(
+                plf => plf.LimitedFeatures,
+                (plf, lf) => new LimitedFeatureResponse(
+                    lf.Id,
+                    lf.Key.ToString(),
+                    lf.Description.ToString(),
+                    plf.LimitValue
+            )).ToList();
         var planDTO = PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
         return Result.Success(planDTO);
 

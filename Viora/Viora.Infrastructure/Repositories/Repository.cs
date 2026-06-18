@@ -23,7 +23,8 @@ internal abstract class Repository<T>(ApplicationDbContext dbContext)
     {
         return DbContext.Set<T>().Where(entity => ids.Contains(entity.Id));
     }
-    public async Task<List<T>> GetAllAsNoTrackingAsync(CancellationToken cancellationToken)
+    // make it virtual to allow overriding for better performance in some cases.
+    public virtual async Task<List<T>> GetAllAsNoTrackingAsync(CancellationToken cancellationToken)
     {
         return await DbContext.Set<T>()
             .AsNoTracking()
