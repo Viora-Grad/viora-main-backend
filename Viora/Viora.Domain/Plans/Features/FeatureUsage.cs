@@ -60,4 +60,10 @@ public class FeatureUsage : Entity
     {
         Quota += addonValue;
     }
+
+    public void Expire(DateTime now)
+    {
+        PeriodEnd = now;
+        Quota = 0;
+    }
 }
