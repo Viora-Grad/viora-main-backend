@@ -9,7 +9,7 @@ public class PlanLimitedFeature : Entity
     public Guid LimitedFeatureId { get; private set; }
     public int LimitValue { get; private set; }
 
-    public IReadOnlyCollection<LimitedFeature> LimitedFeatures { get; private set; } = new List<LimitedFeature>();
+    public LimitedFeature LimitedFeature { get; private set; }
     private PlanLimitedFeature(Guid id, Guid planId, Guid limitedFeatureId, int limitValue) : base(id)
     {
         PlanId = planId;

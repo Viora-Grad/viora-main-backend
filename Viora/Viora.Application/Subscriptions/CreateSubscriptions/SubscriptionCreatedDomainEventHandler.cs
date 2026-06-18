@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
-using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
@@ -24,10 +23,7 @@ internal class SubscriptionCreatedDomainEventHandler(
     IOrganizationRepository organizationRepository,
     ISubscriptionRepository subscriptionRepository,
     IFeatureUsageRepository featureUsageRepository,
-    IPlanFeatureRepository planFeatureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository,
-    IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork
+    IDateTimeProvider dateTimeProvider
     ) : INotificationHandler<SubscriptionCreatedDomainEvent>
 {
     public async Task Handle(SubscriptionCreatedDomainEvent notification, CancellationToken cancellationToken)
@@ -57,18 +53,15 @@ internal class SubscriptionCreatedDomainEventHandler(
 
         subscriptionRepository.Add(result.Value);
         await CreateFeaturesUsage(notification.PlanId, notification.OrganizationId, startDate, endDate.Value, cancellationToken);
-        await unitOfWork.SaveChangesAsync();
-
     }
 
     public async Task CreateFeaturesUsage(Guid planId, Guid organizationId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken)
     {
-        var features = await planFeatureRepository.GetByPlanIdAsync(planId, cancellationToken)
-            ?? throw new NotFoundException($"Plan features with {planId} not found.");
-
-        var limitedFeaturesIds = features.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
-
-        var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeaturesIds, cancellationToken);
+        var plan = await planRepository.GetByIdAsync(planId, cancellationToken)
+            ?? throw new NotFoundException($"the plan with id {planId} not found");
+        var limitedFeatures = plan.PlanLimitedFeatures.Select(
+            plf => plf.LimitedFeature
+            ).ToList();
 
         var featureUsages = FeatureUsage.CreateMany(
             organizationId,

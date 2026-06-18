@@ -3,7 +3,6 @@ using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Plans.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
-using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetPlanById;
 
@@ -20,10 +19,8 @@ namespace Viora.Application.Plans.GetPlanById;
 /// </summary>
 
 public class GetPlanByIdQueryHandler(
-    IPlanRepository planRepository,
-    IPlanFeatureRepository planFeatureRepository,
-    IFeatureRepository featureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlanByIdQuery, PlanResponse>
+    IPlanRepository planRepository
+) : IQueryHandler<GetPlanByIdQuery, PlanResponse>
 {
     public async Task<Result<PlanResponse>> Handle(GetPlanByIdQuery request, CancellationToken cancellationToken)
     {
@@ -31,20 +28,17 @@ public class GetPlanByIdQueryHandler(
             ?? throw new NotFoundException($"Plan with ID {request.Id} not found.");
 
         var featureDTOs = plan.PlanFeatures
-            .SelectMany(pf => pf.features)
-            .Select(f => new FeatureResponse(
-                f.Id,
-                f.FeatureKey.ToString(),
-                f.Description.ToString()
+            .Select(pf => new FeatureResponse(
+                    pf.Feature.Id,
+                    pf.Feature.FeatureKey.ToString(),
+                    pf.Feature.Description.ToString()
             )).ToList();
 
         var limitedFeatureDTOs = plan.PlanLimitedFeatures
-            .SelectMany(
-                plf => plf.LimitedFeatures,
-                (plf, lf) => new LimitedFeatureResponse(
-                    lf.Id,
-                    lf.Key.ToString(),
-                    lf.Description.ToString(),
+            .Select(plf => new LimitedFeatureResponse(
+                    plf.LimitedFeature.Id,
+                    plf.LimitedFeature.Key.ToString(),
+                    plf.LimitedFeature.Description.ToString(),
                     plf.LimitValue
             )).ToList();
         var planDTO = PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);

@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
-using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
@@ -10,13 +9,10 @@ using Viora.Domain.Subscriptions.Events;
 namespace Viora.Application.Subscriptions.ChangeSubscription;
 
 public class SubscriptionPlanChangeDomainEventHandler(
-    IPlanFeatureRepository planFeatureRepository,
     IPlanRepository planRepository,
     IFeatureUsageRepository featureUsageRepository,
-    ILimitedFeatureRepository limitedFeatureRepository,
     ISubscriptionRepository subscriptionRepository,
-    IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork) : INotificationHandler<SubscriptionPlanChangedDomainEvent>
+    IDateTimeProvider dateTimeProvider) : INotificationHandler<SubscriptionPlanChangedDomainEvent>
 {
 
     public async Task Handle(SubscriptionPlanChangedDomainEvent notification, CancellationToken cancellationToken)
@@ -41,7 +37,6 @@ public class SubscriptionPlanChangeDomainEventHandler(
 
         subscriptionRepository.Add(result.Value);
         await ChangeFeatureUsage(notification.OldPlanId, newPlan.Id, subscription.OrganizationId, startTime, endTimeResult.Value, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task ChangeFeatureUsage(Guid oldPlanId, Guid newPlanId, Guid organizationId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
@@ -50,20 +45,16 @@ public class SubscriptionPlanChangeDomainEventHandler(
         var oldPlan = await planRepository.GetByIdAsync(oldPlanId, cancellationToken)
             ?? throw new NotFoundException($"Plan with ID {oldPlanId} not found.");
 
-        var oldPlanFeatures = await planFeatureRepository.GetByPlanIdAsync(oldPlanId, cancellationToken)
-            ?? throw new NotFoundException($"Features for Plan with ID {oldPlanId} not found.");
-
-        var LimitedFeaturesIds = oldPlanFeatures.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
+        var LimitedFeaturesIds = oldPlan.PlanLimitedFeatures.Select(plf => plf.LimitedFeatureId).ToList();
         featureUsageRepository.RemoveRangeByLimitedIdAndOrganizationId(LimitedFeaturesIds, organizationId);
 
         //add feature usages for the new plan
-        var newPlanFeatures = await planFeatureRepository.GetByPlanIdAsync(newPlanId, cancellationToken)
-            ?? throw new NotFoundException($"Features for Plan with ID {newPlanId} not found.");
+        var newPlan = await planRepository.GetByIdAsync(newPlanId, cancellationToken)
+            ?? throw new NotFoundException($"Plan with ID {newPlanId} not found.");
 
-        var newLimitedFeaturesIds = newPlanFeatures.Where(f => f.LimitedFeatureId.HasValue).Select(f => f.LimitedFeatureId.Value).ToList();
-
-        var newLimitedFeatures = await limitedFeatureRepository.GetByIdsAsync(newLimitedFeaturesIds, cancellationToken)
-            ?? throw new NotFoundException($"Limited Features with IDs {string.Join(", ", newLimitedFeaturesIds)} not found.");
+        var newLimitedFeatures = newPlan.PlanLimitedFeatures
+            .Select(plf => plf.LimitedFeature)
+            .ToList();
 
         var newFeatureUsages = FeatureUsage.CreateMany(organizationId, newLimitedFeatures, startTime, endTime);
 

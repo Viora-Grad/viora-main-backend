@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
-using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
@@ -14,8 +13,8 @@ public class AddonAddedDomainEventHandler(
     IOrganizationRepository organizationRepository,
     ILimitedFeatureAddonRepository limitedFeatureAddonRepository,
     IFeatureUsageRepository featureUsageRepository,
-    ILimitedFeatureRepository limitedFeatureRepository,
-    IUnitOfWork unitOfWork) : INotificationHandler<AddonAddedDomainEvent>
+    ILimitedFeatureRepository limitedFeatureRepository
+    ) : INotificationHandler<AddonAddedDomainEvent>
 {
     public async Task Handle(AddonAddedDomainEvent notification, CancellationToken cancellationToken)
     {
@@ -39,7 +38,6 @@ public class AddonAddedDomainEventHandler(
             throw new InvalidOperationException("Failed to add addons to subscription: " + result.Error);
 
         await AddFeatureAddonUsage(subscription, organization, featureUsages, addons, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task AddFeatureAddonUsage(

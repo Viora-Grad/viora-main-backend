@@ -66,22 +66,19 @@ public class GetPlansQueryHandler(
         {
 
             var featureDTOs = plan.PlanFeatures
-            .SelectMany(pf => pf.features)
-            .Select(f => new FeatureResponse(
-                f.Id,
-                f.FeatureKey.ToString(),
-                f.Description.ToString()
-            )).ToList();
+            .Select(pf => new FeatureResponse(
+                 pf.Feature.Id,
+                 pf.Feature.FeatureKey.ToString(),
+                 pf.Feature.Description.ToString()
+             )).ToList();
 
             var limitedFeatureDTOs = plan.PlanLimitedFeatures
-                .SelectMany(
-                    plf => plf.LimitedFeatures,
-                    (plf, lf) => new LimitedFeatureResponse(
-                        lf.Id,
-                        lf.Key.ToString(),
-                        lf.Description.ToString(),
-                        plf.LimitValue
-                )).ToList();
+            .Select(plf => new LimitedFeatureResponse(
+                   plf.LimitedFeature.Id,
+                   plf.LimitedFeature.Key.ToString(),
+                   plf.LimitedFeature.Description.ToString(),
+                   plf.LimitValue
+           )).ToList();
             return PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
         }).ToList();
 

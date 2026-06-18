@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
-using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
@@ -21,15 +20,12 @@ namespace Viora.Application.Subscriptions.RenewSubscriptions;
 /// </summary>
 
 internal class SubscriptionRenewedDomainEventHandler(
-    IPlanFeatureRepository planFeatureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository,
     IFeatureUsageRepository featureUsageRepository,
     ISubscriptionRepository subscriptionRepository,
     IPlanRepository planRepository,
     IDateTimeProvider dateTimeProvider,
     IOrganizationRepository organizationRepository,
-    ILimitedFeatureAddonRepository limitedFeatureAddonRepository,
-    IUnitOfWork unitOfWork
+    ILimitedFeatureAddonRepository limitedFeatureAddonRepository
     ) : INotificationHandler<SubscriptionRenewedDomainEvent>
 {
     public async Task Handle(SubscriptionRenewedDomainEvent notification, CancellationToken cancellationToken)
@@ -61,7 +57,6 @@ internal class SubscriptionRenewedDomainEventHandler(
             startDate, endDate.Value, cancellationToken);
 
         subscriptionRepository.Add(result.Value);
-        await unitOfWork.SaveChangesAsync();
     }
 
     private async Task RenewFeatureUsage(
@@ -72,8 +67,8 @@ internal class SubscriptionRenewedDomainEventHandler(
          DateTime endDate,
          CancellationToken cancellationToken)
     {
-        var Features = await planFeatureRepository.GetByPlanIdAsync(PlanId, cancellationToken)
-            ?? throw new NotFoundException($"The plan features for plan with id {PlanId} were not found");
+        var plan = await planRepository.GetByIdAsync(PlanId, cancellationToken)
+            ?? throw new NotFoundException($"the plan with id {PlanId} not found");
 
         var Addons = subscription.GetAddons();
         var AddonIds = Addons.Where(x => x.IsActive == true)
@@ -81,35 +76,27 @@ internal class SubscriptionRenewedDomainEventHandler(
             .ToList();
         var LimitedFeatureAddon = await limitedFeatureAddonRepository.GetByIdsAsync(AddonIds, cancellationToken);
 
-        foreach (var feature in Features)
+        var planlimitedFeatures = plan.PlanLimitedFeatures;
+
+        foreach (var planlimitedFeature in planlimitedFeatures)
         {
-            if (feature.LimitedFeatureId is null)
-
-                continue;
-
-            var limitedFeature = await limitedFeatureRepository.GetByIdAsync((Guid)feature.LimitedFeatureId, cancellationToken)
-                ?? throw new NotFoundException($"the limited feature with {feature.LimitedFeatureId} is not found ");
-
-
+            var limitedFeature = planlimitedFeature.LimitedFeature;
             var featureUsage = await featureUsageRepository.GetByOrganizationIdAndFeatureIdAsync(
-                organizationId,
-                limitedFeature.Id, cancellationToken)
-                ?? throw new NotFoundException(
-                    $"The feature usage for organization with id {organizationId}" +
-                    $" and limited feature with id {limitedFeature.Id} was not found");
+                 organizationId,
+                 limitedFeature.Id, cancellationToken)
+                 ?? throw new NotFoundException(
+                     $"The feature usage for organization with id {organizationId}" +
+                     $" and limited feature with id {limitedFeature.Id} was not found");
 
-            var featureAddons = LimitedFeatureAddon.FindAll(x => x.LimitedFeatureId == feature.Id);
+            var featureAddons = LimitedFeatureAddon.FindAll(x => x.LimitedFeatureId == limitedFeature.Id);
 
             if (featureAddons == null || !featureAddons.Any())
-                featureUsage.Renew(limitedFeature.Limit, startDate, endDate);
+                featureUsage.Renew(planlimitedFeature.LimitValue, startDate, endDate);
             else
             {
-                var newLimit = limitedFeature.Limit + featureAddons.Sum(x => x.RestoreValue);
+                var newLimit = planlimitedFeature.LimitValue + featureAddons.Sum(x => x.RestoreValue);
                 featureUsage.Renew(newLimit, startDate, endDate);
             }
-
-
         }
-
     }
 }
