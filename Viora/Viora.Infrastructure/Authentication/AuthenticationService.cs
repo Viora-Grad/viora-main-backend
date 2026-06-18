@@ -168,8 +168,13 @@ internal class AuthenticationService(IUserRepository userRepository,
 
     }
 
-    public Task<Result<AuthResult>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        dbContext.Attach(Role.Registered);
+        identityRepository.Add(identity);
+        userRepository.Add(user);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success(user.Id.ToString());
     }
 }

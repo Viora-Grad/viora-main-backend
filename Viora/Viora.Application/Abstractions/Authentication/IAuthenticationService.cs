@@ -8,7 +8,7 @@ public interface IAuthenticationService
     Task<Result<string>> RegisterAsync(User user, string password, CancellationToken cancellationToken = default); // Returns the user ID of the newly registered user
     Task<Result<AuthResult>> LocalLoginAsync(string email, string password, CancellationToken cancellationToken = default);
     Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
-    Task<Result<AuthResult>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
+    Task<Result<string>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
     Task<Result<AuthResult>> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
 }

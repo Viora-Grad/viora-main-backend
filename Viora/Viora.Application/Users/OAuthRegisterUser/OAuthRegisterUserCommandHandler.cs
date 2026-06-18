@@ -1,4 +1,5 @@
-﻿using Viora.Application.Abstractions.Clock;
+﻿using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Users.Identity;
@@ -7,10 +8,8 @@ using Viora.Domain.Users.Internal;
 namespace Viora.Application.Users.OAuthRegisterUser;
 
 internal class OAuthRegisterUserCommandHandler(
-    IUserRepository userRepository,
-    IIdentityRepository identityRepository,
-    IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork
+    IAuthenticationService authenticationService,
+    IDateTimeProvider dateTimeProvider
     ) : ICommandHandler<OAuthRegisterUserCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(OAuthRegisterUserCommand request, CancellationToken cancellationToken)
@@ -25,9 +24,10 @@ internal class OAuthRegisterUserCommandHandler(
         if (linkResult.IsFailure)
             return Result.Failure<Guid>(linkResult.Error);
 
-        userRepository.Add(user);
-        identityRepository.Add(identity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        var socialRegisterResult = await authenticationService.SocialRegisterAsync(user, identity, cancellationToken);
+        if (socialRegisterResult.IsFailure)
+            return Result.Failure<Guid>(socialRegisterResult.Error);
+
         return Result.Success(user.Id);
 
 
