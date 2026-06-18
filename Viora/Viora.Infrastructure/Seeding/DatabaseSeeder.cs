@@ -138,17 +138,17 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             .Select(f => f.Id)
             .ToListAsync(cancellationToken);
 
-        var missingFeatures = LimitedFeaturesData.All
+        var missingFeatures = FeatureData.All
             .Where(f => !existingFeatureIds.Contains(f.Id))
             .ToList();
 
-        if (missingLimitedFeatures.Count == 0)
-            logger.LogInformation("LimitedFeature seed: all {Count} features already present.", LimitedFeaturesData.All.Count);
+        if (missingFeatures.Count == 0)
+            logger.LogInformation("Feature seed: all {Count} features already present.", FeatureData.All.Count);
         else
         {
-            await db.Set<LimitedFeature>().AddRangeAsync(missingLimitedFeatures, cancellationToken);
+            await db.Set<Feature>().AddRangeAsync(missingFeatures, cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("LimitedFeature seed: inserted {Count} new features.", missingLimitedFeatures.Count);
+            logger.LogInformation("Feature seed: inserted {Count} new features.", missingFeatures.Count);
         }
 
         #endregion Feature
