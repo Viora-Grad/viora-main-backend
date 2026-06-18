@@ -6,6 +6,8 @@ using Viora.Application.Authentication.ConsumeRefreshToken;
 using Viora.Application.Authentication.ValidateEmail;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
+using Viora.Application.Users.OAuthLoginUser;
+using Viora.Application.Users.OAuthRegisterUser;
 using Viora.Application.Users.OAuthValidateToken;
 using Viora.Application.Users.RegisterUser;
 
@@ -60,13 +62,24 @@ public class AuthController : ControllerBase
     [Route("oauth/{provider=google}/login")]
     public async Task<IActionResult> OAuthLogin(string provider, OAuthLoginRequest request, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var command = new OAuthLoginUserCommand(provider, request.Token, request.Code, request.RedirectUri);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
     }
     [HttpPost]
     [Route("oauth/{provider=google}/register")]
     public async Task<IActionResult> OAuthRegister(string provider, OAuthRegisterRequest request, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var OAuthRegisterCommand = new OAuthRegisterUserCommand(
+            request.FirstName,
+            request.LastName,
+            request.DateOfBirth,
+            request.Gender,
+            request.Email,
+            provider,
+            request.ProviderKey);
+        var result = await _sender.Send(OAuthRegisterCommand, cancellationToken);
+        return result.ToActionResult();
     }
     [HttpPost]
     [Route("oauth/{provider=google}/validate")]

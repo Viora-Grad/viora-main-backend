@@ -41,7 +41,6 @@ public static class DependencyInjection
 
         #endregion Mediator
 
-
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         return services;
