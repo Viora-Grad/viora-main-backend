@@ -34,11 +34,17 @@ public class ScheduleNotifier : IScheduleNotifier
             ct);
     }
 
-    public async Task NotifySlotFreedAsync(Guid branchId, Guid appointmentId, CancellationToken ct)
+    public async Task NotifySlotFreedAsync(Guid branchId, Guid appointmentId, DateTime freeTime, CancellationToken ct)
     {
         await _hubContext.Clients.Group(branchId.ToString()).SendAsync(
             "SlotFreed",
-            appointmentId,
+            new
+            {
+                AppointmentId = appointmentId,
+                FreeTime = freeTime
+            },
             ct);
     }
+
+
 }

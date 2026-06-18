@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 
 namespace Viora.Infrastructure.Repositories.Appointments;
@@ -35,6 +36,11 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .Where(appointment => appointment.ServiceId == serviceId)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)

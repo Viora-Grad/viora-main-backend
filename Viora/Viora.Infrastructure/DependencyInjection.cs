@@ -20,6 +20,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Shared;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
@@ -30,12 +31,13 @@ using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
-using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Firebase;
+using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
+using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
@@ -78,6 +80,13 @@ public static class DependencyInjection
         #region Branches
         services.AddScoped<IBranchRepository, BranchRepository>();
         #endregion Branches
+
+        #region RealTimeSchedule
+        services.AddScoped<IScheduleRepository, ScheduleRepository>();
+        services.AddScoped<IShiftRepository, ShiftRepository>();
+        services.AddScoped<IScheduleDelayRepository, ScheduleDelayRepository>();
+        services.AddScoped<IScheduleCancellationRepository, ScheduleCancellationRepository>();
+        #endregion RealTimeSchedule
 
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();

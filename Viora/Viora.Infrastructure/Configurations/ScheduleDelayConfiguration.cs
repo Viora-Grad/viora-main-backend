@@ -6,9 +6,9 @@ using Viora.Domain.RealTimeScheduling.Internals;
 
 namespace Viora.Infrastructure.Configurations;
 
-internal class ScheduleDelayConfiguration : IEntityTypeConfiguration<ScheduleDelays>
+internal class ScheduleDelayConfiguration : IEntityTypeConfiguration<ScheduleDelay>
 {
-    public void Configure(EntityTypeBuilder<ScheduleDelays> builder)
+    public void Configure(EntityTypeBuilder<ScheduleDelay> builder)
     {
         builder.ToTable("ScheduleDelays");
 
