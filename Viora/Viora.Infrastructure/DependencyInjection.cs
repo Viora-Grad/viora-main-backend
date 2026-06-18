@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<ISubscriptionOrderRepository, SubscriptionOrderRepository>();
         services.AddScoped<IAddonOrderRepository, AddonOrderRepository>();
         services.AddScoped<ILimitedFeatureRepository, LimitedFeatureRepository>();
+        services.AddScoped<IPlanLimitedFeatureRepository, PlanLimitedFeatureRepository>();
         #endregion PlansRepos
 
         #region UsersRepos

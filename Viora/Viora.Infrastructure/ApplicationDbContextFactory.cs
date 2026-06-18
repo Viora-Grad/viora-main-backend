@@ -15,7 +15,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         {
             Env.Load(env);
         }
-        var password = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "YourSecurePassword123!";
+        var password = Environment.GetEnvironmentVariable("SA_PASSWORD") ?? "YoWassup123!PASS";
         var connectionString = $"Server=localhost,1433;Database=Viora;User Id=sa;Password={password};TrustServerCertificate=True;";
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(connectionString,

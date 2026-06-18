@@ -29,4 +29,15 @@ public class Plan : Entity
         Price = price;
         PlanPeriod = planPeriod;
     }
+
+    public static Plan Create(
+        Guid id,
+        string name,
+        string description,
+        string content,
+        double price,
+        PlanPeriod planPeriod)
+    {
+        return new Plan(id, PlanName.Create(name), PlanDescription.Create(description), PlanContent.Create(content), price, planPeriod);
+    }
 }

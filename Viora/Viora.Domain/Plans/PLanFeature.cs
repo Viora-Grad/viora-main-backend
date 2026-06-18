@@ -15,4 +15,9 @@ public class PlanFeature : Entity
         PlanId = planId;
         FeatureId = featureId;
     }
+
+    public static PlanFeature Create(Guid id, Guid planId, Guid featureId)
+    {
+        return new PlanFeature(id, planId, featureId);
+    }
 }

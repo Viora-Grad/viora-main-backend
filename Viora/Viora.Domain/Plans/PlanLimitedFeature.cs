@@ -16,4 +16,9 @@ public class PlanLimitedFeature : Entity
         LimitedFeatureId = limitedFeatureId;
         LimitValue = limitValue;
     }
+
+    public static PlanLimitedFeature Create(Guid id, Guid planId, Guid limitedFeatureId, long limitValue)
+    {
+        return new PlanLimitedFeature(id, planId, limitedFeatureId, limitValue);
+    }
 }

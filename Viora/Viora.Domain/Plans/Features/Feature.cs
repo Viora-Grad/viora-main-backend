@@ -13,4 +13,9 @@ public class Feature : Entity
         this.FeatureKey = featureKey;
         this.Description = description;
     }
+
+    public static Feature Create(Guid id, string featureKey, string description)
+    {
+        return new Feature(id, FeatureKey.Create(featureKey), FeatureDescription.Create(description));
+    }
 }
