@@ -1,19 +1,15 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Appointments.AppointmentCompleted;
 using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
-using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Staff;
 namespace Viora.Application.RealTimeScheduling.GetStaffShiftByDay;
 
 public class GetStaffShiftByDayQueryHandler(
-   IBranchRepository branchRepository,
    IAppointmentsRepository appointmentsRepository,
    IStaffRepository staffRepository,
-   IScheduleRepository scheduleRepository,
    IShiftRepository shiftRepository) : IQueryHandler<GetStaffShiftByDayQuery, StaffDayShiftResponse>
 {
     public async Task<Result<StaffDayShiftResponse>> Handle(GetStaffShiftByDayQuery request, CancellationToken cancellationToken)
@@ -21,17 +17,10 @@ public class GetStaffShiftByDayQueryHandler(
         var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
               ?? throw new NotFoundException($"Staff with id {request.StaffId} not Found");
 
-        var branch = await branchRepository.GetByIdAsync(staff.BranchId, cancellationToken)
-            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");
+        var staffShift = await shiftRepository.GetByIdAsync(request.ShiftId, cancellationToken)
+            ?? throw new NotFoundException($"Shift with id {request.ShiftId} not Found");
 
-        var branchSchedule = await scheduleRepository.getByBranchIdAndDayAsync(branch.Id, request.Date.DayOfWeek, cancellationToken)
-            ?? throw new NotFoundException($"branch with Id {branch.Id} does not have schedule");
-
-        var staffShift = await shiftRepository.GetActiveShiftAsync(branchSchedule.Id, request.StaffId, TimeOnly.FromDateTime(request.Date), cancellationToken)
-            ?? throw new NotFoundException($"the staff with id {request.StaffId} does not have shift ");
-
-
-        var specificationParam = new SearchShiftAppoinmentparameter(
+        var specificationParam = new SearchStaffAppointmentParameters(
             request.StaffId,
             DateOnly.FromDateTime(request.Date)
             .ToDateTime(staffShift.StartTime),
@@ -39,13 +28,13 @@ public class GetStaffShiftByDayQueryHandler(
             .ToDateTime(staffShift.EndTime)
         );
 
-        var specification = new SearchShiftAppointmentSpecification(specificationParam);
+        var specification = new SearchStaffAppointmentspecification(specificationParam);
 
         var appointments = await appointmentsRepository.ListAsync(specification, cancellationToken);
 
         var staffShiftResponse = new StaffDayShiftResponse(
             staffShift.Id,
-            branchSchedule.Id,
+            staff.BranchId,
             staffShift.StaffId,
             staffShift.StartTime,
             staffShift.EndTime,

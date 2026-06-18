@@ -10,6 +10,7 @@ using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
+using Viora.Infrastructure.RealTime.Hubs;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
@@ -41,6 +42,7 @@ builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
     builder.Configuration, "Service");
 builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
     builder.Configuration, "Email");
+builder.Services.AddSignalR();
 #endregion Settings
 
 var app = builder.Build();
@@ -64,4 +66,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHub<ScheduleHub>("/realtime-scheduling");
+
 app.Run();

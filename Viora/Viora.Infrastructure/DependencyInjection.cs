@@ -9,6 +9,7 @@ using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
+using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
@@ -34,6 +35,7 @@ using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
+using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
@@ -107,6 +109,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
         #endregion ServicesRegisters
 
         #region HostedWorkers

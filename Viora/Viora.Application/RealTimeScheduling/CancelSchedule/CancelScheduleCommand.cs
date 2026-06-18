@@ -2,5 +2,5 @@
 
 namespace Viora.Application.RealTimeScheduling.CancelSchedule;
 
-public record CancelScheduleCommand(Guid StaffId, Guid ShiftId, Guid branchId, DateTime date) : ICommand;
+public record CancelScheduleCommand(Guid ShiftId, Guid branchId, DateTime date, string reason) : ICommand;
 

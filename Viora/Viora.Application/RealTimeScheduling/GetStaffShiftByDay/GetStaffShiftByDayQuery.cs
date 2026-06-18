@@ -3,4 +3,4 @@ using Viora.Application.RealTimeScheduling.Shared;
 
 namespace Viora.Application.RealTimeScheduling.GetStaffShiftByDay;
 
-public record GetStaffShiftByDayQuery(DateTime Date, Guid StaffId) : IQuery<StaffDayShiftResponse>;
+public record GetStaffShiftByDayQuery(DateTime Date, Guid StaffId, Guid ShiftId) : IQuery<StaffDayShiftResponse>;

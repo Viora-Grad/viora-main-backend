@@ -7,13 +7,14 @@ internal class SearchStaffAppointmentspecification : BaseSpecification<Appointme
 {
     public SearchStaffAppointmentspecification(SearchStaffAppointmentParameters parameters)
     {
-        if (parameters.Day.HasValue)
-            AddCriteria(a => a.ReservationDate == parameters.Day);
+        if (parameters.StartDate.HasValue && parameters.EndDate.HasValue)
+            AddCriteria(x => x.ReservationDate >= parameters.StartDate && x.ReservationDate <= parameters.EndDate);
         if (parameters.StaffId.HasValue)
             AddCriteria(a => a.StaffId == parameters.StaffId);
     }
 }
 internal record SearchStaffAppointmentParameters(
     Guid? StaffId = null,
-    DateTime? Day = null
+    DateTime? StartDate = null,
+    DateTime? EndDate = null
 );

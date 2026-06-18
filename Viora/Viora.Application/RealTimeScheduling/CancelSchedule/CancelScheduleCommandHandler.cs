@@ -6,31 +6,28 @@ using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
-using Viora.Domain.Staff;
 
 namespace Viora.Application.RealTimeScheduling.CancelSchedule;
 
 public class CancelScheduleCommandHandler(
-    IStaffRepository staffRepository,
     IShiftRepository shiftRepository,
     IAppointmentsRepository appointmentsRepository,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
+    IScheduleCancellationRepository scheduleCancellationRepository,
     IBranchRepository branchRepository
     ) : ICommandHandler<CancelScheduleCommand>
 {
     public async Task<Result> Handle(CancelScheduleCommand request, CancellationToken cancellationToken)
     {
-        var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
-             ?? throw new NotFoundException($"staff with id {request.StaffId} not found ");
-
         var branch = await branchRepository.GetByIdAsync(request.branchId, cancellationToken)
             ?? throw new NotFoundException($"Branch with id {request.branchId} not found");
 
         var shift = await shiftRepository.GetByIdAsync(request.ShiftId, cancellationToken)
             ?? throw new NotFoundException($"shift with id {request.ShiftId} not Found");
+
         var parameter = new SearchShiftAppoinmentparameter(
-            request.StaffId, DateOnly.FromDateTime(request.date)
+            shift.StaffId, DateOnly.FromDateTime(request.date)
             .ToDateTime(shift.StartTime),
             DateOnly.FromDateTime(request.date)
             .ToDateTime(shift.EndTime));
@@ -43,6 +40,9 @@ public class CancelScheduleCommandHandler(
             .Select(s => s.Cancel(dateTimeProvider.UtcNow, request.branchId));
 
         var result = results.Any(r => r.IsFailure);
+
+        var cancellation = ScheduleCancellations.Create(request.ShiftId, dateTimeProvider.UtcNow, request.reason);
+        scheduleCancellationRepository.Add(cancellation);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
