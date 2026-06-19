@@ -64,4 +64,10 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? throw new InvalidOperationException("AllowedOrigins configuration is missing.");
+app.UseCors(builder =>
+    builder.WithOrigins(allowedOrigins)
+           .AllowAnyHeader()
+           .AllowAnyMethod()
+           .AllowCredentials());
 app.Run();

@@ -112,7 +112,7 @@ public class AuthController : ControllerBase
 
     [HttpGet]
     [Route("me")]
-    [Authorize(Policy = "users:read")]
+    [Authorize]
     public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken = default)
     {
         var query = new GetLoggedInUserQuery();
