@@ -10,14 +10,14 @@ internal static class AuthorizationData
     [
         // TODO please register the presmissions in the Permission class and fetch them from there do not define them here
         Permission.UsersRead,
-        Permission.Create(2,  "users:write"),
-        Permission.Create(10, "roles:read"),
-        Permission.Create(11, "roles:write"),
-        Permission.Create(20, "plans:read"),
-        Permission.Create(21, "plans:write"),
-        Permission.Create(30, "subscriptions:manage"),
-        Permission.Create(40, "features:read"),
-        Permission.Create(41, "features:write"),
+        Permission.UsersWrite,
+        Permission.RolesRead,
+        Permission.RolesWrite,
+        Permission.PlansRead,
+        Permission.PlansWrite,
+        Permission.FeaturesRead,
+        Permission.FeaturesWrite,
+        Permission.SubscriptionsManage
     ];
 
     public static IReadOnlyList<RolePermission> RolePermissions =>
@@ -36,5 +36,6 @@ internal static class AuthorizationData
         new() { RoleId = Role.Admin.Id, PermissionId = 30 },
         new() { RoleId = Role.Admin.Id, PermissionId = 40 },
         new() { RoleId = Role.Admin.Id, PermissionId = 41 },
+        new() { RoleId = Role.Customer.Id, PermissionId = Permission.UsersRead.Id },
     ];
 }
