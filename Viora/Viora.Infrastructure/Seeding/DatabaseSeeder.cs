@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Shared;
+using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Seeding.Data;
 
@@ -154,7 +155,7 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
         #endregion Feature
 
         #region PlanFeature
-        /*var existingPlanFeatureIds = await db.Set<PlanFeature>()
+        var existingPlanFeatureIds = await db.Set<PlanFeature>()
             .Select(f => f.Id)
             .ToListAsync(cancellationToken);
 
@@ -170,27 +171,46 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             await db.SaveChangesAsync(cancellationToken);
             logger.LogInformation("PlanFeature seed: inserted {Count} new plan-features.", missingPlanFeatures.Count);
         }
-*/
         #endregion PlanFeature
 
         #region PlanLimitedFeature
-        var existingPlanLimitedFeatureIds = await db.Set<LimitedFeature>()
+        var existingPlanLimitedFeatureIds = await db.Set<PlanLimitedFeature>()
             .Select(f => f.Id)
             .ToListAsync(cancellationToken);
 
-        var missingPlanLimitedFeatures = LimitedFeaturesData.All
+        var missingPlanLimitedFeatures = PlanLimitedFeatureData.All
             .Where(f => !existingPlanLimitedFeatureIds.Contains(f.Id))
             .ToList();
 
         if (missingPlanLimitedFeatures.Count == 0)
-            logger.LogInformation("PlanLimitedFeature seed: all {Count} plan-limited-features already present.", LimitedFeaturesData.All.Count);
+            logger.LogInformation("PlanLimitedFeature seed: all {Count} plan-limited-features already present.", PlanLimitedFeatureData.All.Count);
         else
         {
-            await db.Set<LimitedFeature>().AddRangeAsync(missingPlanLimitedFeatures, cancellationToken);
+            await db.Set<PlanLimitedFeature>().AddRangeAsync(missingPlanLimitedFeatures, cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
             logger.LogInformation("PlanLimitedFeature seed: inserted {Count} new plan-limited-features.", missingPlanLimitedFeatures.Count);
         }
 
         #endregion PlanLimitedFeature
+
+        #region Addons
+        var existingAddon = await db.Set<LimitedFeatureAddon>()
+            .Select(f => f.Id)
+            .ToListAsync(cancellationToken);
+
+        var missingAddons = AddonData.All
+            .Where(f => !existingAddon.Contains(f.Id))
+            .ToList();
+
+        if (missingAddons.Count == 0)
+            logger.LogInformation("Addon seed: all {Count} addons already present.", AddonData.All.Count);
+        else
+        {
+            await db.Set<LimitedFeatureAddon>().AddRangeAsync(missingAddons, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Addon seed: inserted {Count} new addons.", missingAddons.Count);
+        }
+        #endregion Addons
     }
+
 }
