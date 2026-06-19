@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Viora.Domain.ChatSessions;
 
 namespace Viora.Application.AiRag.Session;
@@ -10,15 +12,28 @@ public sealed record SessionSummaryDto(Guid SessionId, string? Title, DateTime C
 public sealed class GetSessionHistoryQuery
 {
     private readonly IChatSessionRepository _repository;
+    private readonly ILogger<GetSessionHistoryQuery> _logger;
 
-    public GetSessionHistoryQuery(IChatSessionRepository repository) => _repository = repository;
+    public GetSessionHistoryQuery(IChatSessionRepository repository, ILogger<GetSessionHistoryQuery> logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
 
     public async Task<SessionHistoryDto?> ExecuteAsync(Guid sessionId, Guid userId, CancellationToken ct = default)
     {
         var session = await _repository.GetByIdAsync(sessionId, ct);
-        if (session is null || session.UserId != userId) return null;
+        if (session is null || session.UserId != userId)
+        {
+            _logger.LogWarning("ExecuteAsync: sessionId={SessionId} not found or wrong user", sessionId);
+            return null;
+        }
+
+        _logger.LogInformation("ExecuteAsync: sessionId={SessionId}, HistoryJson length={Len}, starts with={Start}",
+            sessionId, session.HistoryJson?.Length ?? 0, session.HistoryJson?.Length > 50 ? session.HistoryJson[..50] : session.HistoryJson);
 
         var messages = ParseJson(session.HistoryJson);
+        _logger.LogInformation("ExecuteAsync: sessionId={SessionId}, parsed {Count} messages", sessionId, messages.Count);
         return new SessionHistoryDto(session.Id, session.Title, session.CreatedAt, messages);
     }
 
@@ -27,11 +42,12 @@ public sealed class GetSessionHistoryQuery
         if (string.IsNullOrWhiteSpace(json) || json == "[]") return [];
         try
         {
-            using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.EnumerateArray()
-                .Select((el, i) => new SessionMessageDto(
-                    Role: el.GetProperty("role").GetString() ?? "unknown",
-                    Content: el.GetProperty("content").GetString() ?? string.Empty,
+            var history = JsonSerializer.Deserialize<ChatHistory>(json);
+            if (history is null) return [];
+            return history
+                .Select((msg, i) => new SessionMessageDto(
+                    Role: msg.Role.ToString(),
+                    Content: msg.Content ?? string.Empty,
                     Index: i))
                 .ToList();
         }
