@@ -27,4 +27,8 @@
     <ProjectReference Include="..\Viora.Infrastructure\Viora.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\LegalPapers\" />
+  </ItemGroup>
+
 </Project>

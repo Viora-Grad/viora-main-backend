@@ -2,9 +2,11 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Viora.Api.Middleware;
+using Viora.Api.OpenApi;
 using Viora.Application;
 using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
+using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
@@ -26,7 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddSchemaTransformer<EnumSchemaTransformer>();
+});
 
 #region Settings
 builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
@@ -41,6 +46,10 @@ builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
     builder.Configuration, "Service");
 builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
     builder.Configuration, "Email");
+builder.Services.AddInterfacedOptions<IAdminMessagingSettings, AdminMessagingSettings>(
+    builder.Configuration, "Admins");
+builder.Services.AddInterfacedOptions<IBranchSettings, BranchSettings>(
+    builder.Configuration, "Branch");
 #endregion Settings
 
 var app = builder.Build();

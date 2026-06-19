@@ -5,6 +5,7 @@ namespace Viora.Domain.Organizations.LegalPapers;
 
 public sealed class LegalPaper : Entity
 {
+    public Guid ApplicationId { get; private set; }
     public Guid AttachmentId { get; private set; }
     public Guid? ApprovedById { get; private set; }
     public OfficalName Name { get; private set; } = default!;
@@ -15,8 +16,17 @@ public sealed class LegalPaper : Entity
 
     private LegalPaper() { } // for Ef
 
-    private LegalPaper(Guid id, Guid attachmentId, OfficalName name, AcceptanceStatus status, LegalPaperType type, DateTime submissionDate, DateTime expiryDateUtc) : base(id)
+    private LegalPaper(
+        Guid id,
+        Guid applicationId,
+        Guid attachmentId,
+        OfficalName name,
+        AcceptanceStatus status,
+        LegalPaperType type,
+        DateTime submissionDate,
+        DateTime expiryDateUtc) : base(id)
     {
+        ApplicationId = applicationId;
         AttachmentId = attachmentId;
         Name = name;
         Status = status;
@@ -25,33 +35,66 @@ public sealed class LegalPaper : Entity
         ExpiryDateUtc = expiryDateUtc;
     }
 
-    public static Result<LegalPaper> Create(Guid attachemntId, string name, AcceptanceStatus status, LegalPaperType type, DateTime submissionDateUtc, ILegalPapersSettings legalPaperSettings)
+    public static Result<LegalPaper> Create(
+        Guid attachemntId,
+        Guid applicationId,
+        string name,
+        AcceptanceStatus status,
+        LegalPaperType type,
+        DateTime submissionDateUtc,
+        DateTime ExpiryUtc)
     {
         LegalPaper legalPaper = new(
             Guid.NewGuid(),
+            applicationId,
             attachemntId,
             new(name),
             status,
             type,
             submissionDateUtc,
-            submissionDateUtc + legalPaperSettings.LegalPaperExpiry);
+            ExpiryUtc);
 
         return Result.Success(legalPaper);
     }
 
-    public Result MarkExpired(DateTime ExpiryTimeUtc, DateTime currentDateTime)
+    public void MarkExpired()
     {
-        if (Status == AcceptanceStatus.Expired)
-            return Result.Failure(LegalPaperErrors.AlreadyExpired);
+        Status = AcceptanceStatus.Expired;
+    }
 
-        if (currentDateTime > ExpiryDateUtc)
+    public Result Accept(DateTime currentDateTime)
+    {
+        var passesExpiryCheckResult = PassesExpiryCheck(currentDateTime);
+        if (passesExpiryCheckResult.IsFailure)
+            return Result.Failure(passesExpiryCheckResult.Error);
+
+        Status = AcceptanceStatus.Accepted;
+
+        return Result.Success();
+    }
+
+    public Result Deny(DateTime currentDateTime)
+    {
+        var passesExpiryCheckResult = PassesExpiryCheck(currentDateTime);
+        if (passesExpiryCheckResult.IsFailure)
+            return Result.Failure(passesExpiryCheckResult.Error);
+
+        Status = AcceptanceStatus.Denied;
+
+        return Result.Success();
+
+    }
+
+    private Result PassesExpiryCheck(DateTime currentDateTime)
+    {
+        if (Status != AcceptanceStatus.UnderReview)
+            return Result.Failure(LegalPaperErrors.PaperStatusNotUnderReview);
+
+        if (ExpiryDateUtc < currentDateTime)
         {
             Status = AcceptanceStatus.Expired;
             return Result.Failure(LegalPaperErrors.AlreadyExpired);
         }
-
-        ExpiryDateUtc = ExpiryTimeUtc;
-
         return Result.Success();
     }
 }

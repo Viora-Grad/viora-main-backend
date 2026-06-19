@@ -2,8 +2,8 @@
 
 public enum LegalPaperType
 {
-    CommercialRegistration,
-    TaxCard,
     ArticleOfAssociation,
-    RegisteredAddressProof
+    CommercialRegistration,
+    RegisteredAddressProof,
+    TaxCard,
 }

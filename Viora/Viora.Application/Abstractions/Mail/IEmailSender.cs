@@ -2,5 +2,5 @@
 
 public interface IEmailSender
 {
-    public Task Send(string emailId, EmailMessage mail, CancellationToken cancellationToken = default);
+    public Task<bool> SendAsync(string emailId, EmailMessage mail, CancellationToken cancellationToken = default);
 }

@@ -1,7 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
+using Viora.Application.Abstractions.Media;
+using Viora.Application.Organizations.AddToGallery;
 using Viora.Application.Organizations.ApproveOnboardRequest;
+using Viora.Application.Organizations.GetApplicationDetails;
 using Viora.Application.Organizations.GetOrganizationDetails;
 using Viora.Application.Organizations.HideOrganization;
 using Viora.Application.Organizations.RequestOnboard;
@@ -26,15 +29,6 @@ public class OrganizationsController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
 
-    [HttpGet("applications")]
-    public async Task<IActionResult> SearchApplications(Guid? id, Guid? ownerId, string? status, string? referralSource, int page = 1, int pageSize = 20,
-        CancellationToken cancellationToken = default)
-    {
-        var query = new SearchApplicationsQuery(id, ownerId, status, referralSource, page, pageSize);
-        var result = await sender.Send(query, cancellationToken);
-        return result.ToActionResult();
-    }
-
     [HttpGet("{organizationId:guid}")]
     public async Task<IActionResult> GetOrganizationDetails(Guid organizationId, CancellationToken cancellationToken)
     {
@@ -43,28 +37,43 @@ public class OrganizationsController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
 
-    [HttpPost("onboard")]
-    public async Task<IActionResult> RequestOnboard(RequestOnboardRequest request, CancellationToken cancellationToken)
+    [HttpPost("{organizationId:guid}/gallery/images")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AddImageToGallery(
+    Guid organizationId,
+    IFormFileCollection files,
+    [FromServices] IStorageSettings storageSettings,
+    CancellationToken cancellationToken)
     {
-        var command = new RequestOnboardCommand(
-            request.OwnerId,
-            request.CountryId,
-            request.ProposedName,
-            request.About,
-            request.ServiceDescription,
-            request.Letter,
-            request.ServiceTypes,
-            request.ReferralSource,
-            request.BillingEmail,
-            request.SupportEmail);
-        var result = await sender.Send(command, cancellationToken);
-        return result.ToActionResult();
+        List<MediaRequest> medias;
+
+        medias = files
+            .Select(f => MediaRequest.CreateImage(f.FileName, f.ContentType, f.Length, f.OpenReadStream(), storageSettings.MaxFileSizeBytes))
+            .ToList();
+
+        return await AddToGallery(organizationId, medias, cancellationToken);
     }
 
-    [HttpPost("applications/{requestId:guid}/approve")]
-    public async Task<IActionResult> ApproveOnboardRequest(Guid requestId, CancellationToken cancellationToken)
+    [HttpPost("{organizationId:guid}/gallery/documents")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AddDocToGallery(
+    Guid organizationId,
+    IFormFileCollection files,
+    [FromServices] IStorageSettings storageSettings,
+    CancellationToken cancellationToken)
     {
-        var command = new ApproveOnboardRequestCommand(requestId);
+        List<MediaRequest> medias;
+
+        medias = files
+            .Select(f => MediaRequest.CreateDocument(f.FileName, f.ContentType, f.Length, f.OpenReadStream(), storageSettings.MaxFileSizeBytes))
+            .ToList();
+
+        return await AddToGallery(organizationId, medias, cancellationToken);
+    }
+
+    private async Task<IActionResult> AddToGallery(Guid organizationId, List<MediaRequest> medias, CancellationToken cancellationToken)
+    {
+        var command = new AddToGalleryCommand(organizationId, medias);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }

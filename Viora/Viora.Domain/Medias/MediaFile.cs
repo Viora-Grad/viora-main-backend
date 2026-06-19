@@ -15,9 +15,10 @@ public sealed class MediaFile : Entity
 
     public MediaType CategoryType => MimeType.Value switch
     {
-        "image/jpeg" or "image/png" or "image/gif" => MediaType.Image,
+        "image/jpeg" or "image/png" or "image/gif" or "image/webp" => MediaType.Image,
         "audio/mpeg" or "audio/wav" => MediaType.Audio,
         "video/mp4" => MediaType.Video,
+        "application/pdf" or "application/msword" => MediaType.Document,
         _ => MediaType.Binary
     };
 

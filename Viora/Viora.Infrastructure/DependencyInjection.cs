@@ -16,6 +16,7 @@ using Viora.Domain.Branches;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
+using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
@@ -54,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRepository, OrganziationRepository>();
         services.AddScoped<IOrganizationApplicationRepository, OrganizationApplicationRepository>();
         services.AddScoped<ISuspensionRepository, SuspensionRepository>();
+        services.AddScoped<ILegalPaperRepository, LegalPaperRepository>();
         #endregion OrgRepos
 
         #region PlansRepos
@@ -98,7 +100,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-        services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IEmailSender, EmailSender>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
