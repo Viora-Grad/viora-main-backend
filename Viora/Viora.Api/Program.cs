@@ -44,7 +44,6 @@ builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
     builder.Configuration, "Service");
 builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
     builder.Configuration, "Email");
-builder.Services.AddSignalR();
 #endregion Settings
 
 var app = builder.Build();
@@ -69,9 +68,6 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-app.MapHub<ScheduleHub>("/realtime-scheduling");
-
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? throw new InvalidOperationException("AllowedOrigins configuration is missing.");
 app.UseCors(builder =>
     builder.WithOrigins(allowedOrigins)
