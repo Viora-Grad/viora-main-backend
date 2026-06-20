@@ -14,8 +14,9 @@ public sealed class RegisterUserCommandHandler(
 {
     public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+        var gender = Enum.Parse<Gender>(request.Gender);
         var user = User.Create(
-        new PersonalInfo(request.FirstName, request.LastName, request.DateOfBirth, request.Gender),
+        new PersonalInfo(request.FirstName, request.LastName, request.DateOfBirth, gender),
         new Email(request.Email),
         dateTimeProvider.UtcNow
         );

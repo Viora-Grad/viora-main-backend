@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Controllers.Subscriptions;
+using Viora.Api.Extensions;
 using Viora.Application.Orders.ChangeSubscriptionOrder;
 using Viora.Application.Orders.CreateAddonOrder;
 using Viora.Application.Orders.CreateSubscriptionOrder;
@@ -28,9 +29,7 @@ public class OrderController : ControllerBase
     {
         var command = new CreateSubscriptionOrderCommand(request.OrganizationId, request.PlanId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
     [HttpPost]
@@ -41,9 +40,7 @@ public class OrderController : ControllerBase
     {
         var command = new RenewSubscriptionOrderCommand(subscriptionId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
 
@@ -55,9 +52,7 @@ public class OrderController : ControllerBase
     {
         var command = new ChangeSubscriptionOrderCommand(request.SubscriptionId, request.NewPlanId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
     [HttpPost]
@@ -68,9 +63,7 @@ public class OrderController : ControllerBase
     {
         var Command = new CreateAddonOrderCommand(createAddAddonRequest.OrganizationId, createAddAddonRequest.SubscriptionId, createAddAddonRequest.Addons);
         var result = await _sender.Send(Command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
 }

@@ -11,11 +11,8 @@ internal class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermis
 
         builder.HasKey(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId });
 
-        builder.HasData(
-            new RolePermission
-            {
-                RoleId = Role.Registered.Id,
-                PermissionId = Permission.UsersRead.Id
-            });
+        builder.HasData(new { RoleId = Role.Registered.Id, PermissionId = Permission.UsersRead.Id });
+
+
     }
 }
