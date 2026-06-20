@@ -2,7 +2,7 @@
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Internal;
 
-namespace Viora.Infrastructure.Repositories;
+namespace Viora.Infrastructure.Repositories.Subscriptions;
 
 internal sealed class SubscriptionRepository : Repository<Subscription>, ISubscriptionRepository
 {
