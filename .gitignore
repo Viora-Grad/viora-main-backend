@@ -65,5 +65,5 @@ nunit-*.xml
 /Viora/viora-d7020-firebase-adminsdk-fbsvc-1f8db5bf05.json
 
 # ONNX model binary — download via download-models.ps1
-Viora/Viora.Api/Models/*
+Viora/Viora.Api/Models/all-MiniLM-L6-v2/model.onnx
 Viora/Viora.Api/Knowledge/*
