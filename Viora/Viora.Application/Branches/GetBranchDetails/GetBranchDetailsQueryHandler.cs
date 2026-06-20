@@ -31,7 +31,7 @@ internal class GetBranchDetailsQueryHandler(
                 .ToList()
                 .AsReadOnly(),
             branch.Address.Value,
-            new Coordinations(branch.Location),
+            new Coordinates(branch.Location),
             branch.Status,
             branch.ContactEmail,
             branch.PhoneNumbers

@@ -13,7 +13,7 @@ public sealed record SearchBranchesResponse(
     float Rating,
     BranchStatus Status,
     string Address,
-    MediaResponse? CoverImageEncoded,
+    MediaResponse? CoverImage,
     string TimeLineId,
-    Coordinations Coordinations
+    Coordinates Coordinates
     );

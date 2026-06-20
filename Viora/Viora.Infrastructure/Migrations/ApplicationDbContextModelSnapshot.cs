@@ -74,7 +74,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRole");
+                    b.ToTable("UserRole", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
@@ -413,12 +413,15 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("SubscriptionOrder");
+                    b.ToTable("SubscriptionOrder", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Organizations.LegalPapers.LegalPaper", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApplicationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ApprovedById")
@@ -455,6 +458,8 @@ namespace Viora.Infrastructure.Migrations
                         });
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId");
 
                     b.HasIndex("AttachmentId")
                         .IsUnique();
@@ -1148,7 +1153,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasIndex("SubscriptionId");
 
-                    b.ToTable("SubscriptionAddon");
+                    b.ToTable("SubscriptionAddon", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Users.Customers.Customer", b =>
@@ -1239,7 +1244,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Users.Identity.RolePermission", b =>
@@ -1336,7 +1341,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("LocalCredential");
+                    b.ToTable("LocalCredential", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Infrastructure.Authentication.RefreshToken", b =>
@@ -1371,7 +1376,7 @@ namespace Viora.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[IsRevoked] = 0");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshToken", (string)null);
                 });
 
             modelBuilder.Entity("BranchGallery", b =>
@@ -1508,7 +1513,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("FeedbackId");
 
-                            b1.ToTable("Feedback");
+                            b1.ToTable("Feedback", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("FeedbackId");
@@ -1543,7 +1548,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("InventoryItemId");
 
-                            b1.ToTable("InventoryItem");
+                            b1.ToTable("InventoryItem", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("InventoryItemId");
@@ -1610,7 +1615,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("MedicalRecordId");
 
-                            b1.ToTable("MedicalRecords");
+                            b1.ToTable("MedicalRecords", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MedicalRecordId");
@@ -1635,6 +1640,12 @@ namespace Viora.Infrastructure.Migrations
 
             modelBuilder.Entity("Viora.Domain.Organizations.LegalPapers.LegalPaper", b =>
                 {
+                    b.HasOne("Viora.Domain.Organizations.OnBoardings.OrganizationApplication", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Viora.Domain.Medias.MediaFile", null)
                         .WithOne()
                         .HasForeignKey("Viora.Domain.Organizations.LegalPapers.LegalPaper", "AttachmentId")
@@ -1819,7 +1830,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("CustomerId", "Id");
 
-                            b1.ToTable("Contact");
+                            b1.ToTable("Contact", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -1849,7 +1860,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -1915,7 +1926,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                            b1.ToTable("Users", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -1959,7 +1970,7 @@ namespace Viora.Infrastructure.Migrations
 
                             b1.HasKey("OwnerId");
 
-                            b1.ToTable("Owners");
+                            b1.ToTable("Owners", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OwnerId");
