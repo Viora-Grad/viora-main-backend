@@ -37,6 +37,7 @@ using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
+using Viora.Infrastructure.Repositories.Subscriptions;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
