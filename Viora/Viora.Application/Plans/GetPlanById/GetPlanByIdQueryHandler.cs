@@ -3,7 +3,6 @@ using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Plans.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
-using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetPlanById;
 
@@ -20,34 +19,28 @@ namespace Viora.Application.Plans.GetPlanById;
 /// </summary>
 
 public class GetPlanByIdQueryHandler(
-    IPlanRepository planRepository,
-    IPlanFeatureRepository planFeatureRepository,
-    IFeatureRepository featureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlanByIdQuery, PlanResponse>
+    IPlanRepository planRepository
+) : IQueryHandler<GetPlanByIdQuery, PlanResponse>
 {
     public async Task<Result<PlanResponse>> Handle(GetPlanByIdQuery request, CancellationToken cancellationToken)
     {
         var plan = await planRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Plan with ID {request.Id} not found.");
-        var planFeatures = await planFeatureRepository.GetByPlanIdAsync(request.Id, cancellationToken);
-        var featureIds = planFeatures.Select(pf => pf.FeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
-        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Where(id => id.HasValue).Select(id => id.Value).ToList();
-        var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
-        var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
 
-        var featureDTOs = features.Select(f => new FeatureResponse(
-               f.Id,
-               f.FeatureKey.value,
-               f.Description.value
-            )
-        ).ToList();
-        var limitedFeatureDTOs = limitedFeatures.Select(lf => new LimitedFeatureResponse(
-            lf.Id,
-            lf.Key.value,
-            lf.Description.value,
-            lf.Limit
-            )
-        ).ToList();
+        var featureDTOs = plan.PlanFeatures
+            .Select(pf => new FeatureResponse(
+                    pf.Feature.Id,
+                    pf.Feature.FeatureKey.ToString(),
+                    pf.Feature.Description.ToString()
+            )).ToList();
+
+        var limitedFeatureDTOs = plan.PlanLimitedFeatures
+            .Select(plf => new LimitedFeatureResponse(
+                    plf.LimitedFeature.Id,
+                    plf.LimitedFeature.Key.ToString(),
+                    plf.LimitedFeature.Description.ToString(),
+                    plf.LimitValue
+            )).ToList();
         var planDTO = PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
         return Result.Success(planDTO);
 
