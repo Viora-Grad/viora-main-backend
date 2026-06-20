@@ -82,5 +82,19 @@ public class User : Entity
         user._roles.Add(Role.Registered); // default role assignment, can be changed later
         return user;
     }
+    public Result BecomeCustomer(Role customerRole)
+    {
+        if (_roles.Any(r => r.Id == Role.Customer.Id))
+            return Result.Failure(UserErrors.AlreadyCustomer);
+        _roles.Add(customerRole);
+        return Result.Success();
+    }
+    public Result AddRole(Role role)
+    {
+        if (_roles.Any(r => r.Id == role.Id))
+            return Result.Failure(UserErrors.RoleAlreadyAssigned);
+        _roles.Add(role);
+        return Result.Success();
+    }
 
 }

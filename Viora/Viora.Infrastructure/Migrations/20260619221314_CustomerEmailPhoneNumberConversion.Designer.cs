@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Viora.Infrastructure;
@@ -13,9 +14,11 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260619221314_CustomerEmailPhoneNumberConversion")]
+    partial class CustomerEmailPhoneNumberConversion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,66 +78,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRole");
-                });
-
-            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("EstimatedDuration")
-                        .HasColumnType("float");
-
-                    b.Property<bool>("IsCheckedIn")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastUpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("PaymentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("RequestPlatform")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReservationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
-                        .HasColumnName("RowVersion");
-
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StaffId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.HasIndex("StaffId");
-
-                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
@@ -1490,17 +1433,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
-                {
-                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
