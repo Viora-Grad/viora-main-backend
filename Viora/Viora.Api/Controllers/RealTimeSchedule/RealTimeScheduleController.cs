@@ -4,6 +4,7 @@ using Viora.Api.Extensions;
 using Viora.Application.RealTimeScheduling.CancelSchedule;
 using Viora.Application.RealTimeScheduling.CreateRecurringSchedule;
 using Viora.Application.RealTimeScheduling.CreateSchedule;
+using Viora.Application.RealTimeScheduling.DeleteShift;
 using Viora.Application.RealTimeScheduling.GetBranchSchedule;
 using Viora.Application.RealTimeScheduling.GetStaffShiftByDay;
 using Viora.Application.RealTimeScheduling.GetStaffShiftQuery;
@@ -73,6 +74,16 @@ public class RealTimeScheduleController : ControllerBase
     {
         var query = new GetStaffShiftByDayQuery(request.day, request.StaffId, request.ShiftId);
         var result = await _sender.Send(query);
+        return result.ToActionResult();
+    }
+
+
+    [HttpDelete]
+    [Route("api/schedule/shift/delete/{id}")]
+    public async Task<IActionResult> DeleteShift(Guid id)
+    {
+        var command = new DeleteShiftCommand(id);
+        var result = await _sender.Send(command);
         return result.ToActionResult();
     }
 }
