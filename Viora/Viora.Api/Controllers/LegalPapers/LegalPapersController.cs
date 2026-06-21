@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
@@ -11,7 +13,13 @@ namespace Viora.Api.Controllers.LegalPapers;
 [ApiController]
 public class LegalPapersController(ISender sender) : ControllerBase
 {
+    private Guid? UserId =>
+        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)
+            ? userId
+            : null;
+
     [HttpPost]
+    [Authorize]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> AddLegalPaper(
         [FromForm] AddLegalPaperRequest request,
@@ -32,6 +40,7 @@ public class LegalPapersController(ISender sender) : ControllerBase
 
         var command = new AddLegalPaperCommand(
             request.ApplicationId,
+            (Guid)UserId!,
             media,
             request.Type,
             request.OfficialName,

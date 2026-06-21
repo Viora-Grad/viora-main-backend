@@ -34,6 +34,9 @@ internal sealed class AddLegalPaperCommandHandler(
         if (duplicate != null)
             return Result.Failure<Guid>(LegalPaperErrors.PaperExistsAndUpdated);
 
+        if (request.UserId != application.OwnerId)
+            throw new UnauthorizedAccessException("Only application owners can submit legal papers");
+
         var mediaContent = request.MediaContent;
         var extension = Path.GetExtension(mediaContent.FileName);
         var storageKey = $"legal-papers/{request.ApplicationId}/{Guid.NewGuid()}{extension}";
