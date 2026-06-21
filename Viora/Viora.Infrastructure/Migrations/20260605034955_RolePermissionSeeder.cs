@@ -6,6 +6,7 @@
 
 namespace Viora.Infrastructure.Migrations
 {
+    // TODO remove this migration from the history
     /// <inheritdoc />
     public partial class RolePermissionSeeder : Migration
     {

@@ -165,6 +165,38 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Branch", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.ChatSessions.ChatSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("HistoryJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastActiveAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LastActiveAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatSessions", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Feedbacks.Feedback", b =>
                 {
                     b.Property<Guid>("Id")
