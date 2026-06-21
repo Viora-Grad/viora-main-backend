@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Viora.Api.Extensions;
 using Viora.Application.Subscriptions.GetOrganizationSubscriptions;
 using Viora.Application.Subscriptions.RemoveAddon;
 
@@ -22,9 +23,7 @@ public class SubscriptionController : ControllerBase
     {
         var query = new GetOrganizationSubscriptionsQuery(organizationId);
         var result = await _sender.Send(query, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok(result.Value);
+        return result.ToActionResult();
     }
 
 
@@ -36,9 +35,7 @@ public class SubscriptionController : ControllerBase
     {
         var command = new RemoveAddonCommand(request.SubscriptionId, request.SubscriptionAddonId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
 }

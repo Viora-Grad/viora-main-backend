@@ -18,7 +18,7 @@ internal class GetLoggedInUserQueryHandler(IUserContext userContext, IUserReposi
             LastName = user.PersonalInfo.LastName,
             Email = user.Email.Value,
             DateOfBirth = user.PersonalInfo.DateOfBirth,
-            Gender = user.PersonalInfo.Gender
+            Gender = user.PersonalInfo.Gender.ToString(),
         };
         return Result.Success(result);
 

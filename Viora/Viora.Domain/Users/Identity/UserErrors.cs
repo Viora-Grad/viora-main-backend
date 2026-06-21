@@ -12,6 +12,8 @@ public static class UserErrors
     public static readonly Error RegistrationFailed = new("User.RegistrationFailed", "User registration failed due to an internal error", ErrorCategory.Internal);
     public static readonly Error IdentityLinked = new("User.IdentityLinked", "The provided identity is already linked before", ErrorCategory.Conflict);
     public static readonly Error AlreadyOwner = new("User.AlreadyOwner", "The user is already an owner", ErrorCategory.Conflict);
+    public static readonly Error AlreadyCustomer = new("User.AlreadyCustomer", "The user is already a customer", ErrorCategory.Conflict);
+    public static readonly Error RoleAlreadyAssigned = new("User.RoleAlreadyAssigned", "The user already has the specified role assigned", ErrorCategory.Conflict);
 
 
 }

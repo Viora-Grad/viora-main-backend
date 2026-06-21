@@ -69,4 +69,10 @@ internal class UserRepository(ApplicationDbContext dbContext) : Repository<User>
     {
         return DbContext.Set<Role>().FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
     }
+
+    public void AttachRole(Role role)
+    {
+        DbContext.Set<Role>().Attach(role);
+        return;
+    }
 }

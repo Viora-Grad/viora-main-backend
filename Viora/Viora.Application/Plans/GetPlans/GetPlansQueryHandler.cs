@@ -27,11 +27,10 @@ public class GetPlansQueryHandler(
 {
     public async Task<Result<List<PlanResponse>>> Handle(GetPlansQuery request, CancellationToken cancellationToken)
     {
-        // 1. Fetch all data upfront — 4 DB calls total, not N*M
         var plans = await planRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (!plans.Any())
             throw new NotFoundException("No plans found.");
-
+        /*
         var planIds = plans.Select(p => p.Id).ToList();
 
         var planFeatures = await planFeatureRepository.GetByPlanIdsAsync(planIds, cancellationToken);
@@ -46,9 +45,9 @@ public class GetPlansQueryHandler(
         var limitedFeatureLookup = limitedFeatures.ToDictionary(lf => lf.Id);
         var planFeatureLookup = planFeatures.GroupBy(pf => pf.PlanId)
                                                .ToDictionary(g => g.Key, g => g.ToList());
-
+*/
         // 3. Map in memory
-        var planDtos = plans.Select(plan =>
+        /*var planDtos = plans.Select(plan =>
         {
             var features = planFeatureLookup.GetValueOrDefault(plan.Id, []);
             var featureDtos = features
@@ -61,6 +60,26 @@ public class GetPlansQueryHandler(
                                     .ToList();
 
             return PlanResponse.MapToDTO(plan, featureDtos, limitedFeatureDtos);
+        }).ToList();*/
+
+        var planDtos = plans.Select(plan =>
+        {
+
+            var featureDTOs = plan.PlanFeatures
+            .Select(pf => new FeatureResponse(
+                 pf.Feature.Id,
+                 pf.Feature.FeatureKey.value,
+                 pf.Feature.Description.value
+             )).ToList();
+
+            var limitedFeatureDTOs = plan.PlanLimitedFeatures
+            .Select(plf => new LimitedFeatureResponse(
+                   plf.LimitedFeature.Id,
+                   plf.LimitedFeature.Key.value,
+                   plf.LimitedFeature.Description.value,
+                   plf.LimitValue
+           )).ToList();
+            return PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);
         }).ToList();
 
         return Result.Success(planDtos);

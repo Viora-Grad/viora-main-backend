@@ -852,9 +852,6 @@ namespace Viora.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<long>("Limit")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.ToTable("LimitedFeatures", (string)null);
@@ -898,10 +895,7 @@ namespace Viora.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("FeatureId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LimitedFeatureId")
+                    b.Property<Guid>("FeatureId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("PlanId")
@@ -911,11 +905,33 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasIndex("FeatureId");
 
+                    b.HasIndex("PlanId");
+
+                    b.ToTable("PlanFeatures", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Plans.PlanLimitedFeature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("LimitValue")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("LimitedFeatureId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
                     b.HasIndex("LimitedFeatureId");
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("PlanFeatures", (string)null);
+                    b.ToTable("PlanLimitedFeatures", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Scheduling.ScheduledDomainEvent", b =>
@@ -1161,10 +1177,19 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Emails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("MedicalRecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhoneNumbers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProfilePicId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UserName")
@@ -1172,6 +1197,10 @@ namespace Viora.Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProfilePicId")
+                        .IsUnique()
+                        .HasFilter("[ProfilePicId] IS NOT NULL");
 
                     b.ToTable("Customers", (string)null);
                 });
@@ -1719,19 +1748,36 @@ namespace Viora.Infrastructure.Migrations
 
             modelBuilder.Entity("Viora.Domain.Plans.PlanFeature", b =>
                 {
-                    b.HasOne("Viora.Domain.Plans.Features.Feature", null)
+                    b.HasOne("Viora.Domain.Plans.Features.Feature", "Feature")
                         .WithMany()
-                        .HasForeignKey("FeatureId");
-
-                    b.HasOne("Viora.Domain.Plans.Features.LimitedFeature", null)
-                        .WithMany()
-                        .HasForeignKey("LimitedFeatureId");
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Viora.Domain.Plans.Plan", null)
-                        .WithMany()
+                        .WithMany("PlanFeatures")
                         .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Feature");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Plans.PlanLimitedFeature", b =>
+                {
+                    b.HasOne("Viora.Domain.Plans.Features.LimitedFeature", "LimitedFeature")
+                        .WithMany()
+                        .HasForeignKey("LimitedFeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Plans.Plan", null)
+                        .WithMany("PlanLimitedFeatures")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LimitedFeature");
                 });
 
             modelBuilder.Entity("Viora.Domain.Services.Service", b =>
@@ -1807,6 +1853,11 @@ namespace Viora.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Viora.Domain.Medias.MediaFile", null)
+                        .WithOne()
+                        .HasForeignKey("Viora.Domain.Users.Customers.Customer", "ProfilePicId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.OwnsMany("Viora.Domain.Shared.Contact", "Contacts", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
@@ -1865,8 +1916,6 @@ namespace Viora.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
                         });
-
-                    b.Navigation("Contacts");
 
                     b.Navigation("PersonalInfo")
                         .IsRequired();
@@ -1994,6 +2043,13 @@ namespace Viora.Infrastructure.Migrations
             modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
                 {
                     b.Navigation("Addons");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Plans.Plan", b =>
+                {
+                    b.Navigation("PlanFeatures");
+
+                    b.Navigation("PlanLimitedFeatures");
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Subscription", b =>
