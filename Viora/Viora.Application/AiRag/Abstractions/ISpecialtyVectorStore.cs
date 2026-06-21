@@ -11,7 +11,7 @@ public interface ISpecialtyVectorStore
     Task<List<MedicalInquiry>> SearchAsync(string query, int topK = 10, CancellationToken ct = default);
 
     /// <summary>
-    /// Ingests a batch of specialty names into Qdrant. Idempotent: if a name already exists, it is overwritten.
+    /// Streams specialty inquiries into Qdrant in batches. Idempotent: existing ids are overwritten.
     /// </summary>
-    Task IndexAsync(IEnumerable<MedicalInquiry> specialtyNames, CancellationToken ct = default);
+    Task IndexAsync(IAsyncEnumerable<MedicalInquiry> inquiries, CancellationToken ct = default);
 }

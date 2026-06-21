@@ -4,6 +4,7 @@ using Scalar.AspNetCore;
 using Viora.Api.Middleware;
 using Viora.Application;
 using Viora.Application.Abstractions.Mail;
+using Viora.Application.AiRag.Ingestion;
 using Viora.Application.Abstractions.Media;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
@@ -11,7 +12,6 @@ using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
 using Viora.Infrastructure.AiRag;
-using Viora.Infrastructure.RealTime.Hubs;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
@@ -30,6 +30,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAiRagServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
+
 
 #region Settings
 builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
@@ -47,6 +49,34 @@ builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
 #endregion Settings
 
 var app = builder.Build();
+
+// Offline bulk ingestion: `dotnet run -- ingest-specialty [path]`.
+// Runs the full streaming/batched ingest outside the HTTP pipeline (no request
+// timeout) and exits. Falls back to AiRag:SpecialtyBase:FilePath when no path given.
+if (args.Length > 0 && args[0] == "ingest-specialty")
+{
+    using var scope = app.Services.CreateScope();
+    var sp = scope.ServiceProvider;
+    var command = sp.GetRequiredService<IngestSpecialtyCommand>();
+    var cfg = sp.GetRequiredService<IConfiguration>();
+
+    var path = args.Length > 1 ? args[1] : cfg["AiRag:SpecialtyBase:FilePath"];
+    if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+    {
+        Console.Error.WriteLine($"Specialty file not found: {path ?? "(null)"}");
+        return;
+    }
+
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    Console.WriteLine($"Ingesting specialty inquiries from {path} ...");
+
+    await using var stream = File.OpenRead(path);
+    await command.ExecuteAsync(SpecialtyInquiryParser.ParseAsync(stream), CancellationToken.None);
+
+    sw.Stop();
+    Console.WriteLine($"Done in {sw.Elapsed}.");
+    return;
+}
 
 if (app.Environment.IsDevelopment())
 {

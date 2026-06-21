@@ -14,7 +14,16 @@ public sealed class OnnxEmbeddingService : ITextEmbeddingGenerationService, IDis
 
     public OnnxEmbeddingService(OnnxOptions options)
     {
-        _session = new InferenceSession(options.ModelPath);
+        // Tune for CPU throughput: full graph optimization and intra-op
+        // parallelism across physical cores. Set once at session creation.
+        var sessionOptions = new SessionOptions
+        {
+            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
+            IntraOpNumThreads = Environment.ProcessorCount,
+            EnableMemoryPattern = true,
+        };
+
+        _session = new InferenceSession(options.ModelPath, sessionOptions);
         _tokenizer = new BertTokenizer(options.VocabPath);
         _maxLength = options.MaxLength;
 

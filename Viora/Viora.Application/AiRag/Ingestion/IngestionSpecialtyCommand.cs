@@ -12,10 +12,9 @@ public sealed class IngestSpecialtyCommand
         _store = store;
     }
 
-    public async Task ExecuteAsync(IEnumerable<MedicalInquiry> inquiries, CancellationToken ct = default)
+    public async Task ExecuteAsync(IAsyncEnumerable<MedicalInquiry> inquiries, CancellationToken ct = default)
     {
-        if (inquiries == null)
-            throw new ArgumentException("Inquiries cannot be null.", nameof(inquiries));
+        ArgumentNullException.ThrowIfNull(inquiries);
 
         await _store.IndexAsync(inquiries, ct);
     }

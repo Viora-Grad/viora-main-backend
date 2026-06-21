@@ -4,6 +4,7 @@ namespace Viora.Infrastructure.Seeding.Data;
 
 internal class FeatureData
 {
+    // TODO make this wired like LimitedFeatureData.cs
     public static IReadOnlyList<Feature> All { get; } =
         [
              Feature.Create(

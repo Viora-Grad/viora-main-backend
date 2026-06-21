@@ -1,10 +1,8 @@
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Application.AiRag.Ingestion;
-using Viora.Domain.MedicalInquiries;
 
 namespace Viora.Api.Controllers.AiRag;
 
@@ -72,9 +70,8 @@ public sealed class IngestionController : ControllerBase
             if (!System.IO.File.Exists(path))
                 return NotFound(new { Error = $"Specialty file not found at: {path}" });
 
-            var json = await System.IO.File.ReadAllTextAsync(path, ct);
-            var inquiries = ParseSpecialtyInquiries(json);
-            await _ingestSpecialty.ExecuteAsync(inquiries, ct);
+            await using var stream = System.IO.File.OpenRead(path);
+            await _ingestSpecialty.ExecuteAsync(SpecialtyInquiryParser.ParseAsync(stream, ct), ct);
             return NoContent();
         }
         catch (Exception ex)
@@ -92,8 +89,9 @@ public sealed class IngestionController : ControllerBase
     {
         try
         {
-            var inquiries = ParseSpecialtyInquiries(json.GetRawText());
-            await _ingestSpecialty.ExecuteAsync(inquiries, ct);
+            var bytes = Encoding.UTF8.GetBytes(json.GetRawText());
+            using var stream = new MemoryStream(bytes);
+            await _ingestSpecialty.ExecuteAsync(SpecialtyInquiryParser.ParseAsync(stream, ct), ct);
             return NoContent();
         }
         catch (Exception ex)
@@ -122,24 +120,6 @@ public sealed class IngestionController : ControllerBase
             _logger.LogError(ex, "Knowledge ingestion from body failed");
             return StatusCode(500, new { Error = $"Ingestion failed: {ex.Message}" });
         }
-    }
-
-    // This method parses the specialty inquiries JSON into a collection of MedicalInquiry objects.
-    private static IEnumerable<MedicalInquiry> ParseSpecialtyInquiries(string json)
-    {
-        var items = JsonSerializer.Deserialize<MedicalInquiryJson[]>(json)
-            ?? throw new InvalidOperationException("Failed to parse specialty inquiries JSON.");
-
-        return items.Select(item =>
-        {
-            var id = new Guid(SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Category}:{item.Question}"))[..16]);
-            return new MedicalInquiry
-            {
-                Id = id.ToString(),
-                Question = item.Question,
-                Specialty = item.Category,
-            };
-        });
     }
 
 }

@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
@@ -84,7 +85,7 @@ public static class DependencyInjection
         #endregion Branches
 
         services.AddScoped<IMediaRepository, MediaRepository>();
-        services.AddScoped<Domain.ChatSessions.IChatSessionRepository, Repositories.ChatSessionRepository>();
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
 
         #region ServicesRegisters
