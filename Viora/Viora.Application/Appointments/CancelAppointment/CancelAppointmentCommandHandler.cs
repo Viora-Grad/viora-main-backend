@@ -1,30 +1,51 @@
-﻿using Viora.Application.Abstractions.Clock;
+﻿using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
+using Viora.Domain.Staffs;
+using Viora.Domain.Users.Customers;
 
 namespace Viora.Application.Appointments.CancelAppointment;
 
 internal class CancelAppointmentCommandHandler(
+    IUserContext userContext,
+    ICustomerRepository customerRepository,
+    IStaffRepository staffRepository,
     IAppointmentsRepository appointmentsRepository,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CancelAppointmentCommand>
 {
     public async Task<Result> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken);
-        if (appointment is null)
+        var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
+            throw new NotFoundException($"Appointment with ID {request.AppointmentId} not found");
+
+        var customer = await customerRepository.GetByIdAsync(userContext.UserId, cancellationToken);
+        if (customer is not null)
         {
-            return Result.Failure(AppointmentErrors.AppointmentNotFound);
-        }
-        var now = dateTimeProvider.UtcNow;
-        var canCancel = appointment.ReservationDate > now.AddHours(3); // Assuming appointments can only be canceled if they are more than 3 hours away
-        if (canCancel)
-        {
-            appointmentsRepository.Remove(appointment);
+            var result = appointment.Cancel(dateTimeProvider.UtcNow, "Appointment cancelled by customer", Creator.Customer);
+
+            if (result.IsFailure)
+                return Result.Failure(result.Error);
+
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return Result.Success();
+            return result;
+
         }
-        return Result.Failure(AppointmentErrors.CancellationProhibited);
+        var staff = await staffRepository.GetByIdAsync(userContext.UserId, cancellationToken) ??
+            throw new NotFoundException($"Could not find request maker account");
+
+        var staffResult = appointment.Cancel(dateTimeProvider.UtcNow, "Appointment cancelled by staff", Creator.Staff);
+
+        if (staffResult.IsFailure)
+            return Result.Failure(staffResult.Error);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+
     }
+
 }

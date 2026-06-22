@@ -14,13 +14,14 @@ namespace Viora.Domain.Appointments;
 /// 
 public sealed class Appointment : Entity
 {
-    public Guid CustomerId { get; private set; }
+    public Guid? CustomerId { get; private set; } // nullable if only staff made the appointment for unknown customer
     public Guid ServiceId { get; private set; }
     public Guid StaffId { get; private set; }
     public Guid BranchId { get; private set; }
     public Guid? PaymentId { get; private set; }
     public DateTime ReservationDate { get; private set; }
     public CustomerStatus Status { get; private set; }
+    public int AppointmentQueueNumber { get; private set; } // This can be set by the application service when booking the appointment based on the number of existing appointments for the same date, time, and staff member
     public bool IsCheckedIn { get; private set; } = false;
     public Creator CreatedBy { get; private set; }
     public Platform RequestPlatform { get; private set; }
@@ -30,13 +31,13 @@ public sealed class Appointment : Entity
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastUpdatedAt { get; private set; }
 
-    public Customer Customer { get; private set; } = null!; // Navigation property
+    public Customer? Customer { get; private set; }
     public Service Service { get; private set; } = null!; // Navigation property
     public Staff Staff { get; private set; } = null!; // Navigation property
     public Branch Branch { get; private set; } = null!; // Navigation property
     private Appointment() { } // For EF Core
     private Appointment(Guid id,
-        Guid customerId,
+        Guid? customerId,
         Guid serviceId,
         Guid staffId,
         Guid branchId,
@@ -61,7 +62,8 @@ public sealed class Appointment : Entity
         CreatedAt = createdAt;
     }
 
-    public static Appointment Book(Guid customerId,
+    public static Appointment Book(
+        Guid? customerId,
         Guid serviceId,
         Guid staffId,
         Guid branchId,
@@ -90,21 +92,30 @@ public sealed class Appointment : Entity
         appointment.RaiseDomainEvent(new AppointmentBookedEvent(appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
         return appointment;
     }
-    public Result CheckIn(DateTime checkInTime)
+
+    public Result CheckIn(DateTime checkInTime, Creator madeBy)
     {
+        if (madeBy == Creator.Staff)
+        {
+            Status = CustomerStatus.InProgress;
+            IsCheckedIn = true;
+            LastUpdatedAt = checkInTime;
+            RaiseDomainEvent(new AppointmentCheckedInEvent(Id, checkInTime)); // triggers the background job to send a notification to the staff about the customer check-in
+            return Result.Success();
+        }
         // Only allow check-in if the customer has not arrived yet
-        // TODO: Publish an event when the customer checks in
         if (Status != CustomerStatus.NotArrived)
             return Result.Failure(AppointmentErrors.CheckInProhibited);
-
+        if (checkInTime.AddMinutes(30) < ReservationDate)
+            return Result.Failure(AppointmentErrors.CheckInNotWithinAcceptableWindow);
+        Status = CustomerStatus.InProgress;
         IsCheckedIn = true;
-        Status = CustomerStatus.Waiting;
         LastUpdatedAt = checkInTime;
-
         RaiseDomainEvent(new AppointmentCheckedInEvent(Id, checkInTime)); // triggers the background job to send a notification to the staff about the customer check-in
         return Result.Success();
     }
-    public Result Start(DateTime startTime)
+
+    public Result Start(DateTime startTime) // this sorta is not valid state anymore since check-in covers that 
     {
         // Only allow starting the appointment if the customer is waiting
         if (Status != CustomerStatus.Waiting)
@@ -115,9 +126,7 @@ public sealed class Appointment : Entity
     }
     public Result Complete(DateTime completeTime)
     {
-        // Only allow completing the appointment if it is in progress
-        if (Status != CustomerStatus.InProgress)
-            return Result.Failure(AppointmentErrors.CompleteProhibited);
+        // since it's only done by staff, we can immediately set the status to completed without checking the current status, as the staff would know if the appointment is in progress or not
         Status = CustomerStatus.Completed;
         LastUpdatedAt = completeTime;
 
@@ -149,14 +158,22 @@ public sealed class Appointment : Entity
         RaiseDomainEvent(new AppointmentNoShowEvent(Id, ReservationDate));
         return Result.Success();
     }
-    public Result Cancel(DateTime cancelTime)
+    public Result Cancel(DateTime cancelTime, string reason, Creator madeBy)
     {
+        if (madeBy == Creator.Staff)
+        {
+            Status = CustomerStatus.Canceled;
+            LastUpdatedAt = cancelTime;
+            RaiseDomainEvent(new AppointmentCanceledEvent(Id, ReservationDate, reason, madeBy));
+            return Result.Success();
+        }
+
         // Only allow canceling the appointment if it is not completed
-        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress || cancelTime.AddHours(2) > ReservationDate)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
         Status = CustomerStatus.Canceled;
         LastUpdatedAt = cancelTime;
-        RaiseDomainEvent(new AppointmentCanceledEvent(Id, ReservationDate));
+        RaiseDomainEvent(new AppointmentCanceledEvent(Id, ReservationDate, reason, madeBy));
         return Result.Success();
     }
 }

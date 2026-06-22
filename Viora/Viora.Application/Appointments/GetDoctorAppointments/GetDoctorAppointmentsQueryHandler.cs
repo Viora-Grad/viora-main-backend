@@ -1,22 +1,19 @@
-﻿using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Abstractions.Pagination;
 using Viora.Application.Appointments.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 
-namespace Viora.Application.Appointments.GetCustomerAllAppointments;
+namespace Viora.Application.Appointments.GetDoctorAppointments;
 
-internal class GetCustomerAllAppointmentsQueryHandler(
-    IUserContext userContext,
-    IAppointmentsRepository appointmentsRepository) : IQueryHandler<GetCustomerAllAppointmentsQuery, PaginatedModel<AppointmentsResponse>>
+internal class GetDoctorAppointmentsQueryHandler(
+    IAppointmentsRepository appointmentsRepository
+    ) : IQueryHandler<GetDoctorAppointmentsQuery, PaginatedModel<AppointmentsResponse>>
 {
-    public async Task<Result<PaginatedModel<AppointmentsResponse>>> Handle(GetCustomerAllAppointmentsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedModel<AppointmentsResponse>>> Handle(GetDoctorAppointmentsQuery request, CancellationToken cancellationToken)
     {
-        var userId = userContext.UserId;
-
         var parameters = new GetAppointmentsParameters(
-            CustomerId: userId,
+            CustomerId: request.CustomerId,
             BranchId: request.BranchId,
             ServiceId: request.ServiceId,
             StaffId: request.StaffId,
@@ -30,8 +27,9 @@ internal class GetCustomerAllAppointmentsQueryHandler(
             Page: request.Page,
             PageSize: request.PageSize
         );
-        var specs = new GetAppointmentsSpecification(parameters);
-        var appointments = await appointmentsRepository.ListAsync(specs, cancellationToken);
+        var specification = new GetAppointmentsSpecification(parameters);
+        var appointments = await appointmentsRepository.ListAsync(specification, cancellationToken);
+
         var response = appointments.Select(a => new AppointmentsResponse
         {
             AppointmentId = a.Id,
@@ -41,6 +39,8 @@ internal class GetCustomerAllAppointmentsQueryHandler(
             ReservationDate = a.ReservationDate,
             Status = a.Status,
             EstimatedDuration = a.EstimatedDuration,
+            CustomerId = a.CustomerId,
+            CustomerName = a.Customer?.PersonalInfo.FirstName + " " + a.Customer?.PersonalInfo.LastName ?? string.Empty,
             ServiceName = a.Service?.Name ?? string.Empty,
             StaffName = $"", // staff not implemented yet
             Cost = $"{a.Service?.Cost.Amount}{a.Service?.Cost.Currency}"

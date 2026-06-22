@@ -1,13 +1,20 @@
 ﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Abstractions.Pagination;
+using Viora.Application.Appointments.Shared;
 
-namespace Viora.Application.Appointments.GetCustomerAppointments;
+namespace Viora.Application.Appointments.GetCustomerAllAppointments;
 
 public sealed record GetCustomerAllAppointmentsQuery(
-    bool IncludeCancelled,
-    bool IncludeCompleted,
-    bool IncludeStaffObject,
-    bool IncludeServiceObject,
-    bool IncludeBranchObject,
+    Guid CustomerId,
+    Guid? BranchId = null,
+    Guid? ServiceId = null,
+    Guid? StaffId = null,
+    IEnumerable<string>? CustomerStatus = null,
+    bool? IncludeStaffObject = false,
+    bool? IncludeServiceObject = false,
+    bool? IncludeBranchObject = false,
+    DateTime? ReservationDate = null,
+    DateTime? FromDate = null,
+    DateTime? ToDate = null,
     int Page = 1,
-    int PageSize = 20) : IQuery<PaginatedModel<GetCustomerAllAppointmentsResponse>>;
+    int PageSize = 20) : IQuery<PaginatedModel<AppointmentsResponse>>;

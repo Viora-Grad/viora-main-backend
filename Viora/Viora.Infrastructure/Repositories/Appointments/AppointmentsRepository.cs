@@ -46,6 +46,15 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
+    public override async Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<Appointment>()
+            .Include(appointment => appointment.Customer)
+            .Include(appointment => appointment.Service)
+            .Include(appointment => appointment.Staff)
+            .Include(appointment => appointment.Branch)
+            .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
+    }
 
     public async Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
