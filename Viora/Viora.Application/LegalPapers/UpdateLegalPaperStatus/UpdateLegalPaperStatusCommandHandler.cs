@@ -22,8 +22,8 @@ internal class UpdateLegalPaperStatusCommandHandler(
 
         var result = request.Status switch
         {
-            AcceptanceStatus.Accepted => legalPaper.Accept(dateTimeProvider.UtcNow),
-            AcceptanceStatus.Denied => legalPaper.Deny(dateTimeProvider.UtcNow),
+            AcceptanceStatus.Accepted => legalPaper.Accept(dateTimeProvider.UtcNow, request.AdminId),
+            AcceptanceStatus.Denied => legalPaper.Deny(dateTimeProvider.UtcNow, request.AdminId),
             _ => Result.Failure(LegalPaperErrors.PaperStatusNotUnderReview)
         };
 

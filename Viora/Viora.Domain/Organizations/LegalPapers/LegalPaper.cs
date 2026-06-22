@@ -62,24 +62,26 @@ public sealed class LegalPaper : Entity
         Status = AcceptanceStatus.Expired;
     }
 
-    public Result Accept(DateTime currentDateTime)
+    public Result Accept(DateTime currentDateTime, Guid adminId)
     {
         var passesExpiryCheckResult = PassesExpiryCheck(currentDateTime);
         if (passesExpiryCheckResult.IsFailure)
             return Result.Failure(passesExpiryCheckResult.Error);
 
         Status = AcceptanceStatus.Accepted;
+        ApprovedById = adminId;
 
         return Result.Success();
     }
 
-    public Result Deny(DateTime currentDateTime)
+    public Result Deny(DateTime currentDateTime, Guid adminId)
     {
         var passesExpiryCheckResult = PassesExpiryCheck(currentDateTime);
         if (passesExpiryCheckResult.IsFailure)
             return Result.Failure(passesExpiryCheckResult.Error);
 
         Status = AcceptanceStatus.Denied;
+        ApprovedById = adminId;
 
         return Result.Success();
 

@@ -1,14 +1,12 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Organizations.AddToGallery;
-using Viora.Application.Organizations.ApproveOnboardRequest;
-using Viora.Application.Organizations.GetApplicationDetails;
 using Viora.Application.Organizations.GetOrganizationDetails;
 using Viora.Application.Organizations.HideOrganization;
-using Viora.Application.Organizations.RequestOnboard;
-using Viora.Application.Organizations.SearchApplications;
 using Viora.Application.Organizations.SearchOrganizations;
 using Viora.Application.Organizations.SuspendOrganization;
 using Viora.Application.Organizations.UpdateLogo;
@@ -20,6 +18,11 @@ namespace Viora.Api.Controllers.Oganizations;
 [ApiController]
 public class OrganizationsController(ISender sender) : ControllerBase
 {
+    private Guid? UserId =>
+    Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)
+        ? userId
+        : null;
+
     [HttpGet]
     public async Task<IActionResult> SearchOrganizations(Guid? id, string? country, string? name, string? serviceType, double minimumRating = 0.0, string? sortBy = null, int page = 1, int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -39,6 +42,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
 
     [HttpPost("{organizationId:guid}/gallery/images")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<IActionResult> AddImageToGallery(
     Guid organizationId,
     IFormFileCollection files,
@@ -56,6 +60,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
 
     [HttpPost("{organizationId:guid}/gallery/documents")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<IActionResult> AddDocToGallery(
     Guid organizationId,
     IFormFileCollection files,
@@ -79,9 +84,10 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{organizationId:guid}/suspend")]
+    [Authorize]
     public async Task<IActionResult> SuspendOrganization(Guid organizationId, SuspendOrganizationRequest request, CancellationToken cancellationToken)
     {
-        var command = new SuspendOrganizationCommand(organizationId, request.SuspendedById, request.Reason, request.Notes);
+        var command = new SuspendOrganizationCommand(organizationId, UserId, request.Reason, request.Notes);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }

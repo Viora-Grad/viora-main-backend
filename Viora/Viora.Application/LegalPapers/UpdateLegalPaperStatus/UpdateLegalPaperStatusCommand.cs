@@ -3,4 +3,4 @@ using Viora.Domain.Organizations.LegalPapers.Internals;
 
 namespace Viora.Application.LegalPapers.UpdateLegalPaperStatus;
 
-public sealed record UpdateLegalPaperStatusCommand(Guid LegalPaperId, AcceptanceStatus Status) : ICommand;
+public sealed record UpdateLegalPaperStatusCommand(Guid LegalPaperId, Guid AdminId, AcceptanceStatus Status) : ICommand;

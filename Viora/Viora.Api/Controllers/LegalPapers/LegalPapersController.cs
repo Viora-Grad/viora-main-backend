@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.LegalPapers.AddLegalPaper;
@@ -51,12 +51,13 @@ public class LegalPapersController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{legalPaperId:guid}/status")]
+    [Authorize]
     public async Task<IActionResult> UpdateStatus(
         Guid legalPaperId,
         UpdateLegalPaperStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateLegalPaperStatusCommand(legalPaperId, request.Status);
+        var command = new UpdateLegalPaperStatusCommand(legalPaperId, (Guid)UserId!, request.Status);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }

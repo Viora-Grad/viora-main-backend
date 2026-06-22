@@ -28,7 +28,7 @@ public sealed record LegalPaper(
     Guid Id,
     string Name,
     MediaResponse Media,
-    Approval? ApprovedBy,
+    Approval? ActionBy,
     DateTime SubmittedOnUtc,
     DateTime ExpiryDateUtc);
 

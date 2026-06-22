@@ -18,10 +18,18 @@ internal sealed class GetApplicationDetailsQueryHandler(
 {
     public async Task<Result<ApplicationDetailsResponse>> Handle(GetApplicationDetailsQuery request, CancellationToken cancellationToken)
     {
-        var application = await applicationRepository.GetByIdAsync(request.Id, cancellationToken)
-            ?? throw new NotFoundException($"Application {request.Id} was not found.");
+        var application = request.Id.HasValue
+            ? await applicationRepository.GetByIdAsync(request.Id.Value, cancellationToken)
+            : request.OwnerId.HasValue
+                ? await applicationRepository.GetLatestApplicationForOwnerAsync(request.OwnerId.Value, cancellationToken)
+                : throw new NotFoundException("An application id or owner id must be provided.");
 
-        var legalPapers = (await legalPaperRepository.GetByApplicationIdAsync(request.Id, cancellationToken)).ToList();
+        if (application is null)
+            throw new NotFoundException(request.Id.HasValue
+                ? $"Application {request.Id} was not found."
+                : $"No application was found for owner {request.OwnerId}.");
+
+        var legalPapers = (await legalPaperRepository.GetByApplicationIdAsync(application.Id, cancellationToken)).ToList();
 
         var userIds = new HashSet<Guid> { application.OwnerId };
 
