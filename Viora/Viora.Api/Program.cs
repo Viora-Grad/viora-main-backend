@@ -103,6 +103,10 @@ if (app.Environment.IsDevelopment())
 
     var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
     await seeder.SeedAsync();
+
+    // Dev-only scenario data (loginable personas across entity states). Runs after reference data.
+    var devSeeder = scope.ServiceProvider.GetRequiredService<IDevDataSeeder>();
+    await devSeeder.SeedAsync();
 }
 
 // Skipped in Docker — no dev cert available

@@ -105,6 +105,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+        services.AddScoped<IDevDataSeeder, DevDataSeeder>();
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         #endregion ServicesRegisters
