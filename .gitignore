@@ -67,3 +67,6 @@ nunit-*.xml
 # ONNX model binary — download via download-models.ps1
 Viora/Viora.Api/Models/all-MiniLM-L6-v2/model.onnx
 Viora/Viora.Api/Knowledge/*
+
+# MobileApp
+MobileApp
