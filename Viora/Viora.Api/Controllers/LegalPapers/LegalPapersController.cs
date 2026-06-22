@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.LegalPapers.AddLegalPaper;
+using Viora.Application.LegalPapers.GetLegalPaperFile;
 using Viora.Application.LegalPapers.UpdateLegalPaperStatus;
 
 namespace Viora.Api.Controllers.LegalPapers;
@@ -48,6 +49,27 @@ public class LegalPapersController(ISender sender) : ControllerBase
 
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
+    }
+
+    // Sensitive media is served through its owning legal paper, not a generic media-by-id
+    // endpoint: the handler authorizes against the paper's application owner (admins are
+    // privileged) so the underlying media id is never an access primitive.
+    [HttpGet("{legalPaperId:guid}/file")]
+    [Authorize]
+    public async Task<IActionResult> GetFile(Guid legalPaperId, CancellationToken cancellationToken)
+    {
+        var query = new GetLegalPaperFileQuery(
+            legalPaperId,
+            (Guid)UserId!,
+            User.IsInRole("Admin"));
+
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToActionResult();
+
+        var file = result.Value;
+        return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpPut("{legalPaperId:guid}/status")]

@@ -22,5 +22,8 @@ public static class BranchErrors
     public static readonly Error MediaIsNotImage =
         new("Branches.MediaIsNotImage", "Gallery branch only accepts images", ErrorCategory.Validation);
 
+    public static readonly Error GalleryImageNotFound =
+        new("Branches.GalleryImageNotFound", "The requested image is not part of this branch's gallery", ErrorCategory.NotFound);
+
 
 }

@@ -4,6 +4,7 @@ using Viora.Api.Extensions;
 using Viora.Application.Branches.AddBranch;
 using Viora.Application.Branches.GetBranchDetails;
 using Viora.Application.Branches.GetBranchGallery;
+using Viora.Application.Branches.GetBranchGalleryImage;
 using Viora.Application.Branches.LinkImageToBranch;
 using Viora.Application.Branches.SearchBranches;
 using Viora.Application.Branches.UnlinkImageFromBranch;
@@ -65,6 +66,23 @@ public class BranchesController(ISender sender) : ControllerBase
         var query = new GetBranchGalleryQuery(branchId);
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
+    }
+
+    // Gallery images are served through their owning branch, never a generic media-by-id
+    // endpoint: the handler streams the file only after confirming the media belongs to this
+    // branch's gallery, so the media id is never an access primitive. Public, matching the
+    // gallery listing above.
+    [HttpGet("{branchId:guid}/gallery/{mediaId:guid}/file")]
+    public async Task<IActionResult> GetBranchGalleryImage(Guid branchId, Guid mediaId, CancellationToken cancellationToken)
+    {
+        var query = new GetBranchGalleryImageQuery(branchId, mediaId);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToActionResult();
+
+        var file = result.Value;
+        return File(file.Content, file.ContentType, file.FileName);
     }
 
     [HttpPost]
