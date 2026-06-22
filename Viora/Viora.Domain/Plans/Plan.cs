@@ -11,6 +11,9 @@ public class Plan : Entity
     public double Price { get; private set; }
     public PlanPeriod PlanPeriod { get; private set; }
 
+    public IReadOnlyCollection<PlanFeature> PlanFeatures { get; private set; } = new List<PlanFeature>();
+    public IReadOnlyCollection<PlanLimitedFeature> PlanLimitedFeatures { get; private set; } = new List<PlanLimitedFeature>();
+
 
     private Plan(
         Guid Id,
@@ -25,5 +28,16 @@ public class Plan : Entity
         Content = content;
         Price = price;
         PlanPeriod = planPeriod;
+    }
+
+    public static Plan Create(
+        Guid id,
+        string name,
+        string description,
+        string content,
+        double price,
+        PlanPeriod planPeriod)
+    {
+        return new Plan(id, PlanName.Create(name), PlanDescription.Create(description), PlanContent.Create(content), price, planPeriod);
     }
 }

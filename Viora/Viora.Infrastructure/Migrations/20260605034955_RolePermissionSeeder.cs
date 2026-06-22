@@ -6,21 +6,21 @@
 
 namespace Viora.Infrastructure.Migrations
 {
+    // TODO remove this migration from the history
     /// <inheritdoc />
     public partial class RolePermissionSeeder : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // migrationBuilder.InsertData(
-            //     table: "Role",
-            //     columns: new[] { "Id", "Name" },
-            //     values: new object[,]
-            //     {
-            //         { 2, "Owner" },
-            //         { 3, "Admin" },
-            //         { 4, "Customer" }
-            //     });
+            migrationBuilder.InsertData(
+                table: "Role",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 3, "Admin" },
+                    { 4, "Customer" }
+                });
 
             migrationBuilder.InsertData(
                 table: "permissions",
@@ -37,26 +37,26 @@ namespace Viora.Infrastructure.Migrations
                     { 41, "features:write" }
                 });
 
-            // migrationBuilder.InsertData(
-            //     table: "RolePermissions",
-            //     columns: new[] { "PermissionId", "RoleId" },
-            //     values: new object[,]
-            //     {
-            //         { 1, 2 },
-            //         { 10, 2 },
-            //         { 20, 2 },
-            //         { 30, 2 },
-            //         { 40, 2 },
-            //         { 1, 3 },
-            //         { 2, 3 },
-            //         { 10, 3 },
-            //         { 11, 3 },
-            //         { 20, 3 },
-            //         { 21, 3 },
-            //         { 30, 3 },
-            //         { 40, 3 },
-            //         { 41, 3 }
-            //     });
+            migrationBuilder.InsertData(
+                table: "RolePermissions",
+                columns: new[] { "PermissionId", "RoleId" },
+                values: new object[,]
+                {
+                    { 1, 2 },
+                    { 10, 2 },
+                    { 20, 2 },
+                    { 30, 2 },
+                    { 40, 2 },
+                    { 1, 3 },
+                    { 2, 3 },
+                    { 10, 3 },
+                    { 11, 3 },
+                    { 20, 3 },
+                    { 21, 3 },
+                    { 30, 3 },
+                    { 40, 3 },
+                    { 41, 3 }
+                });
         }
 
         /// <inheritdoc />

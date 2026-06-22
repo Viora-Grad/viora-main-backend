@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Subscriptions.Addons;
 
-namespace Viora.Infrastructure.Repositories;
+namespace Viora.Infrastructure.Repositories.Plans;
 
 internal sealed class LimitedFeatutreAddonRepository : Repository<LimitedFeatureAddon>, ILimitedFeatureAddonRepository
 {

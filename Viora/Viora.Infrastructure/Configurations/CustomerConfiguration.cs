@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Viora.Domain.Medias;
 using Viora.Domain.MedicalRecords;
 using Viora.Domain.Shared.Internal;
 using Viora.Domain.Users.Customers;
@@ -20,6 +21,7 @@ internal class CustomerConfiguration : IEntityTypeConfiguration<Customer>
                 userName => userName != null ? userName.Value : null,
                 value => value != null ? new UserName(value) : null)
             .HasMaxLength(255);
+
         builder.OwnsOne(customer => customer.PersonalInfo, personalInfo =>
         {
             personalInfo.Property(info => info.FirstName).HasMaxLength(100).IsRequired();
@@ -39,21 +41,19 @@ internal class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .HasForeignKey(visit => visit.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsMany(customer => customer.Contacts, contact =>
-        {
-            contact.Property(ct => ct.PhoneNumber)
-                .HasConversion(
-                    phoneNumber => phoneNumber == null ? null : phoneNumber.Value,
-                    value => value == null ? null : new PhoneNumber(value))
-                .HasMaxLength(32)
-                .IsRequired();
-            contact.Property(ct => ct.Email)
-                .HasConversion(
-                    email => email == null ? null : email.Value,
-                    value => value == null ? null : new Domain.Shared.Internal.Email(value))
-                .HasMaxLength(255)
-                .IsRequired();
-        });
+        builder.Property(customer => customer.PhoneNumbers)
+            .HasConversion(
+                phoneNumbers => string.Join(";", phoneNumbers.Select(phoneNumber => phoneNumber.Value)),
+                value => value.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(phoneNumber => new PhoneNumber(phoneNumber)).ToHashSet())
+            .HasField("_phoneNumbers")
+            .IsRequired(false); // this configuration avoids creating a separate table for phone numbers and stores them as a semicolon-separated string in the Customers table
+
+        builder.Property(customer => customer.Emails)
+            .HasConversion(
+                emails => string.Join(";", emails.Select(email => email.Value)),
+                value => value.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(email => new Domain.Users.Internal.Email(value)).ToHashSet())
+            .HasField("_contactEmails")
+            .IsRequired(false); // this configuration avoids creating a separate table for emails and stores them as a semicolon-separated string in the Customers table
 
         builder.Property(customer => customer.MedicalRecordId).IsRequired(false);
         builder.HasOne(customer => customer.MedicalRecord)
@@ -61,6 +61,11 @@ internal class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .HasForeignKey<MedicalRecord>(medicalRecord => medicalRecord.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Property(customer => customer.ProfilePicId).IsRequired(false);
+        builder.HasOne<MediaFile>()
+            .WithOne()
+            .HasForeignKey<Customer>(customer => customer.ProfilePicId)
+            .OnDelete(DeleteBehavior.SetNull);
 
     }
 }

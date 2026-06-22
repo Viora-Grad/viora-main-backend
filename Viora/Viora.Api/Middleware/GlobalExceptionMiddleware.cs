@@ -57,6 +57,8 @@ public class GlobalExceptionMiddleware(
             ConflictException => (StatusCodes.Status409Conflict, ex.Message, true),
             ConcurrencyException => (StatusCodes.Status409Conflict, "The resource was modified by another request. Please retry.", true),
             QuotaExceededException => (StatusCodes.Status405MethodNotAllowed, "The Quota is over please try again later.", true),
+            ValidationException val => (StatusCodes.Status422UnprocessableEntity,
+            $"Validation failed. {string.Join(", ", val.Errors.Select(e => e.ErrorMessage))} Please check your input and try again.", true),
             _ => (StatusCodes.Status500InternalServerError, "An error occurred. Please try again later.", false),
         };
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Plans.Features;
 
-namespace Viora.Infrastructure.Repositories;
+namespace Viora.Infrastructure.Repositories.Plans;
 
 internal sealed class FeatureUsageRepository : Repository<FeatureUsage>, IFeatureUsageRepository
 {

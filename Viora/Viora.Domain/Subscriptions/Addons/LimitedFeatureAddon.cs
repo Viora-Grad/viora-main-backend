@@ -10,10 +10,17 @@ public class LimitedFeatureAddon : Entity
     public AddonType AddonType { get; private set; }
     public double Price { get; private set; }
 
-    private LimitedFeatureAddon(Guid Id, Guid LimitedFeatureId, int RestoreValue, double price) : base(Id)
+    private LimitedFeatureAddon(Guid Id, Guid LimitedFeatureId, int RestoreValue, AddonType AddonType, double price) : base(Id)
     {
         this.LimitedFeatureId = LimitedFeatureId;
         this.RestoreValue = RestoreValue;
+        this.AddonType = AddonType;
         this.Price = price;
+    }
+
+
+    public static LimitedFeatureAddon Create(Guid Id, Guid LimitedFeatureId, AddonType AddonType, int RestoreValue, double price)
+    {
+        return new LimitedFeatureAddon(Id, LimitedFeatureId, RestoreValue, AddonType, price);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Viora.Api.Extensions;
 using Viora.Application.Plans.GetPlanById;
 using Viora.Application.Plans.GetPlans;
 using Viora.Application.Subscriptions.GetFeatureAddon;
@@ -25,10 +26,7 @@ public class PlanController : ControllerBase
     {
         var query = new GetPlanByIdQuery(planId);
         var result = await _sender.Send(query);
-        if (result.IsSuccess)
-            return Ok(result.Value);
-        else
-            return NotFound(result.Error);
+        return result.ToActionResult();
 
     }
 
@@ -39,10 +37,7 @@ public class PlanController : ControllerBase
     {
         var query = new GetPlansQuery();
         var result = await _sender.Send(query);
-        if (result.IsSuccess)
-            return Ok(result.Value);
-        else
-            return NotFound(result.Error);
+        return result.ToActionResult();
     }
 
 
@@ -53,8 +48,6 @@ public class PlanController : ControllerBase
     {
         var query = new GetAllAddonsQuery();
         var result = await _sender.Send(query, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok(result.Value);
+        return result.ToActionResult();
     }
 }

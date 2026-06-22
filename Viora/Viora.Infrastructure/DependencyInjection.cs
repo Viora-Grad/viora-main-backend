@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
@@ -35,6 +36,7 @@ using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
+using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
@@ -64,13 +66,17 @@ public static class DependencyInjection
         services.AddScoped<ILimitedFeatureAddonRepository, LimitedFeatutreAddonRepository>();
         services.AddScoped<ISubscriptionOrderRepository, SubscriptionOrderRepository>();
         services.AddScoped<IAddonOrderRepository, AddonOrderRepository>();
+        services.AddScoped<ILimitedFeatureRepository, LimitedFeatureRepository>();
+        services.AddScoped<IPlanLimitedFeatureRepository, PlanLimitedFeatureRepository>();
         #endregion PlansRepos
 
         #region UsersRepos
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOwnerRepository, OwnerRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IIdentityRepository, IdentityRepository>();
         services.AddScoped<LocalCredentialRepository>();
+        services.AddScoped<RefreshTokenRepository>();
         #endregion UsersRepos
 
         #region Branches
@@ -79,7 +85,7 @@ public static class DependencyInjection
         #endregion Branches
 
         services.AddScoped<IMediaRepository, MediaRepository>();
-        services.AddScoped<Domain.ChatSessions.IChatSessionRepository, Repositories.ChatSessionRepository>();
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -97,6 +103,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         #endregion ServicesRegisters
 
         #region HostedWorkers
@@ -127,12 +134,6 @@ public static class DependencyInjection
                 .AsNoTracking()
                 .ToList();
         });
-        // register repositories here
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IOwnerRepository, OwnerRepository>();
-        services.AddScoped<ICustomerRepository, CustomerRepository>();
-        services.AddScoped<LocalCredentialRepository>();
-        services.AddScoped<RefreshTokenRepository>();
 
         services.AddDistributedMemoryCache();
 
@@ -149,14 +150,14 @@ public static class DependencyInjection
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = configuration["Jwt:Issuer"],
-                ValidAudience = configuration["Jwt:Audience"],
+                ValidIssuer = configuration["JWT:ISSUER"],
+                ValidAudience = configuration["JWT:AUDIENCE"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+                    Encoding.UTF8.GetBytes(configuration["JWT:SECRET"]!)),
                 ClockSkew = TimeSpan.Zero
             };
         });

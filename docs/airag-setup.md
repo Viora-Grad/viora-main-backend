@@ -122,13 +122,29 @@ Request body: raw markdown string.
 
 **`POST /api/ai/ingestion/specialty`** — ingest the specialty inquiries JSON.
 
-Reads the file from `AiRag:SpecialtyBase:FilePath`, embeds, and upserts into the `viora_medical_specialties` Qdrant collection.
+Reads the file from `AiRag:SpecialtyBase:FilePath`, embeds, and upserts into the `viora_medical_specialties` Qdrant collection. The file is streamed and processed in batches, so memory stays bounded regardless of file size.
+
+> **For large specialty datasets, prefer the offline CLI (below) over this endpoint.** The full `specialty_inquiries.json` is ~190 MB / ~800k inquiries; embedding it on CPU takes minutes and should not run inside an HTTP request (timeout risk).
 
 **`POST /api/ai/ingestion/specialty/raw`** — ingest raw specialty JSON.
 
 Request body: JSON array of `{ "Category": "...", "Question": "..." }`.
 
 > All ingestion endpoints are idempotent — re-ingesting updates existing points by content hash.
+
+#### Offline bulk specialty ingestion (CLI)
+
+For the full specialty dataset, run ingestion outside the web pipeline. This streams the JSON, embeds in batches (overlapping CPU embedding with Qdrant upserts), and pauses HNSW indexing until the load completes so the index builds once at the end:
+
+```powershell
+# Uses AiRag:SpecialtyBase:FilePath by default
+dotnet run --project Viora/Viora.Api -- ingest-specialty
+
+# Or pass an explicit path
+dotnet run --project Viora/Viora.Api -- ingest-specialty "Knowledge/specialty_inquiries.json"
+```
+
+Requires Qdrant running and the ONNX model present (same prerequisites as the API). Progress is logged every ~5k inquiries and total elapsed time is printed on completion. The `viora_medical_specialties` collection is created automatically on first run.
 
 ---
 
@@ -152,7 +168,9 @@ dotnet run --project Viora/Viora.Api
 
 # 6. Ingest knowledge (first time only)
 curl -X POST http://localhost:5000/api/ai/ingestion/knowledge
-curl -X POST http://localhost:5000/api/ai/ingestion/specialty
+
+# Ingest specialty data offline (recommended for the full ~800k dataset)
+dotnet run --project Viora/Viora.Api -- ingest-specialty
 
 # 7. Start chatting
 curl -X POST http://localhost:5000/api/ai/chats `

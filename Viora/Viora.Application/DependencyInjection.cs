@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using Viora.Application.Abstractions.Behaviors;
 using Viora.Domain.Plans.Services;
 
@@ -29,6 +30,8 @@ public static class DependencyInjection
         });
 
         #endregion Mediator
+
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         return services;
     }
