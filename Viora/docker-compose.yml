@@ -21,10 +21,14 @@ services:
       - AiRag__Qdrant__Port=6334
       - AiRag__Onnx__ModelPath=Models/all-MiniLM-L6-V2/model.onnx
       - AiRag__Onnx__VocabPath=Models/all-MiniLM-L6-V2/vocab.txt
+      # Override the Seq sink's serverUrl (3rd entry, index 2, in Serilog:WriteTo) to reach the seq container.
+      - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
     depends_on:
       sql:
         condition: service_healthy
       qdrant:
+        condition: service_started
+      seq:
         condition: service_started
     restart: unless-stopped
     networks:
@@ -62,9 +66,24 @@ services:
     networks:
       - viora-net
 
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true   # dev only: skip the admin-login requirement
+    ports:
+      - "5341:80"     # UI + ingestion (browse logs at http://localhost:5341)
+    volumes:
+      - seq-data:/data
+    restart: unless-stopped
+    networks:
+      - viora-net
+
 volumes:
   sql-data:
   qdrant-data:
+  seq-data:
 
 networks:
   viora-net:

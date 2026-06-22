@@ -8,6 +8,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
 
+# Serilog file sink output
+logs/
+
 # Visual Studio workspace
 .vs/
 # Visual Studio Code workspace

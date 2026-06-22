@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Viora.Domain.Abstractions;
 
 namespace Viora.Api.Extensions;
@@ -8,6 +9,8 @@ namespace Viora.Api.Extensions;
 /// </summary>
 internal static class ActionResultMapper
 {
+    private static readonly Serilog.ILogger Logger = Log.ForContext(typeof(ActionResultMapper));
+
     public static IActionResult ToActionResult(this Result result)
     {
         if (result.IsSuccess)
@@ -50,6 +53,15 @@ internal static class ActionResultMapper
             ErrorCategory.BadGateway => StatusCodes.Status502BadGateway,
             _ => StatusCodes.Status500InternalServerError,
         };
+
+        // Result-based failures never throw, so they bypass the exception middleware's logging.
+        // Log them here: server-side faults at Error, expected client errors at Warning.
+        if (statusCode >= StatusCodes.Status500InternalServerError)
+            Logger.Error("Request failed: {ErrorName} ({Category}) -> {StatusCode}: {ErrorDescription}",
+                error.Name, error.Category, statusCode, error.Description);
+        else
+            Logger.Warning("Request rejected: {ErrorName} ({Category}) -> {StatusCode}: {ErrorDescription}",
+                error.Name, error.Category, statusCode, error.Description);
 
         var problemDetails = new ProblemDetails
         {
