@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Controllers.Subscriptions;
+using Viora.Api.Extensions;
 using Viora.Application.Orders.ChangeSubscriptionOrder;
 using Viora.Application.Orders.CreateAddonOrder;
 using Viora.Application.Orders.CreateSubscriptionOrder;
@@ -20,7 +21,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [Route("api/order/subscription/create")]
+    [Route("api/order/subscription")]
 
     public async Task<IActionResult> CreateSubscriptionOrder(
         CreateSubscriptionOrderRequest request,
@@ -28,49 +29,41 @@ public class OrderController : ControllerBase
     {
         var command = new CreateSubscriptionOrderCommand(request.OrganizationId, request.PlanId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
     [HttpPost]
-    [Route("api/order/subscription/renew/{subscriptionId}")]
+    [Route("api/order/subscription/{subscriptionId}/renew")]
     public async Task<IActionResult> RenewSubscriptionOrder(
         Guid subscriptionId,
         CancellationToken cancellationToken)
     {
         var command = new RenewSubscriptionOrderCommand(subscriptionId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
 
     [HttpPost]
-    [Route("api/order/subscription/changePlan")]
+    [Route("api/order/subscription/change-plan")]
     public async Task<IActionResult> ChangeSubscriptionPlan(
         ChangeSubscriptionPlanRequest request,
         CancellationToken cancellationToken)
     {
         var command = new ChangeSubscriptionOrderCommand(request.SubscriptionId, request.NewPlanId);
         var result = await _sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
     [HttpPost]
-    [Route("api/order/addon/add")]
+    [Route("api/order/addon")]
     public async Task<IActionResult> CreateAddAddonOrder(
-    CancellationToken cancellationToken,
-    CreateAddAddonOrderRequest createAddAddonRequest)
+    CreateAddAddonOrderRequest createAddAddonRequest,
+    CancellationToken cancellationToken)
     {
         var Command = new CreateAddonOrderCommand(createAddAddonRequest.OrganizationId, createAddAddonRequest.SubscriptionId, createAddAddonRequest.Addons);
         var result = await _sender.Send(Command, cancellationToken);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-        return Ok();
+        return result.ToActionResult();
     }
 
 }

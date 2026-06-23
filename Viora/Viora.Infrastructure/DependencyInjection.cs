@@ -13,9 +13,11 @@ using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
+using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
@@ -27,7 +29,6 @@ using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
-using Viora.Domain.Vivi.ChatSessions;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
@@ -36,8 +37,9 @@ using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
+using Viora.Infrastructure.Repositories.Plans;
+using Viora.Infrastructure.Repositories.Subscriptions;
 using Viora.Infrastructure.Repositories.Users;
-using Viora.Infrastructure.Repositories.Vivi;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
@@ -54,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationRepository, OrganziationRepository>();
         services.AddScoped<IOrganizationApplicationRepository, OrganizationApplicationRepository>();
         services.AddScoped<ISuspensionRepository, SuspensionRepository>();
+        services.AddScoped<ILegalPaperRepository, LegalPaperRepository>();
         #endregion OrgRepos
 
         #region PlansRepos
@@ -66,6 +69,8 @@ public static class DependencyInjection
         services.AddScoped<ILimitedFeatureAddonRepository, LimitedFeatutreAddonRepository>();
         services.AddScoped<ISubscriptionOrderRepository, SubscriptionOrderRepository>();
         services.AddScoped<IAddonOrderRepository, AddonOrderRepository>();
+        services.AddScoped<ILimitedFeatureRepository, LimitedFeatureRepository>();
+        services.AddScoped<IPlanLimitedFeatureRepository, PlanLimitedFeatureRepository>();
         #endregion PlansRepos
 
         #region UsersRepos
@@ -100,7 +105,8 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IDomainEventScheduler, EfDomainEventScheduler>();
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-        services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IDevDataSeeder, DevDataSeeder>();
+        services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         #endregion ServicesRegisters
 

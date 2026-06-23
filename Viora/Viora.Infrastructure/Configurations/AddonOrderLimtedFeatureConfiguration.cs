@@ -10,6 +10,7 @@ internal sealed class AddonOrderLimitedFeatureConfiguration : IEntityTypeConfigu
     {
         builder.ToTable("AddonOrderLimitedFeatures");
 
+
         builder.HasKey(x => new { x.AddonOrderId, x.LimitedFeatureId });
     }
 }

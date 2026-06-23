@@ -29,8 +29,21 @@ internal sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
                 description => description.Value,
                 value => new PlanDescription(value));
 
-        builder.Property(p => p.Price)
-            .HasPrecision(18, 2);
+        builder.ComplexProperty(s => s.Price, mb =>
+        {
+            mb.Property(m => m.Amount)
+                .HasColumnName("PriceAmount")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            mb.ComplexProperty(m => m.Currency, cb =>
+            {
+                cb.Property(c => c.Code)
+                    .HasColumnName("PriceCurrency")
+                    .HasMaxLength(3)
+                    .IsRequired();
+            });
+        });
 
         builder.Property(x => x.PlanPeriod)
             .HasConversion(
@@ -43,5 +56,16 @@ internal sealed class PlanConfiguration : IEntityTypeConfiguration<Plan>
             .HasConversion(
                 content => content.Value,
                 value => new PlanContent(value));
+
+
+        builder.HasMany(p => p.PlanFeatures)
+            .WithOne()
+            .HasForeignKey(pf => pf.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.PlanLimitedFeatures)
+            .WithOne()
+            .HasForeignKey(plf => plf.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

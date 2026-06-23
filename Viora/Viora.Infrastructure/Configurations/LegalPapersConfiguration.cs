@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.LegalPapers;
+using Viora.Domain.Organizations.OnBoardings;
 
 namespace Viora.Infrastructure.Configurations;
 
@@ -49,6 +50,12 @@ internal sealed class LegalPaperConfiguration : IEntityTypeConfiguration<LegalPa
             .HasForeignKey<LegalPaper>(p => p.AttachmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne<OrganizationApplication>()
+            .WithMany()
+            .HasForeignKey(l => l.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(p => p.ApplicationId);
         builder.HasIndex(p => p.AttachmentId).IsUnique();
         builder.HasIndex(p => p.Status);
     }

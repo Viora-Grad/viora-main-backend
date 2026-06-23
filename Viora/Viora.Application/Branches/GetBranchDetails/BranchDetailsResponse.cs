@@ -10,7 +10,7 @@ public sealed record BranchDetailsResponse(
     string OrganizationName,
     IReadOnlyCollection<string> Services,
     string Address,
-    Coordinations Location,
+    Coordinates Location,
     BranchStatus BranchStatus,
     string ContaceEmail,
     IReadOnlyCollection<string> PhoneNumbers,

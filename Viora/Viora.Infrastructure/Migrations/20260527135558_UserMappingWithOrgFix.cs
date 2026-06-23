@@ -14,10 +14,10 @@ namespace Viora.Infrastructure.Migrations
                 name: "FK_OrganizationApplications_Owners_OwnerId",
                 table: "OrganizationApplications");
 
-            migrationBuilder.InsertData(
-                table: "Role",
-                columns: new[] { "Id", "Name" },
-                values: new object[] { 2, "Owner" });
+            // migrationBuilder.InsertData(
+            //     table: "Role",
+            //     columns: new[] { "Id", "Name" },
+            //     values: new object[] { 2, "Owner" });
 
             migrationBuilder.AddForeignKey(
                 name: "FK_OrganizationApplications_Users_OwnerId",

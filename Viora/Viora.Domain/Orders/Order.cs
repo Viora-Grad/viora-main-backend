@@ -1,12 +1,13 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Orders.Internal;
+using Viora.Domain.Shared;
 
 namespace Viora.Domain.Orders;
 
 public abstract class Order : Entity
 {
     public Guid OrganizationId { get; private set; }
-    public double TotalPrice { get; private set; }
+    public Money TotalPrice { get; private set; }
     public DateTime CreatedDate { get; private set; }
     public Guid? SubscriptionId { get; private set; }
     public OrderStatus Status { get; private set; }
@@ -15,7 +16,7 @@ public abstract class Order : Entity
     {
         // Required by EF Core
     }
-    protected Order(Guid id, Guid organizationId, Guid? subscriptionId, double totalPrice, DateTime createdDate, OrderStatus status) : base(id)
+    protected Order(Guid id, Guid organizationId, Guid? subscriptionId, Money totalPrice, DateTime createdDate, OrderStatus status) : base(id)
     {
         OrganizationId = organizationId;
         SubscriptionId = subscriptionId;
@@ -23,7 +24,7 @@ public abstract class Order : Entity
         CreatedDate = createdDate;
         Status = status;
     }
-    protected Order(Guid id, Guid organizationId, double totalPrice, DateTime createdDate, OrderStatus status) : base(id)
+    protected Order(Guid id, Guid organizationId, Money totalPrice, DateTime createdDate, OrderStatus status) : base(id)
     {
         OrganizationId = organizationId;
         TotalPrice = totalPrice;

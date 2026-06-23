@@ -16,8 +16,21 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
             v => OrderStatus.FromId(v)
             );
 
-        builder.Property(s => s.TotalPrice)
-            .HasPrecision(18, 2);
+        builder.ComplexProperty(s => s.TotalPrice, mb =>
+        {
+            mb.Property(m => m.Amount)
+                .HasColumnName("TotalPriceAmount")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            mb.ComplexProperty(m => m.Currency, cb =>
+            {
+                cb.Property(c => c.Code)
+                    .HasColumnName("TotalPriceCurrency")
+                    .HasMaxLength(3)
+                    .IsRequired();
+            });
+        });
 
         builder.Property(s => s.PlanId)
             .IsRequired();

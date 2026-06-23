@@ -8,8 +8,13 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
 
+# Serilog file sink output
+logs/
+
 # Visual Studio workspace
 .vs/
+# Visual Studio Code workspace
+.vscode/
 # env
 .env
 # Media file storage
@@ -61,3 +66,7 @@ TestResult.xml
 nunit-*.xml
 /Viora/.env
 /Viora/viora-d7020-firebase-adminsdk-fbsvc-1f8db5bf05.json
+
+# ONNX model binary — download via download-models.ps1
+Viora/Viora.Api/Models/*
+Viora/Viora.Api/Knowledge/*

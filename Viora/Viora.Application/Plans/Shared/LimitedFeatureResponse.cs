@@ -1,6 +1,4 @@
-﻿using Viora.Domain.Plans.Features;
-
-namespace Viora.Application.Plans.Shared;
+﻿namespace Viora.Application.Plans.Shared;
 
 public class LimitedFeatureResponse
 {
@@ -17,17 +15,6 @@ public class LimitedFeatureResponse
         Key = key;
         Description = description;
         Limit = limit;
-    }
-
-    public static LimitedFeatureResponse MapToDTO(LimitedFeature limitedFeature)
-    {
-        var limitedFeatureDTO = new LimitedFeatureResponse(
-            limitedFeature.Id,
-            limitedFeature.Key.value,
-            limitedFeature.Description.value,
-            limitedFeature.Limit
-        );
-        return limitedFeatureDTO;
     }
 
 }

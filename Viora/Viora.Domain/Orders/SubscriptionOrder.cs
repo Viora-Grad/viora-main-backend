@@ -1,6 +1,7 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Orders.Internal;
 using Viora.Domain.Plans;
+using Viora.Domain.Shared;
 
 namespace Viora.Domain.Orders;
 
@@ -17,7 +18,7 @@ public class SubscriptionOrder : Order
     private SubscriptionOrder(
         Guid id,
         Guid organizationId,
-        double totalPrice,
+        Money totalPrice,
         DateTime createdDate,
         Guid planId,
         SubscriptionOrderType subscriptionOrderType,
@@ -32,7 +33,7 @@ public class SubscriptionOrder : Order
         Guid id,
         Guid organizationId,
         Guid subscriptionId,
-        double totalPrice,
+        Money totalPrice,
         DateTime createdAt,
         Guid planId,
         SubscriptionOrderType subscriptionOrderType,
@@ -65,7 +66,7 @@ public class SubscriptionOrder : Order
         Guid organizationId,
         Guid planId,
         Guid subscriptionId,
-        double totalPrice,
+        Money totalPrice,
         DateTime createdAt)
     {
         var newSubscriptionOrder = new SubscriptionOrder(

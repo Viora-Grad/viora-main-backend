@@ -28,8 +28,5 @@ internal sealed class LimitedFeatureConfiguration : IEntityTypeConfiguration<Lim
             d => d.value,
             d => new FeatureDescription(d)
             );
-
-        builder.Property(x => x.Limit)
-            .IsRequired();
     }
 }

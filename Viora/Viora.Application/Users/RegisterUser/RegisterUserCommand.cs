@@ -2,6 +2,7 @@
 
 namespace Viora.Application.Users.RegisterUser;
 
+// TODO put a validator here
 public sealed record RegisterUserCommand(
     string FirstName,
     string LastName,

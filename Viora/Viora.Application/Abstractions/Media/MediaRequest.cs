@@ -1,4 +1,6 @@
-﻿namespace Viora.Application.Abstractions.Media;
+﻿using Viora.Application.Abstractions.Exceptions;
+
+namespace Viora.Application.Abstractions.Media;
 
 public sealed class MediaRequest
 {
@@ -31,12 +33,12 @@ public sealed class MediaRequest
 
         var allowed = new[] { "image/png", "image/jpeg", "image/webp" };
         if (!allowed.Contains(contentType, StringComparer.OrdinalIgnoreCase))
-            throw new ArgumentException(
+            throw new UnallowedMediaException(
                 $"Content type '{contentType}' is not an allowed image type.",
                 nameof(contentType));
 
         if (sizeBytes > maxMediaSizeInBytes)
-            throw new ArgumentException($"Image exceeds {maxMediaSizeInBytes} limit.", nameof(sizeBytes));
+            throw new UnallowedMediaException($"Image exceeds {maxMediaSizeInBytes} limit.", nameof(sizeBytes));
 
         return new MediaRequest(fileName, contentType, sizeBytes, content);
     }
