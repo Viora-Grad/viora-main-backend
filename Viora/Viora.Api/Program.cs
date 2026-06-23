@@ -15,6 +15,7 @@ using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
 using Viora.Infrastructure.AiRag;
+using Viora.Infrastructure.RealTime.Hubs;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
