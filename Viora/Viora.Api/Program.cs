@@ -6,8 +6,8 @@ using Viora.Api.Middleware;
 using Viora.Api.OpenApi;
 using Viora.Application;
 using Viora.Application.Abstractions.Mail;
-using Viora.Application.AiRag.Ingestion;
 using Viora.Application.Abstractions.Media;
+using Viora.Application.AiRag.Ingestion;
 using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
@@ -81,6 +81,8 @@ try
     #endregion Settings
 
     var app = builder.Build();
+
+    app.MapHub<ScheduleHub>("/hubs/dashboard");
 
     // Offline bulk ingestion: `dotnet run -- ingest-specialty [path]`.
     // Runs the full streaming/batched ingest outside the HTTP pipeline (no request

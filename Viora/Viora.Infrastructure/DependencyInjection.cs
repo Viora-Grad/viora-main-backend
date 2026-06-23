@@ -9,6 +9,7 @@ using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Media;
+using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
@@ -23,7 +24,9 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Shared;
+using Viora.Domain.Staff;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
@@ -34,10 +37,13 @@ using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
+using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
+using Viora.Infrastructure.Repositories.RealTimeScheduling;
+using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
@@ -87,6 +93,17 @@ public static class DependencyInjection
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         #endregion Branches
 
+        #region RealTime 
+        services.AddScoped<IScheduleRepository, ScheduleRepository>();
+        services.AddScoped<IScheduleDelayRepository, ScheduleDelayRepository>();
+        services.AddScoped<IShiftRepository, ShiftRepository>();
+        services.AddScoped<IScheduleCancellationRepository, ScheduleCancellationRepository>();
+        #endregion
+
+        #region Staff
+        services.AddScoped<IStaffRepository, StaffRepository>();
+        #endregion
+
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
@@ -108,6 +125,7 @@ public static class DependencyInjection
         services.AddScoped<IDevDataSeeder, DevDataSeeder>();
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
+        services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
         #endregion ServicesRegisters
 
         #region HostedWorkers

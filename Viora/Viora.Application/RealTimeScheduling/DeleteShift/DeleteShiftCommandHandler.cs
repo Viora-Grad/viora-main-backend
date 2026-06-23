@@ -18,7 +18,7 @@ public class DeleteShiftCommandHandler(
         var shift = await shiftRepository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Shift with id {request.Id} not found.");
 
-        var branchSchedule = await scheduleRepository.getByIdAsync(shift.ScheduleId, cancellationToken)
+        var branchSchedule = await scheduleRepository.GetByIdAsync(shift.ScheduleId, cancellationToken)
             ?? throw new NotFoundException($"Schedule with id {shift.ScheduleId} not found.");
 
         var parameters = new SearchAllShiftAppointmentParameter(shift.StaffId, shift.StartTime, shift.EndTime);

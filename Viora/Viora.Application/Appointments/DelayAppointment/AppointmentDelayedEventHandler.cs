@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Notification;
-using Viora.Application.Notification.NotificationService;
 using Viora.Domain.Appointments.Events;
 using Viora.Domain.Staff;
 
@@ -9,7 +8,7 @@ namespace Viora.Application.Appointments.DelayAppointment;
 
 public class AppointmentDelayedEventHandler(
     IScheduleNotifier scheduleNotifiy,
-    INotificationService notificationService,
+    //INotificationService notificationService,
     IStaffRepository staffRepository
     ) : INotificationHandler<AppointmentDelayedEvent>
 {
@@ -28,11 +27,11 @@ public class AppointmentDelayedEventHandler(
             cancellationToken);
 
         // send notification 
-        await notificationService.SendNotificationAsync(
+        /*await notificationService.SendNotificationAsync(
             notification.CustomerId,
             "appointmentDelay",
             $"your appointment become at {newTime}",
             cancellationToken
-            );
+            );*/
     }
 }
