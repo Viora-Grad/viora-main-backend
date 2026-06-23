@@ -68,6 +68,26 @@ internal class ServiceConfiguration : IEntityTypeConfiguration<Service>
             });
         });
 
+        builder.OwnsOne(s => s.Discount, dis =>
+        {
+            dis.Property(d => d.PercentageOutOf100)
+                .HasColumnName("DiscountPercentage")
+                .IsRequired();
+
+            dis.Property(d => d.Reason)
+                .HasColumnName("DiscountReason")
+                .HasMaxLength(500)
+                .IsRequired();
+
+            dis.Property(d => d.StartDateUtc)
+                .HasColumnName("DiscountStartDateUtc")
+                .IsRequired();
+
+            dis.Property(d => d.EndDateUtc)
+                .HasColumnName("DiscountEndDateUtc")
+                .IsRequired();
+        });
+
         builder.HasOne<Branch>()
             .WithMany()
             .HasForeignKey(s => s.BranchId)
