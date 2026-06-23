@@ -22,7 +22,8 @@ internal static class ActionResultMapper
     public static IActionResult ToActionResult<T>(
         this Result<T> result,
         string? createdAtAction = null,
-        Func<T, object>? routeValueFactory = null) // Changed to a factory function
+        Func<T, object>? routeValueFactory = null, // Changed to a factory function
+        string? createdAtController = null) // null => current controller; set when the action lives on another controller
     {
         if (result.IsSuccess)
         {
@@ -30,7 +31,7 @@ internal static class ActionResultMapper
             {
                 // Safely evaluate the route values using the successful result value
                 var routeValues = routeValueFactory(result.Value);
-                return new CreatedAtActionResult(createdAtAction, null, routeValues, result.Value);
+                return new CreatedAtActionResult(createdAtAction, createdAtController, routeValues, result.Value);
             }
 
             return new OkObjectResult(result.Value);

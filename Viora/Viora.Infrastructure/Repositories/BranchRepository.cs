@@ -10,8 +10,7 @@ internal class BranchRepository(ApplicationDbContext dbContext) : Repository<Bra
     {
         return await DbContext.Set<Branch>()
             .Where(r => r.Id == id)
-            .Include(b => b.Gallery)
-            .Include(b => b.PhoneNumbers)
+            .Include("_gallery")
             .FirstOrDefaultAsync(cancellation);
     }
 
@@ -20,7 +19,7 @@ internal class BranchRepository(ApplicationDbContext dbContext) : Repository<Bra
         var branches = await DbContext.Set<Branch>()
             .Where(x => x.OrganizationId == orgId)
             .OrderBy(x => x.OpenedAtUtc)
-            .Include(x => x.Gallery)
+            .Include("_gallery")
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
@@ -29,12 +28,12 @@ internal class BranchRepository(ApplicationDbContext dbContext) : Repository<Bra
 
     public async Task<IReadOnlyCollection<MediaFile>?> GetMediaByBranchId(Guid id, CancellationToken cancellation = default)
     {
-        var gallery = await DbContext.Set<Branch>()
+        var branch = await DbContext.Set<Branch>()
             .AsNoTracking()
-            .Include(x => x.Gallery)
-            .Select(x => x.Gallery)
+            .Where(x => x.Id == id)
+            .Include("_gallery")
             .FirstOrDefaultAsync(cancellation);
 
-        return gallery;
+        return branch?.Gallery;
     }
 }
