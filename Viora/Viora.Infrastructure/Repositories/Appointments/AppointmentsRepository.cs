@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Infrastructure.Presistance;
 
 namespace Viora.Infrastructure.Repositories.Appointments;
 
@@ -38,6 +39,23 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default)
+    {
+        return await SpecificationEvaluator<Appointment>
+            .GetQuery(DbContext.Set<Appointment>().AsQueryable(), spec)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+    public override async Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<Appointment>()
+            .Include(appointment => appointment.Customer)
+            .Include(appointment => appointment.Service)
+            .Include(appointment => appointment.Staff)
+            .Include(appointment => appointment.Branch)
+            .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
+    }
+
     public Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
@@ -52,5 +70,6 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
 
         return overlappingAppointments.Count != 0;
     }
+
 
 }

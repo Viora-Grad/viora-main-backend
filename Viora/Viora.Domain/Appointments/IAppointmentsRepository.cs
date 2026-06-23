@@ -11,6 +11,8 @@ public interface IAppointmentsRepository
     Task<IEnumerable<Appointment>> GetByDateRangeAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
     Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
     Task<Appointment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default);
+    Task<long> CountAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default);
     void Add(Appointment appointment);
     void Remove(Appointment appointment);
 

@@ -26,4 +26,6 @@ public static class AppointmentErrors
         new("Appointment.AppointmentNotFound", "The specified appointment was not found.", ErrorCategory.NotFound);
     public static Error NoShowTimeInvalid =>
         new("Appointment.NoShowTimeInvalid", "The no-show time must be after the appointment time.", ErrorCategory.Validation);
+    public static Error CheckInNotWithinAcceptableWindow =>
+        new("Appointment.CheckInNotWithinAcceptableWindow", "Check-in is only allowed within 30 minutes before the appointment time.", ErrorCategory.Validation);
 }
