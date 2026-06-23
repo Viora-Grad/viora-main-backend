@@ -68,7 +68,7 @@ public class ApplicationsController(ISender sender) : ControllerBase
 
         return result.ToActionResult(
             createdAtAction: nameof(GetApplicationDetails),
-            routeValueFactory: val => new { id = val }
+            routeValueFactory: val => new { applicationId = val }
         );
     }
 
@@ -79,6 +79,9 @@ public class ApplicationsController(ISender sender) : ControllerBase
     {
         var command = new ApproveOnboardRequestCommand(requestId);
         var result = await sender.Send(command, cancellationToken);
-        return result.ToActionResult(nameof(OrganizationsController.GetOrganizationDetails), val => val);
+        return result.ToActionResult(
+            createdAtAction: nameof(OrganizationsController.GetOrganizationDetails),
+            routeValueFactory: val => new { organizationId = val },
+            createdAtController: "Organizations");
     }
 }
