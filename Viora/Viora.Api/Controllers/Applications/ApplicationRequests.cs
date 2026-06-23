@@ -3,7 +3,6 @@
 namespace Viora.Api.Controllers.Applications;
 
 public record RequestOnboardRequest(
-    Guid OwnerId,
     Guid CountryId,
     string ProposedName,
     string About,

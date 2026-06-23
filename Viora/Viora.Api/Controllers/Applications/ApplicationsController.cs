@@ -54,7 +54,7 @@ public class ApplicationsController(ISender sender) : ControllerBase
     public async Task<IActionResult> RequestOnboard(RequestOnboardRequest request, CancellationToken cancellationToken)
     {
         var command = new RequestOnboardCommand(
-            request.OwnerId,
+            (Guid)UserId!,
             request.CountryId,
             request.ProposedName,
             request.About,
