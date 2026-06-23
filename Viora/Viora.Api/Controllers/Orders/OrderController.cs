@@ -21,7 +21,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [Route("api/order/subscription/create")]
+    [Route("api/order/subscription")]
 
     public async Task<IActionResult> CreateSubscriptionOrder(
         CreateSubscriptionOrderRequest request,
@@ -33,7 +33,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [Route("api/order/subscription/renew/{subscriptionId}")]
+    [Route("api/order/subscription/{subscriptionId}/renew")]
     public async Task<IActionResult> RenewSubscriptionOrder(
         Guid subscriptionId,
         CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class OrderController : ControllerBase
 
 
     [HttpPost]
-    [Route("api/order/subscription/changePlan")]
+    [Route("api/order/subscription/change-plan")]
     public async Task<IActionResult> ChangeSubscriptionPlan(
         ChangeSubscriptionPlanRequest request,
         CancellationToken cancellationToken)
@@ -56,10 +56,10 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    [Route("api/order/addon/add")]
+    [Route("api/order/addon")]
     public async Task<IActionResult> CreateAddAddonOrder(
-    CancellationToken cancellationToken,
-    CreateAddAddonOrderRequest createAddAddonRequest)
+    CreateAddAddonOrderRequest createAddAddonRequest,
+    CancellationToken cancellationToken)
     {
         var Command = new CreateAddonOrderCommand(createAddAddonRequest.OrganizationId, createAddAddonRequest.SubscriptionId, createAddAddonRequest.Addons);
         var result = await _sender.Send(Command, cancellationToken);
