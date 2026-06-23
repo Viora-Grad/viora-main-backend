@@ -19,6 +19,22 @@ internal sealed class AddonOrderConfiguration : IEntityTypeConfiguration<AddonOr
 
         builder.ToTable("AddonOrders");
 
+        builder.ComplexProperty(s => s.TotalPrice, mb =>
+        {
+            mb.Property(m => m.Amount)
+                .HasColumnName("TotalPriceAmount")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            mb.ComplexProperty(m => m.Currency, cb =>
+            {
+                cb.Property(c => c.Code)
+                    .HasColumnName("TotalPriceCurrency")
+                    .HasMaxLength(3)
+                    .IsRequired();
+            });
+        });
+
         builder.HasMany<AddonOrderLimitedFeature>()
             .WithOne()
             .HasForeignKey(x => x.AddonOrderId);

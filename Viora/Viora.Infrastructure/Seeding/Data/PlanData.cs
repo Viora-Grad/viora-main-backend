@@ -1,5 +1,6 @@
 ﻿using Viora.Domain.Plans;
 using Viora.Domain.Plans.Internal;
+using Viora.Domain.Shared;
 
 namespace Viora.Infrastructure.Seeding.Data;
 
@@ -12,7 +13,8 @@ internal static class PlanData
         "Starter",
         "Starter Plan",
         "Basic features for small businesses",
-        99,
+        (decimal)99.9,
+        Currency.Egp,
         PlanPeriod.monthly),
 
     Plan.Create(
@@ -20,7 +22,8 @@ internal static class PlanData
         "Professional",
         "Professional Plan",
         "Advanced features for growing businesses",
-        199,
+        (decimal)199.9,
+        Currency.Egp,
         PlanPeriod.semiAnnually),
 
     Plan.Create(
@@ -28,7 +31,9 @@ internal static class PlanData
         "Enterprise",
         "Enterprise Plan",
         "Full feature set for large organizations",
-        399,
-        PlanPeriod.annually)
+        (decimal)399.9,
+        Currency.Egp,
+        PlanPeriod.annually),
+
     ];
 }
