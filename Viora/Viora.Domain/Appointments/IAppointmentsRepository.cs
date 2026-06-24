@@ -16,6 +16,5 @@ public interface IAppointmentsRepository
     void Add(Appointment appointment);
     void Remove(Appointment appointment);
 
-    Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default);
 }
 // TODO: Consider using a specification pattern for more complex queries, e.g., GetAppointmentsByCriteriaAsync(AppointmentQueryCriteria criteria)

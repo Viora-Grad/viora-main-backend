@@ -3,6 +3,7 @@ using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
 using Viora.Domain.RealTimeScheduling;
 
 namespace Viora.Application.RealTimeScheduling.DeleteShift;
@@ -27,7 +28,7 @@ public class DeleteShiftCommandHandler(
 
         var appointments = await appointmentsRepository.ListAsync(specification, cancellationToken);
 
-        var results = appointments.Select(appointment => appointment.Cancel(dateTimeProvider.UtcNow, branchSchedule.BranchId)).ToList();
+        var results = appointments.Select(appointment => appointment.Cancel(dateTimeProvider.UtcNow, branchSchedule.BranchId, Creator.None)).ToList();
 
         var result = results.Any(
             r => r.IsFailure);

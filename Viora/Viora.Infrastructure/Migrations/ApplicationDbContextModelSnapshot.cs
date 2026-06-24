@@ -1328,7 +1328,7 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Countries", (string)null);
                 });
 
-            modelBuilder.Entity("Viora.Domain.Staff.Staff", b =>
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -2175,7 +2175,7 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Discount");
                 });
 
-            modelBuilder.Entity("Viora.Domain.Staff.Staff", b =>
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
                         .WithMany()

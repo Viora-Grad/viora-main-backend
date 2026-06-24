@@ -73,8 +73,7 @@ public sealed class Appointment : Entity
         Creator createdBy,
         Platform requestPlatform,
         TimeSpan estimatedDuration,
-        DateTime createdAt,
-        Guid branchId)
+        DateTime createdAt)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
         var appointment = new Appointment(Guid.NewGuid(),
@@ -159,14 +158,14 @@ public sealed class Appointment : Entity
         RaiseDomainEvent(new AppointmentNoShowEvent(Id, ReservationDate));
         return Result.Success();
     }
-    public Result Cancel(DateTime cancelTime, Guid branchId)
+    public Result Cancel(DateTime cancelTime, Guid branchId, Creator creator)
     {
         // Only allow canceling the appointment if it is not completed
         if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress || cancelTime.AddHours(2) > ReservationDate)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
         Status = CustomerStatus.Canceled;
         LastUpdatedAt = cancelTime;
-        RaiseDomainEvent(new AppointmentCanceledEvent(branchId, Id, ReservationDate));
+        RaiseDomainEvent(new AppointmentCanceledEvent(Id, branchId, ReservationDate, creator));
         return Result.Success();
     }
 

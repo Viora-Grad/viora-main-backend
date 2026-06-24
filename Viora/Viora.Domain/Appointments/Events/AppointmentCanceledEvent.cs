@@ -3,4 +3,4 @@ using Viora.Domain.Appointments.Internal;
 
 namespace Viora.Domain.Appointments.Events;
 
-public sealed record AppointmentCanceledEvent(Guid Id, DateTime ReservationDate, string Reason, Creator MadeBy) : IDomainEvent;
+public sealed record AppointmentCanceledEvent(Guid Id, Guid BranchId, DateTime ReservationDate, Creator MadeBy) : IDomainEvent;

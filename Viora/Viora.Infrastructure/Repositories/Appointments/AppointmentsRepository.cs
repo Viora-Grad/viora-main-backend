@@ -56,11 +56,6 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .FirstOrDefaultAsync(appointment => appointment.Id == id, cancellationToken);
     }
 
-    public Task<IReadOnlyList<Appointment>> ListAsync(ISpecification<Appointment> spec, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
         var overlappingAppointments = await DbContext.Set<Appointment>()

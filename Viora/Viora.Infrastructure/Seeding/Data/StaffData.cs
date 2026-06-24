@@ -1,4 +1,4 @@
-﻿using Viora.Domain.Staff;
+﻿using Viora.Domain.Staffs;
 
 namespace Viora.Infrastructure.Seeding.Data;
 

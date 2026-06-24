@@ -26,17 +26,6 @@ namespace Viora.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
-            migrationBuilder.CreateTable(
-                name: "Staff",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Staff", x => x.Id);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_BranchId",
                 table: "Appointments",

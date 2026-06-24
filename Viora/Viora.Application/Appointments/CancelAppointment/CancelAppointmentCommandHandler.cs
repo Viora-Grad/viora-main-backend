@@ -26,7 +26,7 @@ internal class CancelAppointmentCommandHandler(
         var customer = await customerRepository.GetByIdAsync(userContext.UserId, cancellationToken);
         if (customer is not null)
         {
-            var result = appointment.Cancel(dateTimeProvider.UtcNow, "Appointment cancelled by customer", Creator.Customer);
+            var result = appointment.Cancel(dateTimeProvider.UtcNow, appointment.BranchId, Creator.Customer);
 
             if (result.IsFailure)
                 return Result.Failure(result.Error);
@@ -38,7 +38,7 @@ internal class CancelAppointmentCommandHandler(
         var staff = await staffRepository.GetByIdAsync(userContext.UserId, cancellationToken) ??
             throw new NotFoundException($"Could not find request maker account");
 
-        var staffResult = appointment.Cancel(dateTimeProvider.UtcNow, "Appointment cancelled by staff", Creator.Staff);
+        var staffResult = appointment.Cancel(dateTimeProvider.UtcNow, appointment.BranchId, Creator.Staff);
 
         if (staffResult.IsFailure)
             return Result.Failure(staffResult.Error);

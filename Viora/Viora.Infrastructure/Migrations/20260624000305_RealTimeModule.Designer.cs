@@ -14,7 +14,7 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260623201957_RealTimeModule")]
+    [Migration("20260624000305_RealTimeModule")]
     partial class RealTimeModule
     {
         /// <inheritdoc />
@@ -86,13 +86,19 @@ namespace Viora.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AppointmentQueueNumber")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("CustomerId")
+                    b.Property<Guid?>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("EstimatedDuration")
@@ -104,7 +110,7 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<DateTime?>("LastUpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PaymentId")
+                    b.Property<Guid?>("PaymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RequestPlatform")
@@ -130,6 +136,8 @@ namespace Viora.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
 
                     b.HasIndex("CustomerId");
 
@@ -1323,7 +1331,7 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Countries", (string)null);
                 });
 
-            modelBuilder.Entity("Viora.Domain.Staff.Staff", b =>
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1742,13 +1750,36 @@ namespace Viora.Infrastructure.Migrations
 
             modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
                 {
-                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
+                    b.HasOne("Viora.Domain.Branches.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Viora.Domain.Services.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
@@ -2147,7 +2178,7 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Discount");
                 });
 
-            modelBuilder.Entity("Viora.Domain.Staff.Staff", b =>
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
                         .WithMany()

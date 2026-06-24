@@ -4,6 +4,7 @@ using Viora.Application.Abstractions.Messaging;
 using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
 using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
 
@@ -37,7 +38,7 @@ public class CancelScheduleCommandHandler(
         var shiftAppointment = await appointmentsRepository.ListAsync(spec, cancellationToken);
 
         var results = shiftAppointment
-            .Select(s => s.Cancel(dateTimeProvider.UtcNow, request.branchId));
+            .Select(s => s.Cancel(dateTimeProvider.UtcNow, request.branchId, Creator.None));
 
         var result = results.Any(r => r.IsFailure);
 

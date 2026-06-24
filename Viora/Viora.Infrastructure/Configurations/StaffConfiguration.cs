@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Branches;
-using Viora.Domain.Staff;
+using Viora.Domain.Staffs;
 
 namespace Viora.Infrastructure.Configurations;
 

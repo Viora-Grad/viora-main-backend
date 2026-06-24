@@ -2,7 +2,7 @@
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Notification;
 using Viora.Domain.Appointments.Events;
-using Viora.Domain.Staff;
+using Viora.Domain.Staffs;
 
 namespace Viora.Application.Appointments.DelayAppointment;
 

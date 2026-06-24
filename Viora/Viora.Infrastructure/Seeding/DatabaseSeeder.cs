@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Shared;
-using Viora.Domain.Staff;
+using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Seeding.Data;

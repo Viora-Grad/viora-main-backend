@@ -8,7 +8,7 @@ public sealed record AppointmentDelayedEvent(
     DateTime ReservationDate,
     TimeSpan DelayDuration,
     Guid StaffId,
-    Guid CustomerId,
+    Guid? CustomerId,
     string status) : IDomainEvent
 {
 }

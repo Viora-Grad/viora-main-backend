@@ -4,7 +4,7 @@ using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
 using Viora.Domain.RealTimeScheduling;
-using Viora.Domain.Staff;
+using Viora.Domain.Staffs;
 
 namespace Viora.Application.RealTimeScheduling.GetStaffShiftQuery;
 
