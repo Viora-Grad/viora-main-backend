@@ -40,13 +40,10 @@ internal sealed class GetApplicationDetailsQueryHandler(
 
         var mediaIds = legalPapers.Select(lp => lp.AttachmentId).ToList();
 
-        var namesTask = userRepository.GetNamesDictAsync(userIds, cancellationToken);
-        var mediasTask = mediaRepository.GetByIdsAsync(mediaIds, cancellationToken);
-
-        await Task.WhenAll(namesTask, mediasTask);
-
-        var names = await namesTask;
-        var mediaDict = (await mediasTask).ToDictionary(m => m.Id);
+        // Awaited sequentially on purpose: both repositories share the same scoped DbContext,
+        // which does not allow concurrent operations (Task.WhenAll here throws a concurrency error).
+        var names = await userRepository.GetNamesDictAsync(userIds, cancellationToken);
+        var mediaDict = (await mediaRepository.GetByIdsAsync(mediaIds, cancellationToken)).ToDictionary(m => m.Id);
 
         var response = new ApplicationDetailsResponse(
             application.Id,
@@ -96,6 +93,7 @@ internal sealed class GetApplicationDetailsQueryHandler(
             paper.Name.Value,
             mediaResponse,
             approval,
+            paper.Status,
             paper.SubmissionDateUtc,
             paper.ExpiryDateUtc);
     }

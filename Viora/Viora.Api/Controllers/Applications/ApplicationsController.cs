@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Viora.Api.Controllers.Oganizations;
 using Viora.Api.Extensions;
 using Viora.Application.Organizations.ApproveOnboardRequest;
+using Viora.Application.Organizations.DenyApplicationRequest;
 using Viora.Application.Organizations.GetApplicationDetails;
 using Viora.Application.Organizations.RequestOnboard;
 using Viora.Application.Organizations.SearchApplications;
@@ -83,5 +84,14 @@ public class ApplicationsController(ISender sender) : ControllerBase
             createdAtAction: nameof(OrganizationsController.GetOrganizationDetails),
             routeValueFactory: val => new { organizationId = val },
             createdAtController: "Organizations");
+    }
+
+    [HttpDelete("{requestId:guid}/deny")]
+    [Authorize]
+    public async Task<IActionResult> DenyOnboardRequest(Guid requestId, CancellationToken cancellationToken)
+    {
+        var command = new DenyApplicationRequestCommand(requestId, (Guid)UserId!);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
     }
 }
