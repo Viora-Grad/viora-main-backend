@@ -6,8 +6,8 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
-using Viora.Domain.Branches.Internals;
 using Viora.Domain.Medias;
+using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.LegalPapers.Internals;
 using Viora.Domain.Organizations.OnBoardings;
@@ -15,9 +15,9 @@ using Viora.Domain.Organizations.OnBoardings.Internals;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Shared;
 using Viora.Domain.Organizations.Shared.Enums;
-using Viora.Domain.Orders;
 using Viora.Domain.Plans;
 using Viora.Domain.Shared;
+using Viora.Domain.Shared.Internal;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
@@ -219,7 +219,7 @@ internal sealed class DevDataSeeder(
 
         var user = User.Create(
             new PersonalInfo(firstName, lastName, new DateOnly(1990, 1, 1), Gender.Male),
-            new Email(email), now);
+            new Domain.Users.Internal.Email(email), now);
 
         db.Set<LocalCredential>().Add(new LocalCredential(user.Id, hasher.Hash(DefaultPassword)));
 

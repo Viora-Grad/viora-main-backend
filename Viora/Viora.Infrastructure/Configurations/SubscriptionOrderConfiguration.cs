@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Orders;
 using Viora.Domain.Orders.Internal;
 using Viora.Domain.Plans;
@@ -10,6 +11,8 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<SubscriptionOrder> builder)
     {
+        builder.ToTable("SubscriptionOrder");
+
         builder.Property(s => s.Status)
             .HasConversion(
             v => v.id,
@@ -44,6 +47,11 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
         builder.HasOne<Plan>()
             .WithMany()
             .HasForeignKey(s => s.PlanId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Invoice>()
+            .WithMany()
+            .HasForeignKey(o => o.InvoiceId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Orders;
 using Viora.Domain.Orders.Internal;
 using Viora.Domain.Subscriptions.Addons;
@@ -38,5 +39,10 @@ internal sealed class AddonOrderConfiguration : IEntityTypeConfiguration<AddonOr
         builder.HasMany<AddonOrderLimitedFeature>()
             .WithOne()
             .HasForeignKey(x => x.AddonOrderId);
+
+        builder.HasOne<Invoice>()
+            .WithMany()
+            .HasForeignKey(o => o.InvoiceId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

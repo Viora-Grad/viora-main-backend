@@ -335,4 +335,110 @@ internal static class EmailTemplateFactory
             </body>
             </html>
             """);
+
+    public static EmailMessage ApplicationDenied(string ownerName, string organizationName, TimeSpan coolDownPeriod)
+    {
+        return new(
+            Header: $"Update regarding your application {organizationName}",
+            Body: $$"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Update</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 0;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #f8fafc;
+            padding: 40px 0;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #ffffff;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .content {
+            padding: 40px;
+        }
+        h1 {
+            color: #1e293b;
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 0;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #475569;
+        }
+        .cooldown-badge {
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .cooldown-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cooldown-countdown {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 4px;
+        }
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="content">
+                <h1>Thank you for your application</h1>
+                
+                <p>Dear {{ownerName}},</p>
+                
+                <p>Thank you for your interest in joining <strong>Viora</strong>. We truly appreciate the time and effort you put into your submission.</p>
+                
+                <p>We review every application thoroughly, and while your background is compelling, we regret to inform you that we are unable to accept your application for <strong>{{organizationName}}</strong> at this time.</p>
+                
+                <div class="cooldown-badge">
+                    <div class="cooldown-text">Next Application Window Opens In</div>
+                    <div class="cooldown-countdown">{{(int)Math.Ceiling(coolDownPeriod.TotalDays)}} Days</div>
+                </div>
+                
+                <p>We hope to see your application again once this window reopens. We wish you the absolute best in your current endeavors.</p>
+                
+                <div class="footer">
+                    <p>Warm regards,</p>
+                    <p style="font-weight: 600; color: #1e293b;">The Viora Team</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+        );
+    }
 }
