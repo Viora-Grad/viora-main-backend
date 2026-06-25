@@ -1,3 +1,4 @@
+using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Messaging;
 
 namespace Viora.Application.LegalPapers.GetLegalPaperFile;
@@ -11,4 +12,4 @@ namespace Viora.Application.LegalPapers.GetLegalPaperFile;
 /// <param name="RequesterId">The currently authenticated user.</param>
 /// <param name="IsPrivileged">True when the caller may read any application's papers (e.g. an admin reviewer).</param>
 public sealed record GetLegalPaperFileQuery(Guid LegalPaperId, Guid RequesterId, bool IsPrivileged)
-    : IQuery<LegalPaperFileResponse>;
+    : IQuery<MediaResponseStream>;
