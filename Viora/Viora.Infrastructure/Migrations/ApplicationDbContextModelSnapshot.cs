@@ -77,56 +77,6 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BillTo")
-                        .IsRequired()
-                        .HasMaxLength(320)
-                        .HasColumnType("nvarchar(320)")
-                        .HasColumnName("BillTo");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)")
-                        .HasColumnName("Currency");
-
-                    b.Property<DateTime?>("DueDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OrganizationName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("OrganizationName");
-
-                    b.Property<long>("Sequence")
-                        .HasColumnType("bigint")
-                        .HasColumnName("Sequence");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("TaxPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Invoices", (string)null);
-                });
-
             modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -193,6 +143,56 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("StaffId");
 
                     b.ToTable("Appointments", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BillTo")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)")
+                        .HasColumnName("BillTo");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)")
+                        .HasColumnName("Currency");
+
+                    b.Property<DateTime?>("DueDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OrganizationName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("OrganizationName");
+
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("Sequence");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("TaxPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invoices", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
@@ -1805,6 +1805,40 @@ namespace Viora.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Viora.Domain.Services.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
                 {
                     b.OwnsMany("Viora.Domain.Billings.Invoices.Internals.InvoiceItem", "_items", b1 =>
@@ -1882,6 +1916,9 @@ namespace Viora.Infrastructure.Migrations
                             b1.Navigation("Price")
                                 .IsRequired();
                         });
+
+                    b.Navigation("_items");
+                });
 
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
                 {
