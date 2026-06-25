@@ -50,15 +50,12 @@ internal sealed class SearchBranchesQueryHandler(
         var branchIds = branches.Select(b => b.Id).ToList();
         var orgIds = branches.Select(b => b.OrganizationId).Distinct().ToList();
 
-        // bulk load org names and ratings in parallel
-        var ratingsTask = feedbackRepository.GetAverageRatingsByBranchIdsAsync(branchIds, cancellationToken);
-        var orgsTask = organizationRepository.ListAsync(
-            new OrganizationByIdsSpecification(orgIds), cancellationToken);
-
-        await Task.WhenAll(ratingsTask, orgsTask);
-
-        var ratingsDict = await ratingsTask;
-        var orgDict = (await orgsTask).ToDictionary(o => o.Id, o => o.Name.Value);
+        // Awaited sequentially: both repositories share the same scoped DbContext, which does not
+        // allow concurrent operations (Task.WhenAll over them throws a DbContext concurrency error).
+        var ratingsDict = await feedbackRepository.GetAverageRatingsByBranchIdsAsync(branchIds, cancellationToken);
+        var orgDict = (await organizationRepository.ListAsync(
+            new OrganizationByIdsSpecification(orgIds), cancellationToken))
+            .ToDictionary(o => o.Id, o => o.Name.Value);
 
         var utcNow = dateTimeProvider.UtcNow;
         var orderByRating = request.OrderBy?.Any(o => o.Equals("rating", StringComparison.OrdinalIgnoreCase)) ?? false;
