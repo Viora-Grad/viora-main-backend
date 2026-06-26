@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Clock;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Users.Identity;
@@ -134,6 +135,47 @@ internal class AuthenticationService(IUserRepository userRepository,
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(user.Id.ToString());
 
+    }
+
+    public async Task<Result> ChangePassword(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken)
+    {
+        var localCredential = await localCredentialRepository.GetByUserIdAsync(userId, cancellationToken);
+        if (localCredential is null)
+            return Result.Failure(UserErrors.InvalidCredentials); // no local password set (e.g. social-only account)
+
+        if (!Hasher.Verify(currentPassword, localCredential.HashedPassword))
+            return Result.Failure(UserErrors.InvalidCredentials);
+
+        var newHashedPassword = Hasher.Hash(newPassword);
+        localCredential.UpdatePassword(newHashedPassword, dateTimeProvider.UtcNow, localCredential.HashVersion + 1);
+
+        // Revoke the active refresh token so existing sessions can't silently refresh after the change.
+        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(userId, cancellationToken);
+        activeToken?.Revoke();
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdatePassword(string email, string password, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+            return Result.Failure(UserErrors.NotFound);
+
+        var localCredential = await localCredentialRepository.GetByUserIdAsync(user.Id, cancellationToken)
+            ?? throw new NotFoundException("localCredential not found");
+        var newHashedPassword = Hasher.Hash(password);
+
+        localCredential.UpdatePassword(newHashedPassword, dateTimeProvider.UtcNow, localCredential.HashVersion + 1);
+
+        // Revoke the active refresh token so any existing sessions can't refresh after a reset.
+        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
+        activeToken?.Revoke();
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 
     public async Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
