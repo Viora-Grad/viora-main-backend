@@ -13,6 +13,7 @@ public sealed record GetDoctorAppointmentsQuery(
     bool? IncludeStaffObject = false,
     bool? IncludeServiceObject = false,
     bool? IncludeBranchObject = false,
+    bool? IncludeCustomerObject = false,
     DateTime? ReservationDate = null,
     DateTime? FromDate = null,
     DateTime? ToDate = null,

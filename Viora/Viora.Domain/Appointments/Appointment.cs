@@ -25,6 +25,7 @@ public sealed class Appointment : Entity
     public bool IsCheckedIn { get; private set; } = false;
     public Creator CreatedBy { get; private set; }
     public Platform RequestPlatform { get; private set; }
+    public PaymentMethod PayMethod { get; private set; }
     public TimeSpan EstimatedDuration { get; private set; }
     public DateTime EndTime => ReservationDate.Add(EstimatedDuration); // Convenience property to calculate the end time of the appointment
 
@@ -43,6 +44,8 @@ public sealed class Appointment : Entity
         Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
+        int appointmentQueueNumber,
+        PaymentMethod payMethod,
         CustomerStatus status,
         Creator createdBy,
         Platform requestPlatform,
@@ -55,6 +58,8 @@ public sealed class Appointment : Entity
         BranchId = branchId;
         PaymentId = paymentId;
         ReservationDate = reservationDate;
+        AppointmentQueueNumber = appointmentQueueNumber;
+        PayMethod = payMethod;
         Status = status;
         CreatedBy = createdBy;
         RequestPlatform = requestPlatform;
@@ -69,6 +74,8 @@ public sealed class Appointment : Entity
         Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
+        int appointmentQueueNumber,
+        PaymentMethod payMethod,
         CustomerStatus? status,
         Creator createdBy,
         Platform requestPlatform,
@@ -76,13 +83,16 @@ public sealed class Appointment : Entity
         DateTime createdAt)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
-        var appointment = new Appointment(Guid.NewGuid(),
+        var appointment = new Appointment(
+            Guid.NewGuid(),
             customerId,
             serviceId,
             staffId,
             branchId,
             paymentId,
             reservationDate,
+            appointmentQueueNumber,
+            payMethod,
             appointmentStatus,
             createdBy,
             requestPlatform,

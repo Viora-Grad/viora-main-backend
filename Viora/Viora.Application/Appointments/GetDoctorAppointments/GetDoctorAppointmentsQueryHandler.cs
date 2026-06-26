@@ -18,6 +18,7 @@ internal class GetDoctorAppointmentsQueryHandler(
             ServiceId: request.ServiceId,
             StaffId: request.StaffId,
             CustomerStatus: request.CustomerStatus,
+            IncludeCustomerObject: request.IncludeCustomerObject,
             IncludeStaffObject: request.IncludeStaffObject,
             IncludeServiceObject: request.IncludeServiceObject,
             IncludeBranchObject: request.IncludeBranchObject,
@@ -36,14 +37,16 @@ internal class GetDoctorAppointmentsQueryHandler(
             ServiceId = a.ServiceId,
             StaffId = a.StaffId,
             BranchId = a.BranchId,
+            PaymentId = a.PaymentId,
+            PaymentMethod = a.PayMethod.ToString(),
             ReservationDate = a.ReservationDate,
-            Status = a.Status,
+            Status = a.Status.ToString(),
             EstimatedDuration = a.EstimatedDuration,
             CustomerId = a.CustomerId,
             CustomerName = a.Customer?.PersonalInfo.FirstName + " " + a.Customer?.PersonalInfo.LastName ?? string.Empty,
             ServiceName = a.Service?.Name ?? string.Empty,
             StaffName = $"", // staff not implemented yet
-            Cost = $"{a.Service?.Cost.Amount}{a.Service?.Cost.Currency}"
+            Cost = $"{a.Service?.Cost.ToString()}"
         }).ToList();
         return Result.Success(new PaginatedModel<AppointmentsResponse>(response, request.Page, request.PageSize, response.Count));
     }

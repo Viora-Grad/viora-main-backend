@@ -16,6 +16,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Shared;
 using Viora.Domain.Organizations.Shared.Enums;
 using Viora.Domain.Plans;
+using Viora.Domain.Services;
 using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 using Viora.Domain.Subscriptions;
@@ -23,6 +24,7 @@ using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
 using Viora.Domain.Users.Owners;
 using Viora.Infrastructure.Authentication;
+using Viora.Infrastructure.Seeding.Data;
 using BranchEmail = Viora.Domain.Shared.Internal.Email;
 
 namespace Viora.Infrastructure.Seeding;
@@ -49,6 +51,7 @@ internal sealed class DevDataSeeder(
     IHasher hasher,
     IDateTimeProvider clock,
     IStorageService storage,
+    IServiceSettings serviceSettings,
     IStorageSettings storageSettings,
     IOnboardingSettings onboardingSettings,
     ILogger<DevDataSeeder> logger) : IDevDataSeeder
@@ -78,6 +81,7 @@ internal sealed class DevDataSeeder(
 
         await SeedActiveOwnerAsync(cancellationToken);
         await SeedPendingOwnerAsync(cancellationToken);
+        await SeedServicesAsync(cancellationToken);
     }
 
     /// <summary>
@@ -247,6 +251,23 @@ internal sealed class DevDataSeeder(
             $"media {name}");
         db.Set<MediaFile>().Add(media);
         return media;
+    }
+
+    private async Task SeedServicesAsync(CancellationToken cancellationToken)
+    {
+        var existingServices = await db.Set<Service>().ToListAsync(cancellationToken);
+        if (existingServices.Any())
+        {
+            logger.LogInformation("DevData: services already seeded, skipping.");
+            return;
+        }
+        var now = clock.UtcNow;
+        IEnumerable<Service> services = new ServiceData(serviceSettings).All;
+
+
+        db.Set<Service>().AddRange(services);
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded services.");
     }
 
     private Task<bool> PersonaExistsAsync(string email, CancellationToken cancellationToken) =>

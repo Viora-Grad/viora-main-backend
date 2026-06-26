@@ -19,32 +19,18 @@ internal class CheckInAppointmentCommandHandler(
 {
     public async Task<Result> Handle(CheckInAppointmentCommand request, CancellationToken cancellationToken)
     {
-        if (request.IsStaffOverride)
+        var staffId = userContext.UserId;
+        var staff = await staffRepository.GetByIdAsync(staffId, cancellationToken) ??
+            throw new NotFoundException("Staff with ID " + staffId + " not found.");
+
+        var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
+            throw new NotFoundException("Appointment with ID " + request.AppointmentId + " not found.");
+
+        var checkInResult = appointment.CheckIn(dateTimeProvider.UtcNow, Creator.Staff);
+
+        if (checkInResult.IsFailure)
         {
-            var staffId = userContext.UserId;
-            var staff = await staffRepository.GetByIdAsync(staffId, cancellationToken) ??
-                throw new NotFoundException("Staff with ID " + staffId + " not found.");
-
-            var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
-                throw new NotFoundException("Appointment with ID " + request.AppointmentId + " not found.");
-
-            var checkInResult = appointment.CheckIn(dateTimeProvider.UtcNow, Creator.Staff);
-
-            if (checkInResult.IsFailure)
-            {
-                return Result.Failure(checkInResult.Error);
-            }
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            return Result.Success();
-        }
-        var appointmentToCheckIn = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken)
-            ?? throw new NotFoundException("Appointment with ID " + request.AppointmentId + " not found.");
-
-        var checkResult = appointmentToCheckIn.CheckIn(dateTimeProvider.UtcNow, Creator.Customer);
-
-        if (checkResult.IsFailure)
-        {
-            return Result.Failure(checkResult.Error);
+            return Result.Failure(checkInResult.Error);
         }
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();

@@ -19,8 +19,14 @@ internal class GetAppointmentsSpecification : BaseSpecification<Appointment>
         if (p.StaffId.HasValue)
             AddCriteria(a => a.StaffId == p.StaffId);
 
+        if (p.PaymentId.HasValue)
+            AddCriteria(a => a.PaymentId == p.PaymentId);
+
         if (p.CustomerStatus != null && p.CustomerStatus.Any())
             AddCriteria(a => p.CustomerStatus.Contains(a.Status.ToString()));
+
+        if (p.PaymentMethods != null && p.PaymentMethods.Any())
+            AddCriteria(a => p.PaymentMethods.Contains(a.PayMethod.ToString()));
 
         if (p.ReservationDate.HasValue)
             AddCriteria(a => a.ReservationDate.Date == p.ReservationDate.Value.Date);
@@ -32,7 +38,7 @@ internal class GetAppointmentsSpecification : BaseSpecification<Appointment>
             AddCriteria(a => a.ReservationDate <= p.ToDate);
 
         if (p.IncludeCustomerObject == true)
-            AddInclude(a => a.Customer);
+            AddInclude(a => a.Customer!);
 
         if (p.IncludeStaffObject == true)
             AddInclude(a => a.Staff);
@@ -56,7 +62,9 @@ public sealed record GetAppointmentsParameters(
     Guid? BranchId = null,
     Guid? ServiceId = null,
     Guid? StaffId = null,
+    Guid? PaymentId = null,
     IEnumerable<string>? CustomerStatus = null,
+    IEnumerable<string>? PaymentMethods = null,
     bool? IncludeCustomerObject = false,
     bool? IncludeStaffObject = false,
     bool? IncludeServiceObject = false,
