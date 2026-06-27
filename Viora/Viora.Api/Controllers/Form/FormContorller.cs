@@ -1,11 +1,15 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Viora.Api.Extensions;
+using Viora.Application.Abstractions.Media;
 using Viora.Application.Forms.CreateForm;
 using Viora.Application.Forms.DeleteForm;
 using Viora.Application.Forms.GetForm;
+using Viora.Application.Forms.GetFormSubmissionByAppointment;
 using Viora.Application.Forms.GetServiceForm;
+using Viora.Application.Forms.SubmitFormAnswer;
 using Viora.Application.Forms.UpdateForm;
 
 namespace Viora.Api.Controllers.Form;
@@ -64,6 +68,75 @@ public class FormContorller : ControllerBase
     {
         var command = new DeleteFormCommand(formId);
         var result = await _sender.Send(command);
+        return result.ToActionResult();
+    }
+
+
+    [HttpPost]
+    [Route("api/appontment/{appointmentId}/form-submission")]
+    [Authorize]
+    [Consumes("multipart/form-data")]
+
+    public async Task<IActionResult> submitForm(
+        [FromForm] FormSubmissionRequest request,
+        [FromQuery] Guid appointmentId,
+        [FromServices] IStorageSettings storageSetting,
+        CancellationToken cancellationToke
+        )
+    {
+
+        List<MediaRequest> mediaRequests = new List<MediaRequest>();
+        if (request.FormFiles.Any())
+        {
+            try
+            {
+                foreach (var file in request.FormFiles)
+                {
+                    mediaRequests.Add(file.ContentType == "form-submission/pdf"
+                         ? MediaRequest.CreateDocument(file.FileName, file.ContentType, file.Length, file.OpenReadStream(), storageSetting.MaxFileSizeBytes)
+                         : MediaRequest.CreateImage(file.FileName, file.ContentType, file.Length, file.OpenReadStream(), storageSetting.MaxFileSizeBytes)
+
+                        );
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        var command = new SubmitFormAnswerCommand(
+                appointmentId,
+                request.FormId,
+                request.submission,
+                mediaRequests
+                );
+
+        var result = await _sender.Send(command);
+
+        return result.ToActionResult();
+    }
+
+
+
+    [HttpGet]
+    [Authorize]
+    [Route("api/form/{formId}/submission/{appointmentId}")]
+    public async Task<IActionResult> GetAppountmentSubmission(Guid formId, Guid appointmentId, CancellationToken cancellationToke)
+    {
+        var query = new GetFormSubmissionByAppointmentQuery(appointmentId, formId);
+        var result = await _sender.Send(query);
+        return result.ToActionResult();
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("api/form/submission/{FormSubmissionId}")]
+
+    public async Task<IActionResult> GetSubmission(Guid FormSubmissionId, CancellationToken cancellationToke)
+    {
+        var query = new GetFormByIdQuery(FormSubmissionId);
+        var result = await _sender.Send(query);
         return result.ToActionResult();
     }
 }

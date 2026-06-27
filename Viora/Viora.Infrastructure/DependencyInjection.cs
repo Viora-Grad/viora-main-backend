@@ -15,6 +15,7 @@ using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
+using Viora.Domain.Forms;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
@@ -36,6 +37,7 @@ using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Authentication;
+using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.Subscriptions;
@@ -86,6 +88,11 @@ public static class DependencyInjection
         services.AddScoped<IBranchRepository, BranchRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         #endregion Branches
+
+        #region Form 
+        services.AddScoped<IFormRepository, FormRepository>();
+        services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
+        #endregion
 
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
