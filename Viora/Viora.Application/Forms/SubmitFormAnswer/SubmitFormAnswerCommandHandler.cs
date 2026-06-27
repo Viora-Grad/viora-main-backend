@@ -5,6 +5,7 @@ using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.Forms;
 using Viora.Domain.Medias;
@@ -13,7 +14,7 @@ using Viora.Domain.Services;
 namespace Viora.Application.Forms.SubmitFormAnswer;
 
 internal class SubmitFormAnswerCommandHandler(
-    //IAppointmentRepository appointmentRepository
+    IAppointmentsRepository appointmentRepository,
     IUnitOfWork unitOfWork,
     IFormRepository formRepository,
     IFormSubmissionRepository formSubmissionRepository,
@@ -27,8 +28,8 @@ internal class SubmitFormAnswerCommandHandler(
 {
     public async Task<Result> Handle(SubmitFormAnswerCommand request, CancellationToken cancellationToken)
     {
-        /*var appointment = await appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken)
-            ?? throw new NotFoundException($"the appointment with id {request.AppointmentId} not found ");*/
+        var appointment = await appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken)
+            ?? throw new NotFoundException($"the appointment with id {request.AppointmentId} not found ");
 
         var form = await formRepository.GetByIdAsync(request.FormId, cancellationToken)
             ?? throw new NotFoundException($"the form with id {request.FormId} not found ");

@@ -16,7 +16,7 @@ public class SubscriptionController : ControllerBase
     }
 
     [HttpGet]
-    [Route("api/subscription/get/{organizationId}")]
+    [Route("api/subscription/{organizationId}")]
 
     public async Task<IActionResult> GetOrganizationSubscriptions(
         Guid organizationId, CancellationToken cancellationToken)

@@ -7,20 +7,17 @@ namespace Viora.Application.Branches.GetBranchGalleryImage;
 
 internal sealed class GetBranchGalleryImageQueryHandler(
     IBranchRepository branchRepository,
-    IStorageService storageService) : IQueryHandler<GetBranchGalleryImageQuery, BranchGalleryImageResponse>
+    IStorageService storageService) : IQueryHandler<GetBranchGalleryImageQuery, MediaResponseStream>
 {
-    public async Task<Result<BranchGalleryImageResponse>> Handle(GetBranchGalleryImageQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MediaResponseStream>> Handle(GetBranchGalleryImageQuery request, CancellationToken cancellationToken)
     {
-        // Resolve the image from the branch's own gallery. This is the security crux: the
-        // media id must belong to this branch, so the route cannot be used to stream an
-        // unrelated media file (e.g. a legal paper) by guessing its id.
         var gallery = await branchRepository.GetMediaByBranchId(request.BranchId, cancellationToken);
 
         var image = gallery?.FirstOrDefault(media => media.Id == request.MediaId);
         if (image is null)
-            return Result.Failure<BranchGalleryImageResponse>(BranchErrors.GalleryImageNotFound);
+            return Result.Failure<MediaResponseStream>(BranchErrors.GalleryImageNotFound);
 
         var stream = storageService.GetFileStream(image.Key);
-        return Result.Success(new BranchGalleryImageResponse(stream, image.MimeType.Value, image.Name.Value));
+        return Result.Success(new MediaResponseStream(stream, image.MimeType.Value, image.Name.Value));
     }
 }

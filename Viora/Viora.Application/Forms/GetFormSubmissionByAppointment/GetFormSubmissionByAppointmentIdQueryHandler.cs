@@ -1,25 +1,28 @@
 ﻿using System.Text.Json.Nodes;
+using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Forms.Shared;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 using Viora.Domain.Forms;
 using Viora.Domain.Medias;
 
 namespace Viora.Application.Forms.GetFormSubmissionByAppointment;
 
 internal class GetFormSubmissionByAppointmentIdQueryHandler(
-    //IAppontmentRepository appontmentRepository,
+    IAppointmentsRepository appontmentRepository,
     IFormSubmissionRepository formSubmissionRepository,
     IMediaRepository mediaRepository
     ) : IQueryHandler<GetFormSubmissionByAppointmentQuery, FormSubmissionResponse>
 {
     public async Task<Result<FormSubmissionResponse>> Handle(GetFormSubmissionByAppointmentQuery request, CancellationToken cancellationToken)
     {
-        /*var appointment = await appontmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken)
-            ?? throw new NotFoundException($"the appointment with id {request.AppointmentId} not Found");*/
+        var appointment = await appontmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken)
+            ?? throw new NotFoundException($"the appointment with id {request.AppointmentId} not Found");
 
-        var formSubmission = await formSubmissionRepository.GetByAppointmentIdAsync(request.AppointmentId, request.FormId, cancellationToken);
+        var formSubmission = await formSubmissionRepository.GetByAppointmentIdAsync(request.AppointmentId, request.FormId, cancellationToken)
+            ?? throw new NotFoundException($"the appointmentId {request.AppointmentId} does not have submission");
 
         List<MediaResponse> mediaResponses = new List<MediaResponse>();
 

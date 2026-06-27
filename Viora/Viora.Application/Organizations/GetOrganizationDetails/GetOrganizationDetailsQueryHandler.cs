@@ -28,7 +28,7 @@ internal class GetOrganizationDetailsQueryHandler(
             organization.About,
             country.Name,
             country.IsoAlphaThree,
-            organization.ServicesProvided.Select(s => s.ToString()),
+            organization.ServicesProvided.Select(s => s.Value),
             organization.ServiceDescription,
             organization.SupportEmail,
             organization.JoinedOnUtc,

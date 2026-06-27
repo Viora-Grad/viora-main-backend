@@ -1,4 +1,4 @@
-﻿namespace Viora.Domain.Branches.Internals;
+﻿namespace Viora.Domain.Shared.Internal;
 
 /// <summary>
 /// The address for the Branch, Country Id is allowed here because maybe branches could be in many countries

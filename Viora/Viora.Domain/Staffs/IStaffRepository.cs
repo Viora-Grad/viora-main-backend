@@ -2,5 +2,6 @@
 
 public interface IStaffRepository
 {
-    public Task<Staff?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    void Add(Staff staff);
+    Task<Staff?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }

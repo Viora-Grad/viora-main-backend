@@ -2,11 +2,11 @@
 
 namespace Viora.Domain.Staffs;
 
-public class Staff : Entity
+public sealed class Staff : Entity
 {
     public Guid BranchId { get; private set; }
-
-    private Staff(Guid id, Guid branchId) : base(id)
+    private Staff() { } // For EF Core
+    public Staff(Guid id, Guid branchId) : base(id)
     {
         BranchId = branchId;
     }

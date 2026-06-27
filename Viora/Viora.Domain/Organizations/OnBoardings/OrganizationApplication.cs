@@ -81,4 +81,14 @@ public sealed class OrganizationApplication : Entity
             ExpiryDateUtc > utcNow &&
             ExpiryDateUtc <= utcNow.Add(onboardingSettings.CoolDownPeriod));
     }
+
+    public Result Deny(Guid rejectedById)
+    {
+        if (Status != ApplicationStatus.Pending)
+            return Result.Failure(OnboardingErrors.StatusNotPending);
+
+        RejectedBy = rejectedById;
+        Status = ApplicationStatus.Rejected;
+        return Result.Success();
+    }
 }

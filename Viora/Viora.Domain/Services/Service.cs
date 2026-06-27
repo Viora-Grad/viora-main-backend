@@ -13,7 +13,7 @@ public sealed class Service : Entity
     public Guid BranchId { get; private set; }
     public ServiceName Name { get; private set; } = default!;
     public ServiceDescription Description { get; private set; } = default!;
-    public ServiceType Type { get; private set; }
+    public ServiceType Type { get; private set; } = default!;
     public ServiceStatus Status { get; private set; }
 
     public TimeSpan Duration { get; private set; }
@@ -22,6 +22,8 @@ public sealed class Service : Entity
     // TODO for better UX add description per image for what this image represents, not prio now, done later (dunno when xd)
     private readonly List<MediaFile> _gallery = [];
     public IReadOnlyCollection<MediaFile> Gallery => _gallery.AsReadOnly();
+
+    public Discount? Discount { get; set; } = null;
 
     private Service() { }
 
@@ -38,6 +40,7 @@ public sealed class Service : Entity
 
         return Result.Success(new Service
         {
+            Id = Guid.NewGuid(),
             BranchId = branchId,
             Name = name,
             Description = description,

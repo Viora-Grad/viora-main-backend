@@ -77,6 +77,127 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("UserRole");
                 });
 
+            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AppointmentQueueNumber")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("EstimatedDuration")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsCheckedIn")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PayMethod")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RequestPlatform")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReservationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Appointments", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BillTo")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)")
+                        .HasColumnName("BillTo");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)")
+                        .HasColumnName("Currency");
+
+                    b.Property<DateTime?>("DueDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OrganizationName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("OrganizationName");
+
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("Sequence");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("TaxPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invoices", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -395,6 +516,9 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("InvoiceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -404,10 +528,30 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid?>("SubscriptionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float");
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "TotalPrice", "Viora.Domain.Orders.AddonOrder.TotalPrice#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("TotalPriceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Orders.AddonOrder.TotalPrice#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("TotalPriceCurrency");
+                                });
+                        });
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
 
                     b.ToTable("AddonOrders", (string)null);
                 });
@@ -420,6 +564,9 @@ namespace Viora.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("InvoiceId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
@@ -437,15 +584,34 @@ namespace Viora.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("TotalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("float(18)");
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "TotalPrice", "Viora.Domain.Orders.SubscriptionOrder.TotalPrice#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("TotalPriceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Orders.SubscriptionOrder.TotalPrice#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("TotalPriceCurrency");
+                                });
+                        });
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InvoiceId");
+
                     b.HasIndex("PlanId");
 
-                    b.ToTable("SubscriptionOrder");
+                    b.ToTable("SubscriptionOrder", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Organizations.LegalPapers.LegalPaper", b =>
@@ -912,9 +1078,26 @@ namespace Viora.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("PlanPeriodId");
 
-                    b.Property<double>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("float(18)");
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Price", "Viora.Domain.Plans.Plan.Price#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("PriceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Plans.Plan.Price#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("PriceCurrency");
+                                });
+                        });
 
                     b.HasKey("Id");
 
@@ -964,6 +1147,113 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("PlanId");
 
                     b.ToTable("PlanLimitedFeatures", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Schedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("Schedules", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleCancellations", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CancellationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("ShiftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancellationDate");
+
+                    b.HasIndex("ShiftId");
+
+                    b.ToTable("ScheduleCancellations", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleDelay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("DelayDuration")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Initiator")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("OccurrenceTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("OccurrenceTime");
+
+                    b.ToTable("ScheduleDelays", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Shift", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<Guid>("ScheduleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("ScheduleId", "StaffId");
+
+                    b.ToTable("Shifts", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Scheduling.ScheduledDomainEvent", b =>
@@ -1101,6 +1391,22 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Countries", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.ToTable("Staff", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.AddonOrderLimitedFeature", b =>
                 {
                     b.Property<Guid>("AddonOrderId")
@@ -1132,12 +1438,29 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid>("LimitedFeatureId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("float(18)");
-
                     b.Property<int>("RestoreValue")
                         .HasColumnType("int");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Price", "Viora.Domain.Subscriptions.Addons.LimitedFeatureAddon.Price#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("PriceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Subscriptions.Addons.LimitedFeatureAddon.Price#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("PriceCurrency");
+                                });
+                        });
 
                     b.HasKey("Id");
 
@@ -1485,6 +1808,121 @@ namespace Viora.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Viora.Domain.Services.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
+                {
+                    b.OwnsMany("Viora.Domain.Billings.Invoices.Internals.InvoiceItem", "_items", b1 =>
+                        {
+                            b1.Property<Guid>("InvoiceId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)")
+                                .HasColumnName("Description");
+
+                            b1.Property<decimal>("DiscountPercentage")
+                                .HasPrecision(18, 6)
+                                .HasColumnType("decimal(18,6)");
+
+                            b1.Property<string>("ItemName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("ItemName");
+
+                            b1.Property<int>("Quantity")
+                                .HasColumnType("int");
+
+                            b1.Property<decimal>("TaxPercentage")
+                                .HasPrecision(18, 6)
+                                .HasColumnType("decimal(18,6)");
+
+                            b1.Property<int>("_number")
+                                .HasColumnType("int")
+                                .HasColumnName("ItemNumber");
+
+                            b1.HasKey("InvoiceId", "Id");
+
+                            b1.ToTable("InvoiceItems", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("InvoiceId");
+
+                            b1.OwnsOne("Viora.Domain.Shared.Money", "Price", b2 =>
+                                {
+                                    b2.Property<Guid>("InvoiceItemInvoiceId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<int>("InvoiceItemId")
+                                        .HasColumnType("int");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasPrecision(18, 2)
+                                        .HasColumnType("decimal(18,2)")
+                                        .HasColumnName("PriceAmount");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("PriceCurrency");
+
+                                    b2.HasKey("InvoiceItemInvoiceId", "InvoiceItemId");
+
+                                    b2.ToTable("InvoiceItems");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("InvoiceItemInvoiceId", "InvoiceItemId");
+                                });
+
+                            b1.Navigation("Price")
+                                .IsRequired();
+                        });
+
+                    b.Navigation("_items");
+                });
+
             modelBuilder.Entity("Viora.Domain.Branches.Branch", b =>
                 {
                     b.HasOne("Viora.Domain.Organizations.OrganizationDetails.Organization", null)
@@ -1690,8 +2128,21 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
+                {
+                    b.HasOne("Viora.Domain.Billings.Invoices.Invoice", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Viora.Domain.Orders.SubscriptionOrder", b =>
                 {
+                    b.HasOne("Viora.Domain.Billings.Invoices.Invoice", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Viora.Domain.Plans.Plan", null)
                         .WithMany()
                         .HasForeignKey("PlanId")
@@ -1812,7 +2263,76 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("LimitedFeature");
                 });
 
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleCancellations", b =>
+                {
+                    b.HasOne("Viora.Domain.RealTimeScheduling.Shift", null)
+                        .WithMany()
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleDelay", b =>
+                {
+                    b.HasOne("Viora.Domain.Appointments.Appointment", null)
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Shift", b =>
+                {
+                    b.HasOne("Viora.Domain.RealTimeScheduling.Schedule", null)
+                        .WithMany("Intervals")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Viora.Domain.Services.Service", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Viora.Domain.Services.Internals.Discount", "Discount", b1 =>
+                        {
+                            b1.Property<Guid>("ServiceId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<DateTime>("EndDateUtc")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("DiscountEndDateUtc");
+
+                            b1.Property<int>("PercentageOutOf100")
+                                .HasColumnType("int")
+                                .HasColumnName("DiscountPercentage");
+
+                            b1.Property<string>("Reason")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)")
+                                .HasColumnName("DiscountReason");
+
+                            b1.Property<DateTime>("StartDateUtc")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("DiscountStartDateUtc");
+
+                            b1.HasKey("ServiceId");
+
+                            b1.ToTable("Service");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ServiceId");
+                        });
+
+                    b.Navigation("Discount");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
                         .WithMany()
@@ -2053,6 +2573,11 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("PlanFeatures");
 
                     b.Navigation("PlanLimitedFeatures");
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Schedule", b =>
+                {
+                    b.Navigation("Intervals");
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Subscription", b =>
