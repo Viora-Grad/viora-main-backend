@@ -36,9 +36,9 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentCom
             .WithMessage("Invalid payment method.");
 
         RuleFor(a => a.PaymentMethod)
-            .Equal("Cash")
-            .When(a => a.PaymentId == null)
-            .WithMessage("Payment method must be Cash when PaymentId is null.");
+            .NotEqual("Cash")
+            .When(a => a.PaymentId != null)
+            .WithMessage("Payment method cannot be Cash when PaymentId is provided.");
 
         RuleFor(x => x.ReservationDate).GreaterThan(_dateTimeProvider.UtcNow).WithMessage("Reservation date must be in the future.");
         RuleFor(x => x.EstimatedDuration).GreaterThan(TimeSpan.Zero).WithMessage("Estimated duration must be greater than zero.");

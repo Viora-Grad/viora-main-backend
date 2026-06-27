@@ -7,6 +7,9 @@ internal class GetAppointmentsSpecification : BaseSpecification<Appointment>
 {
     public GetAppointmentsSpecification(GetAppointmentsParameters p)
     {
+        if (p.Id.HasValue)
+            AddCriteria(a => a.Id == p.Id);
+
         if (p.CustomerId.HasValue)
             AddCriteria(a => a.CustomerId == p.CustomerId);
 
@@ -58,6 +61,7 @@ internal class GetAppointmentsSpecification : BaseSpecification<Appointment>
 }
 
 public sealed record GetAppointmentsParameters(
+    Guid? Id = null,
     Guid? CustomerId = null,
     Guid? BranchId = null,
     Guid? ServiceId = null,

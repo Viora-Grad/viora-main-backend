@@ -43,7 +43,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/check-in")]
-    [Authorize(Roles = "Staff")] // might change the policy later to be more specific to the staff role
+    [Authorize(Roles = "Staff,Owner")] // might change the policy later to be more specific to the staff role
     public async Task<IActionResult> CheckInAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CheckInAppointmentCommand(AppointmentId: id);
@@ -51,7 +51,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/complete")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff,Owner")]
     public async Task<IActionResult> CompleteAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CompleteAppointmentCommand(AppointmentId: id);
@@ -59,7 +59,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/cancel")]
-    [Authorize(Roles = "Staff,Customer")]
+    [Authorize(Roles = "Staff,Customer,Owner")]
     public async Task<IActionResult> CancelAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CancelAppointmentCommand(AppointmentId: id);
@@ -67,15 +67,16 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/delay")]
-    [Authorize(Roles = "Staff")]
-    public async Task<IActionResult> DelayAppointment([FromRoute] Guid id, [FromBody] TimeSpan delayDuration, CancellationToken cancellationToken)
+    [Authorize(Roles = "Staff,Owner")]
+    public async Task<IActionResult> DelayAppointment([FromRoute] Guid id, [FromBody] int delayDurationInMinutes, CancellationToken cancellationToken)
     {
-        var command = new DelayAppointmentCommand(AppointmentId: id, DelayDuration: delayDuration);
+        var delay = TimeSpan.FromMinutes(delayDurationInMinutes);
+        var command = new DelayAppointmentCommand(AppointmentId: id, DelayDuration: delay);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = "Staff,Customer")]
+    [Authorize(Roles = "Staff,Customer,Owner")]
     public async Task<IActionResult> GetAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var query = new GetAppointmentQuery(AppointmentId: id);

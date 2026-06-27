@@ -2,6 +2,7 @@
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
 
 namespace Viora.Application.Appointments.DelayAppointment;
 
@@ -27,7 +28,33 @@ internal class DelayAppointmentCommandHandler(
         }
         var userId = userContext.UserId;
 
-        appointment.Delay(request.DelayDuration, $"Appointment delayed by: {userId}");
+
+        // get affected appointments and delay them as well
+        var endOfDay = appointment.ReservationDate.Date.AddDays(1).AddTicks(-1);
+        var affectedAppointments = await appointmentsRepository.GetByDateRangeAsync(
+            appointment.ServiceId,
+            appointment.StaffId,
+            appointment.ReservationDate,
+            endOfDay,
+            cancellationToken);
+
+        var sorted = affectedAppointments
+            .Where(a => a.Status != CustomerStatus.Canceled)
+            .OrderBy(a => a.ReservationDate)
+            .ToList();
+
+
+        appointment.Delay(request.DelayDuration, $"Appointment delayed by: {userId}"); // delay the requested appointment first
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            var prev = sorted[i - 1];
+            var current = sorted[i];
+            if (current.ReservationDate < prev.EndTime)
+            {
+                var delayDuration = prev.EndTime - current.ReservationDate;
+                current.Delay(delayDuration, $"Appointment delayed due to previous appointment delay by: {userId}");
+            }
+        }
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
