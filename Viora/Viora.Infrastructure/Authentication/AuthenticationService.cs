@@ -43,7 +43,9 @@ internal class AuthenticationService(IUserRepository userRepository,
         }
 
         localCredential.ResetFailedLoginAttempts();
-        var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Select(p => new Claim("permission", p.Name));
+        var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+        var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+        var allClaims = permissionClaims.Concat(RoleClaims);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
@@ -57,7 +59,7 @@ internal class AuthenticationService(IUserRepository userRepository,
 
         var authResult = new AuthResult(
             UserId: user.Id,
-            AccessToken: jwtService.GenerateToken(user.Id, permissionClaims),
+            AccessToken: jwtService.GenerateToken(user.Id, allClaims),
             RefreshToken: refreshTokenValue,
             Roles: user.Roles.Select(r => r.Name).ToList(),
             Permissions: user.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
@@ -94,11 +96,13 @@ internal class AuthenticationService(IUserRepository userRepository,
             {
                 return Result.Failure<AuthResult>(UserErrors.NotFound);
             }
-            var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Select(p => new Claim("permission", p.Name));
+            var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+            var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+            var allClaims = permissionClaims.Concat(RoleClaims);
 
             var authResult = new AuthResult(
                 UserId: user.Id,
-                AccessToken: jwtService.GenerateToken(user.Id, permissionClaims),
+                AccessToken: jwtService.GenerateToken(user.Id, allClaims),
                 RefreshToken: newRefreshTokenValue,
                 Roles: user.Roles.Select(r => r.Name).ToList(),
                 Permissions: user.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
@@ -183,6 +187,8 @@ internal class AuthenticationService(IUserRepository userRepository,
         identity.RecordLogin(dateTimeProvider.UtcNow);
         var permissions = user.Roles.SelectMany(r => r.Permissions).Distinct().ToList();
         var permissionClaims = permissions.Select(p => new Claim("permission", p.Name));
+        var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+        var allClaims = permissionClaims.Concat(RoleClaims);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
@@ -195,7 +201,7 @@ internal class AuthenticationService(IUserRepository userRepository,
 
         var authResult = new AuthResult(
             UserId: user.Id,
-            AccessToken: jwtService.GenerateToken(user.Id, permissionClaims),
+            AccessToken: jwtService.GenerateToken(user.Id, allClaims),
             RefreshToken: refreshTokenValue,
             Roles: user.Roles.Select(r => r.Name).ToList(),
             Permissions: [.. permissions.Select(p => p.Name).Distinct()]

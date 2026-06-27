@@ -1,0 +1,160 @@
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Viora.Api.Extensions;
+using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Appointments.CancelAppointment;
+using Viora.Application.Appointments.CheckInAppointment;
+using Viora.Application.Appointments.CompleteAppointment;
+using Viora.Application.Appointments.CreateAppointment;
+using Viora.Application.Appointments.DelayAppointment;
+using Viora.Application.Appointments.GetAppointment;
+using Viora.Application.Appointments.GetBranchAppointments;
+using Viora.Application.Appointments.GetCustomerAllAppointments;
+using Viora.Application.Appointments.GetDoctorAppointments;
+
+namespace Viora.Api.Controllers.Appointments;
+
+[Route("api/appointments")]
+[Authorize]
+[ApiController]
+public class AppointmentsController(
+    ISender sender,
+    IUserContext userContext
+    ) : ControllerBase
+{
+    [HttpPost]
+    [Authorize(Roles = "Staff,Customer")]
+    public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateAppointmentCommand(
+            StaffId: request.StaffId,
+            ServiceId: request.ServiceId,
+            BranchId: request.BranchId,
+            PaymentId: request.PaymentId,
+            ReservationDate: request.ReservationDate,
+            PaymentMethod: request.PaymentMethod,
+            Status: request.Status,
+            CreatedBy: request.CreatedBy,
+            RequestPlatform: request.RequestPlatform,
+            EstimatedDuration: request.EstimatedDuration
+        );
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("{id:guid}/check-in")]
+    [Authorize(Roles = "Staff,Owner")] // might change the policy later to be more specific to the staff role
+    public async Task<IActionResult> CheckInAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new CheckInAppointmentCommand(AppointmentId: id);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("{id:guid}/complete")]
+    [Authorize(Roles = "Staff,Owner")]
+    public async Task<IActionResult> CompleteAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new CompleteAppointmentCommand(AppointmentId: id);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("{id:guid}/cancel")]
+    [Authorize(Roles = "Staff,Customer,Owner")]
+    public async Task<IActionResult> CancelAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var command = new CancelAppointmentCommand(AppointmentId: id);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("{id:guid}/delay")]
+    [Authorize(Roles = "Staff,Owner")]
+    public async Task<IActionResult> DelayAppointment([FromRoute] Guid id, [FromBody] int delayDurationInMinutes, CancellationToken cancellationToken)
+    {
+        var delay = TimeSpan.FromMinutes(delayDurationInMinutes);
+        var command = new DelayAppointmentCommand(AppointmentId: id, DelayDuration: delay);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Staff,Customer,Owner")]
+    public async Task<IActionResult> GetAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetAppointmentQuery(AppointmentId: id);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("/branches/{branchId:guid}")]
+    [Authorize(Roles = "Owner,Staff,Customer")]
+    public async Task<IActionResult> GetAppointmentsByBranch([FromRoute] Guid branchId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
+    {
+        var query = new GetBranchAppointmentsQuery(
+            BranchId: branchId,
+            CustomerId: queryParams.CustomerId,
+            ServiceId: queryParams.ServiceId,
+            StaffId: queryParams.StaffId,
+            CustomerStatus: queryParams.CustomerStatus,
+            IncludeCustomerObject: queryParams.IncludeCustomerObject,
+            IncludeStaffObject: queryParams.IncludeStaffObject,
+            IncludeServiceObject: queryParams.IncludeServiceObject,
+            IncludeBranchObject: queryParams.IncludeBranchObject,
+            ReservationDate: queryParams.ReservationDate,
+            FromDate: queryParams.FromDate,
+            ToDate: queryParams.ToDate,
+            Page: queryParams.Page,
+            PageSize: queryParams.PageSize
+            );
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("/doctors/{doctorId:guid}")]
+    [Authorize(Roles = "Owner,Staff,Customer")]
+    public async Task<IActionResult> GetAppointmentsByDoctor([FromRoute] Guid doctorId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
+    {
+
+        var query = new GetDoctorAppointmentsQuery(
+            StaffId: doctorId,
+            CustomerId: queryParams.CustomerId,
+            ServiceId: queryParams.ServiceId,
+            BranchId: queryParams.BranchId,
+            CustomerStatus: queryParams.CustomerStatus,
+            IncludeCustomerObject: queryParams.IncludeCustomerObject,
+            IncludeStaffObject: queryParams.IncludeStaffObject,
+            IncludeServiceObject: queryParams.IncludeServiceObject,
+            IncludeBranchObject: queryParams.IncludeBranchObject,
+            ReservationDate: queryParams.ReservationDate,
+            FromDate: queryParams.FromDate,
+            ToDate: queryParams.ToDate,
+            Page: queryParams.Page,
+            PageSize: queryParams.PageSize
+            );
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("/customers/{customerId:guid}")]
+    [Authorize(Roles = "Staff,Customer")]
+    public async Task<IActionResult> GetAppointmentsByCustomer([FromRoute] Guid customerId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
+    {
+        if (userContext.UserId != customerId)
+        {
+            return Forbid();
+        }
+        var query = new GetCustomerAllAppointmentsQuery(
+            CustomerId: customerId,
+            BranchId: queryParams.BranchId,
+            ServiceId: queryParams.ServiceId,
+            StaffId: queryParams.StaffId,
+            CustomerStatus: queryParams.CustomerStatus,
+            IncludeCustomerObject: queryParams.IncludeCustomerObject,
+            IncludeStaffObject: queryParams.IncludeStaffObject,
+            IncludeServiceObject: queryParams.IncludeServiceObject,
+            IncludeBranchObject: queryParams.IncludeBranchObject,
+            ReservationDate: queryParams.ReservationDate,
+            FromDate: queryParams.FromDate,
+            ToDate: queryParams.ToDate,
+            Page: queryParams.Page,
+            PageSize: queryParams.PageSize
+            );
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+}

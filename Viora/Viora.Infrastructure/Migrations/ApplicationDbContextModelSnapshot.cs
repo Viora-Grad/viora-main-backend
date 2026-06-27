@@ -77,6 +77,77 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("UserRole");
                 });
 
+            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AppointmentQueueNumber")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("EstimatedDuration")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsCheckedIn")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PayMethod")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RequestPlatform")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReservationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Appointments", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1078,6 +1149,113 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("PlanLimitedFeatures", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Schedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("Schedules", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleCancellations", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CancellationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("ShiftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CancellationDate");
+
+                    b.HasIndex("ShiftId");
+
+                    b.ToTable("ScheduleCancellations", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleDelay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("DelayDuration")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Initiator")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("OccurrenceTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("OccurrenceTime");
+
+                    b.ToTable("ScheduleDelays", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Shift", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<Guid>("ScheduleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("ScheduleId", "StaffId");
+
+                    b.ToTable("Shifts", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Scheduling.ScheduledDomainEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1211,6 +1389,22 @@ namespace Viora.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Countries", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.ToTable("Staff", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.AddonOrderLimitedFeature", b =>
@@ -1612,6 +1806,40 @@ namespace Viora.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.Appointments.Appointment", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Users.Customers.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Viora.Domain.Services.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("Viora.Domain.Billings.Invoices.Invoice", b =>
@@ -2035,6 +2263,33 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("LimitedFeature");
                 });
 
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleCancellations", b =>
+                {
+                    b.HasOne("Viora.Domain.RealTimeScheduling.Shift", null)
+                        .WithMany()
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.ScheduleDelay", b =>
+                {
+                    b.HasOne("Viora.Domain.Appointments.Appointment", null)
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Shift", b =>
+                {
+                    b.HasOne("Viora.Domain.RealTimeScheduling.Schedule", null)
+                        .WithMany("Intervals")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Viora.Domain.Services.Service", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
@@ -2075,6 +2330,15 @@ namespace Viora.Infrastructure.Migrations
                         });
 
                     b.Navigation("Discount");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.AddonOrderLimitedFeature", b =>
@@ -2309,6 +2573,11 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("PlanFeatures");
 
                     b.Navigation("PlanLimitedFeatures");
+                });
+
+            modelBuilder.Entity("Viora.Domain.RealTimeScheduling.Schedule", b =>
+                {
+                    b.Navigation("Intervals");
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Subscription", b =>

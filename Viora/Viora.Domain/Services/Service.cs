@@ -40,6 +40,7 @@ public sealed class Service : Entity
 
         return Result.Success(new Service
         {
+            Id = Guid.NewGuid(),
             BranchId = branchId,
             Name = name,
             Description = description,
