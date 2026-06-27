@@ -68,10 +68,6 @@ public class BranchesController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
 
-    // Gallery images are served through their owning branch, never a generic media-by-id
-    // endpoint: the handler streams the file only after confirming the media belongs to this
-    // branch's gallery, so the media id is never an access primitive. Public, matching the
-    // gallery listing above.
     [HttpGet("{branchId:guid}/gallery/{mediaId:guid}/file")]
     public async Task<IActionResult> GetBranchGalleryImage(Guid branchId, Guid mediaId, CancellationToken cancellationToken)
     {

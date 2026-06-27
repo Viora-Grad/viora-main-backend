@@ -1,10 +1,13 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Controllers.Subscriptions;
 using Viora.Api.Extensions;
 using Viora.Application.Orders.ChangeSubscriptionOrder;
 using Viora.Application.Orders.CreateAddonOrder;
 using Viora.Application.Orders.CreateSubscriptionOrder;
+using Viora.Application.Orders.GetOrganizationAddonOrders;
+using Viora.Application.Orders.GetOrganizationSubscriptionOrders;
 using Viora.Application.Orders.RenewSubscriptionOrder;
 
 namespace Viora.Api.Controllers.Orders;
@@ -57,13 +60,36 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Route("api/order/addon")]
-    public async Task<IActionResult> CreateAddAddonOrder(
-    CreateAddAddonOrderRequest createAddAddonRequest,
-    CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAddonOrder(
+        CreateAddAddonOrderRequest createAddAddonRequest,
+        CancellationToken cancellationToken)
     {
         var Command = new CreateAddonOrderCommand(createAddAddonRequest.OrganizationId, createAddAddonRequest.SubscriptionId, createAddAddonRequest.Addons);
         var result = await _sender.Send(Command, cancellationToken);
         return result.ToActionResult();
     }
 
+    [HttpGet]
+    [Route("api/organization/{organizationId:guid}/order/addons")]
+    [Authorize]
+    public async Task<IActionResult> GetAddons(
+        Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetOrganizationAddonOrdersQuery(organizationId);
+        var result = await _sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpGet]
+    [Route("api/organization/{organizationId:guid}/order/subscriptions")]
+    [Authorize]
+    public async Task<IActionResult> GetSubscriptions(
+        Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetOrganizationSubscriptionOrdersQuery(organizationId);
+        var result = await _sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
 }

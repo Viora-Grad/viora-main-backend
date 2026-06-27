@@ -40,7 +40,7 @@ public class AddonOrder : Order
             totalPrice,
             createdDate,
             subscriptionId,
-            OrderStatus.Pending
+            OrderStatus.Draft
         );
         newAddonOrder._addons.AddRange(addons);
         // Raise the orderPaidEvent 
