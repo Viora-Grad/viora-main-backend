@@ -20,4 +20,18 @@ public class FormSubmission : Entity
         Submission = submission;
         CreatedAt = createdAt;
     }
+
+
+
+    public static Result<FormSubmission> Create(Guid appointment, Guid formId, JsonDocument submission, DateTime createdAt)
+    {
+        var formSubmission = new FormSubmission(
+            Guid.NewGuid(),
+            appointment,
+            formId,
+            submission,
+            createdAt
+            );
+        return Result.Success(formSubmission);
+    }
 }
