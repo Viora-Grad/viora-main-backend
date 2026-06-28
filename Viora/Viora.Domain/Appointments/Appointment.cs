@@ -25,6 +25,7 @@ public sealed class Appointment : Entity
     public bool IsCheckedIn { get; private set; } = false;
     public Creator CreatedBy { get; private set; }
     public Platform RequestPlatform { get; private set; }
+    public PaymentMethod PayMethod { get; private set; }
     public TimeSpan EstimatedDuration { get; private set; }
     public DateTime EndTime => ReservationDate.Add(EstimatedDuration); // Convenience property to calculate the end time of the appointment
 
@@ -43,6 +44,8 @@ public sealed class Appointment : Entity
         Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
+        int appointmentQueueNumber,
+        PaymentMethod payMethod,
         CustomerStatus status,
         Creator createdBy,
         Platform requestPlatform,
@@ -55,6 +58,8 @@ public sealed class Appointment : Entity
         BranchId = branchId;
         PaymentId = paymentId;
         ReservationDate = reservationDate;
+        AppointmentQueueNumber = appointmentQueueNumber;
+        PayMethod = payMethod;
         Status = status;
         CreatedBy = createdBy;
         RequestPlatform = requestPlatform;
@@ -69,6 +74,8 @@ public sealed class Appointment : Entity
         Guid branchId,
         Guid? paymentId,
         DateTime reservationDate,
+        int appointmentQueueNumber,
+        PaymentMethod payMethod,
         CustomerStatus? status,
         Creator createdBy,
         Platform requestPlatform,
@@ -76,13 +83,16 @@ public sealed class Appointment : Entity
         DateTime createdAt)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
-        var appointment = new Appointment(Guid.NewGuid(),
+        var appointment = new Appointment(
+            Guid.NewGuid(),
             customerId,
             serviceId,
             staffId,
             branchId,
             paymentId,
             reservationDate,
+            appointmentQueueNumber,
+            payMethod,
             appointmentStatus,
             createdBy,
             requestPlatform,
@@ -126,7 +136,11 @@ public sealed class Appointment : Entity
     }
     public Result Complete(DateTime completeTime)
     {
-        // since it's only done by staff, we can immediately set the status to completed without checking the current status, as the staff would know if the appointment is in progress or not
+        if (Status == CustomerStatus.Completed)
+            return Result.Failure(AppointmentErrors.CompleteProhibited);
+
+        if (completeTime < ReservationDate.AddHours(-1)) // safety check
+            return Result.Failure(AppointmentErrors.CompleteProhibited);
         Status = CustomerStatus.Completed;
         LastUpdatedAt = completeTime;
 
@@ -142,6 +156,16 @@ public sealed class Appointment : Entity
         var originalDate = ReservationDate;
         ReservationDate = ReservationDate.Add(delay);
         RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, delay, StaffId, CustomerId, Status.ToString()));
+        return Result.Success();
+    }
+    public Result Delay(DateTime newTime, string reason)
+    {
+        // Only allow delaying the appointment if it is not completed or in progress
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
+            return Result.Failure(AppointmentErrors.DelayProhibited);
+        var originalDate = ReservationDate;
+        ReservationDate = newTime;
+        RaiseDomainEvent(new AppointmentDelayedEvent(Id, originalDate, ReservationDate, ReservationDate - originalDate, StaffId, CustomerId, Status.ToString()));
         return Result.Success();
     }
     public Result NoShow(DateTime noShowTime)
@@ -170,12 +194,6 @@ public sealed class Appointment : Entity
     }
 
 
+
 }
 
-
-/*
- * builder.Property<byte[]>("RowVersion")
-               .IsRowVersion()
-               .IsConcurrencyToken()
-               .HasColumnName("RowVersion");
-*/

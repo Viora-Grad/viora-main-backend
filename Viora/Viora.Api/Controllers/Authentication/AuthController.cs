@@ -1,8 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Viora.Api.Extensions;
+using Viora.Application.Authentication.ChangePassword;
+using Viora.Application.Authentication.ConfirmForgetPassword;
 using Viora.Application.Authentication.ConsumeRefreshToken;
+using Viora.Application.Authentication.ForgetPassword;
 using Viora.Application.Authentication.ValidateEmail;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
@@ -128,4 +132,43 @@ public class AuthController : ControllerBase
         return result.ToActionResult();
     }
 
+    [HttpPost]
+    [Route("forget-password")]
+    public async Task<IActionResult> ForgetPassword([FromBody] string email, CancellationToken cancellationToken = default)
+    {
+        var command = new ForgetPasswordCommand(email);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost]
+    [Route("confirm-forget-password")]
+    public async Task<IActionResult> ConfirmForgetPassword(ConfirmForgetPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        IPAddress? remoteIp = HttpContext.Connection.RemoteIpAddress;
+
+        var ipv4Address = remoteIp != null
+            ? remoteIp.MapToIPv4().ToString()
+            : "Unknown";
+
+        var command = new ConfirmForgetPasswordCommand(request.Email, request.Otp, request.NewPassword, ipv4Address);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost]
+    [Route("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        IPAddress? remoteIp = HttpContext.Connection.RemoteIpAddress;
+
+        var ipv4Address = remoteIp != null
+            ? remoteIp.MapToIPv4().ToString()
+            : "Unknown";
+
+        var command = new ChangePasswordCommand(request.CurrentPassword, request.NewPassword, ipv4Address);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
 }

@@ -19,4 +19,10 @@ internal sealed class OrganziationRepository(ApplicationDbContext context) : Rep
         return await DbContext.Set<Organization>()
             .AnyAsync(o => o.OwnerId == ownerId, cancellationToken);
     }
+
+    public async Task<bool> NameExistsAsync(string Name, CancellationToken cancellation = default)
+    {
+        return await DbContext.Set<Organization>()
+            .AnyAsync(o => o.Name == Name, cancellation);
+    }
 }

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Shared;
-using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Seeding.Data;
@@ -212,25 +211,6 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             logger.LogInformation("Addon seed: inserted {Count} new addons.", missingAddons.Count);
         }
         #endregion Addons
-
-        #region Staff 
-        var existingStaff = await db.Set<Staff>()
-            .Select(f => f.Id)
-            .ToListAsync(cancellationToken);
-
-        var missingStaff = StaffData.All
-            .Where(f => !existingStaff.Contains(f.Id))
-            .ToList();
-
-        if (missingStaff.Count == 0)
-            logger.LogInformation("Addon seed: all {Count} addons already present.", StaffData.All.Count);
-        else
-        {
-            await db.Set<Staff>().AddRangeAsync(missingStaff, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Addon seed: inserted {Count} new addons.", missingStaff.Count);
-        }
-        #endregion
     }
 
 }

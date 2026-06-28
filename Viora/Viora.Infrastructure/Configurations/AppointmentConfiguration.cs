@@ -55,6 +55,9 @@ internal class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
             .IsRequired()
             .HasConversion<string>();
 
+        builder.Property(a => a.PayMethod)
+            .IsRequired();
+
         builder.Property(a => a.IsCheckedIn)
             .IsRequired();
 

@@ -7,6 +7,7 @@ namespace Viora.Domain.Orders;
 public abstract class Order : Entity
 {
     public Guid OrganizationId { get; private set; }
+    public Guid? InvoiceId { get; private set; }
     public Money TotalPrice { get; private set; }
     public DateTime CreatedDate { get; private set; }
     public Guid? SubscriptionId { get; private set; }

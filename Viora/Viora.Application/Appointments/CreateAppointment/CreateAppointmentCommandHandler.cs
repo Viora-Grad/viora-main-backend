@@ -2,8 +2,11 @@
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
+using Viora.Application.Appointments.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
+using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Users.Customers;
 
 namespace Viora.Application.Appointments.CreateAppointment;
@@ -14,7 +17,8 @@ internal class CreateAppointmentCommandHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork,
     IAppointmentsRepository appointmentsRepository,
-    // IShiftRepository shiftRepository, // Consider adding a shift repository to check staff availability before creating an appointment
+    IScheduleRepository scheduleRepository,
+    IShiftRepository shiftRepository,
     IUserContext context,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CreateAppointmentCommand, Guid>
 {
@@ -24,34 +28,66 @@ internal class CreateAppointmentCommandHandler(
 
         var customer = await customerRepository.GetByIdAsync(userId, cancellationToken) ?? throw new NotFoundException("Customer could not be found.");
 
-        /* var shift = await shiftRepository.GetShiftForStaffAsync(request.StaffId, request.ReservationDate, cancellationToken); // get the staff member's shift for the reservation date
-         if (shift == null)
-         {
-             throw new NotFoundException("Staff member is not available for the requested time.");
-         }
-        var shiftstart = DateTime(Request.ReservationDate.Year, Request.ReservationDate.Month, Request.ReservationDate.Day, shift.StartTime.Hours, shift.StartTime.Minutes, 0);
-        var shiftEnd = DateTime(Request.ReservationDate.Year, Request.ReservationDate.Month, Request.ReservationDate.Day, shift.EndTime.Hours, shift.EndTime.Minutes, 0);
+        var schedule = await scheduleRepository.getByBranchIdAndDayAsync(request.BranchId, request.ReservationDate.DayOfWeek, cancellationToken) ??
+            throw new NotFoundException("No schedule found for the requested branch and day.");
 
-        var isOverlapping = await appointmentsRepository.IsOverlappingAsync(request.ServiceId, request.StaffId, shiftstart, shiftEnd, cancellationToken); // check for overlapping appointments
+        var shift = await shiftRepository.GetActiveShiftAsync(schedule.Id,
+            request.StaffId,
+            TimeOnly.FromDateTime(request.ReservationDate),
+            cancellationToken) ?? throw new NotFoundException("No active shift found for the requested staff member at the specified time.");
+
+        var shiftstart = new DateTime(request.ReservationDate.Year, request.ReservationDate.Month, request.ReservationDate.Day, shift.StartTime.Hour, shift.StartTime.Minute, 0);
+        var shiftEnd = new DateTime(request.ReservationDate.Year, request.ReservationDate.Month, request.ReservationDate.Day, shift.EndTime.Hour, shift.EndTime.Minute, 0);
+
+        var isWithinShift = request.ReservationDate >= shiftstart && request.ReservationDate.Add(request.EstimatedDuration) <= shiftEnd;
+        if (!isWithinShift)
+        {
+            return Result.Failure<Guid>(AppointmentErrors.InvalidAppointmentTime);
+        }
+
+
+        var isOverlapping = await appointmentsRepository.OverlapsAsync(
+            request.ServiceId,
+            request.StaffId,
+            request.ReservationDate,
+            request.ReservationDate.Add(request.EstimatedDuration),
+            cancellationToken); // check for overlapping appointments
+
         if (isOverlapping)
         {
-            throw new InvalidOperationException("The staff member already has an appointment during the requested time.");
-        } 
-        var appointment = Appointment.Create(
-        Guid.NewGuid(), 
+            return Result.Failure<Guid>(AppointmentErrors.AppointmentTimeConflict);
+        }
+        CustomerStatus? status = !string.IsNullOrEmpty(request.Status) ? Enum.Parse<CustomerStatus>(request.Status, true) : null;
+        var parameters = new GetAppointmentsParameters(
+            BranchId: request.BranchId,
+            ServiceId: request.ServiceId,
+            FromDate: shiftstart,
+            ToDate: request.ReservationDate.Add(request.EstimatedDuration)
+
+            );
+        var specs = new GetAppointmentsSpecification(parameters);
+
+        var queueNumber = await appointmentsRepository.CountAsync(specs, cancellationToken);
+
+        var payMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod, true);
+        var appointment = Appointment.Book(
+        userId,
         request.ServiceId,
         request.StaffId,
+        request.BranchId,
         request.PaymentId,
         request.ReservationDate,
-        request.Status,
-        request.CreatedBy,
-        request.RequestPlatform,
-        request.EstimatedDuration);
-        
+        (int)queueNumber,
+        payMethod,
+        status,
+        Enum.Parse<Creator>(request.CreatedBy, true),
+        Enum.Parse<Platform>(request.RequestPlatform, true),
+        request.EstimatedDuration,
+        dateTimeProvider.UtcNow);
+
         appointmentsRepository.Add(appointment);
-        unitOfWork.SaveChanges(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(appointment.Id);
-        */
-        throw new NotImplementedException();
+
     }
 }

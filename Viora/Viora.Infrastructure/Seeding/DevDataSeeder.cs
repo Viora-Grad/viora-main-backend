@@ -6,8 +6,8 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
-using Viora.Domain.Branches.Internals;
 using Viora.Domain.Medias;
+using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.LegalPapers.Internals;
 using Viora.Domain.Organizations.OnBoardings;
@@ -15,9 +15,12 @@ using Viora.Domain.Organizations.OnBoardings.Internals;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Shared;
 using Viora.Domain.Organizations.Shared.Enums;
-using Viora.Domain.Orders;
 using Viora.Domain.Plans;
+using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Services;
 using Viora.Domain.Shared;
+using Viora.Domain.Staffs;
+using Viora.Domain.Shared.Internal;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
@@ -49,6 +52,7 @@ internal sealed class DevDataSeeder(
     IHasher hasher,
     IDateTimeProvider clock,
     IStorageService storage,
+    IServiceSettings serviceSettings,
     IStorageSettings storageSettings,
     IOnboardingSettings onboardingSettings,
     ILogger<DevDataSeeder> logger) : IDevDataSeeder
@@ -56,6 +60,31 @@ internal sealed class DevDataSeeder(
     // Seeded reference ids (see PlanData / CountriesData).
     private static readonly Guid StarterPlanId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static readonly Guid EgyptCountryId = Guid.Parse("a1b2c3d4-0001-0000-0000-000000000003");
+
+    // The dev branch is pinned to a fixed id so its operational data (services, staff, schedules)
+    // can reference it deterministically across runs and machines.
+    private static readonly Guid BranchId = Guid.Parse("9D88C6E0-7B53-434A-82AC-83F1AB9B5C19");
+
+    // Fixed staff ids; shifts below reference these.
+    private static readonly Guid[] StaffIds =
+    [
+        Guid.Parse("e7b4a1c9-2d68-4f35-8b0e-6c9d1f2a7e54"),
+        Guid.Parse("f3c1a2d4-5e6b-4f7c-9a8d-1b2c3d4e5f6a"),
+        Guid.Parse("a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"),
+        Guid.Parse("b1c2d3e4-5f6a-7b8c-9d0e-1f2a3b4c5d6e"),
+        Guid.Parse("c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"),
+    ];
+
+    // Fixed schedule ids (Mon–Fri); shifts reference these, and Shift.ScheduleId is an enforced FK,
+    // so the schedules must carry exactly these ids.
+    private static readonly Guid[] ScheduleIds =
+    [
+        Guid.Parse("AEC9F604-DB9D-4273-95A5-88DED795AD5D"),
+        Guid.Parse("02967DEF-7D97-42EC-ADC6-89AEA592A204"),
+        Guid.Parse("A2202230-5353-4B6A-9D54-2754ABEF6867"),
+        Guid.Parse("BA7AEF31-2F7C-4A56-BF73-9DC4C195D055"),
+        Guid.Parse("AE77FCBF-048F-47CA-A358-88F6BD0B75BC"),
+    ];
 
     private const string DefaultPassword = "Dev123!Pass";
 
@@ -127,6 +156,7 @@ internal sealed class DevDataSeeder(
             new BranchEmail("branch@nilecare.dev"),
             new List<ServiceType> { ServiceType.Cardiology },
             now), "branch");
+        SetEntityId(branch, BranchId); // pin so dev services/staff/schedules can reference it
 
         var galleryImage = await SeedMediaAsync(
             "clinic-front.png", $"branches/{branch.Id}/gallery/{Guid.NewGuid()}.png",
@@ -163,6 +193,11 @@ internal sealed class DevDataSeeder(
         }
 
         await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        // Operational data (services/staff/schedules/shifts) for the branch just created+committed.
+        // Kept under this persona's gate so it can never run without its branch present.
+        await SeedBranchOperationsAsync(cancellationToken);
+
         logger.LogInformation("DevData: seeded active owner persona ({Email}).", email);
     }
 
@@ -219,7 +254,7 @@ internal sealed class DevDataSeeder(
 
         var user = User.Create(
             new PersonalInfo(firstName, lastName, new DateOnly(1990, 1, 1), Gender.Male),
-            new Email(email), now);
+            new Domain.Users.Internal.Email(email), now);
 
         db.Set<LocalCredential>().Add(new LocalCredential(user.Id, hasher.Hash(DefaultPassword)));
 
@@ -249,6 +284,65 @@ internal sealed class DevDataSeeder(
         return media;
     }
 
+    /// <summary>
+    /// Dev-only operational data for the pinned branch: services, staff, a weekly schedule, and shifts.
+    /// Moved here from the production reference seeder (it must never go live). Gated on services
+    /// already existing so re-runs are a no-op.
+    /// </summary>
+    private async Task SeedBranchOperationsAsync(CancellationToken cancellationToken)
+    {
+        if (await db.Set<Service>().AnyAsync(cancellationToken))
+        {
+            logger.LogInformation("DevData: branch operations already seeded, skipping.");
+            return;
+        }
+
+        // Services + staff for the dev branch (branch already committed by the active-owner persona).
+        db.Set<Service>().AddRange(BuildServices());
+
+        foreach (var staffId in StaffIds)
+            db.Set<Staff>().Add(new Staff(staffId, BranchId));
+
+        // Weekly schedule (Mon–Fri), pinned to known ids so the shifts below resolve their FK.
+        var days = new[]
+        {
+            DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday,
+        };
+        for (var i = 0; i < days.Length; i++)
+        {
+            var schedule = Schedule.Create(BranchId, days[i]);
+            SetEntityId(schedule, ScheduleIds[i]);
+            db.Set<Schedule>().Add(schedule);
+        }
+
+        // Persist schedules first — Shift.ScheduleId is an enforced FK to Schedule.
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        db.Set<Shift>().AddRange(
+        [
+            Shift.Create(ScheduleIds[0], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[4]),
+            Shift.Create(ScheduleIds[1], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[4]),
+            Shift.Create(ScheduleIds[2], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[2]),
+            Shift.Create(ScheduleIds[3], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[3]),
+            Shift.Create(ScheduleIds[4], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[0]),
+        ]);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded branch operations (services, staff, schedules, shifts).");
+    }
+
+    private IEnumerable<Service> BuildServices() =>
+    [
+        Unwrap(Service.Create(BranchId, "Haircut", "A basic haircut service.", 30, ServiceType.Cardiology, new Money(20.00m, Currency.Egp), serviceSettings), "service Haircut"),
+        Unwrap(Service.Create(BranchId, "Hair Coloring", "A professional hair coloring service.", 90, ServiceType.Dermatology, new Money(100.00m, Currency.Egp), serviceSettings), "service Hair Coloring"),
+        Unwrap(Service.Create(BranchId, "Manicure", "A complete manicure service.", 40, ServiceType.Otolaryngology, new Money(30.00m, Currency.Egp), serviceSettings), "service Manicure"),
+        Unwrap(Service.Create(BranchId, "Pedicure", "A complete pedicure service.", 60, ServiceType.Endocrinology, new Money(40.00m, Currency.Egp), serviceSettings), "service Pedicure"),
+        Unwrap(Service.Create(BranchId, "Facial", "A complete facial service.", 60, ServiceType.Endocrinology, new Money(50.00m, Currency.Egp), serviceSettings), "service Facial"),
+        Unwrap(Service.Create(BranchId, "Massage", "A relaxing massage service.", 60, ServiceType.Dermatology, new Money(70.00m, Currency.Egp), serviceSettings), "service Massage"),
+        Unwrap(Service.Create(BranchId, "Makeup Application", "A professional makeup application service.", 60, ServiceType.Cardiology, new Money(80.00m, Currency.Egp), serviceSettings), "service Makeup Application"),
+        Unwrap(Service.Create(BranchId, "Waxing", "A complete waxing service.", 30, ServiceType.Cardiology, new Money(25.00m, Currency.Egp), serviceSettings), "service Waxing"),
+    ];
+
     private Task<bool> PersonaExistsAsync(string email, CancellationToken cancellationToken) =>
         db.Set<AuthIdentity>().AnyAsync(
             i => i.Provider == "local" && i.ProviderKey == email.ToLowerInvariant().Trim(),
@@ -275,4 +369,10 @@ internal sealed class DevDataSeeder(
 
     private static string Slug(string value) =>
         new string(value.ToLowerInvariant().Where(c => char.IsLetterOrDigit(c)).ToArray());
+
+    // Entity.Id is init-only and the factories generate their own ids; reflection lets us pin
+    // deterministic ids for dev seeding without adding id parameters to the domain factories.
+    // EF persists the provided (non-empty) key value for these Guid keys.
+    private static void SetEntityId(Entity entity, Guid id) =>
+        typeof(Entity).GetProperty(nameof(Entity.Id))!.SetValue(entity, id);
 }

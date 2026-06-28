@@ -1,3 +1,4 @@
+using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Messaging;
 
 namespace Viora.Application.Branches.GetBranchGalleryImage;
@@ -10,4 +11,4 @@ namespace Viora.Application.Branches.GetBranchGalleryImage;
 /// <param name="BranchId">The branch that owns the gallery.</param>
 /// <param name="MediaId">The image within that branch's gallery.</param>
 public sealed record GetBranchGalleryImageQuery(Guid BranchId, Guid MediaId)
-    : IQuery<BranchGalleryImageResponse>;
+    : IQuery<MediaResponseStream>;

@@ -5,8 +5,10 @@ using System.Security.Claims;
 using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Organizations.AddToGallery;
+using Viora.Application.Organizations.GetLogo;
 using Viora.Application.Organizations.GetOrganizationDetails;
 using Viora.Application.Organizations.HideOrganization;
+using Viora.Application.Organizations.OrganizationNameExists;
 using Viora.Application.Organizations.SearchOrganizations;
 using Viora.Application.Organizations.SuspendOrganization;
 using Viora.Application.Organizations.UpdateLogo;
@@ -107,6 +109,29 @@ public class OrganizationsController(ISender sender) : ControllerBase
         await using var stream = file.OpenReadStream();
         var command = new UpdateLogoCommand(organizationId, stream, file.FileName, file.ContentType, file.Length);
         var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
+
+    [HttpGet("{organizationId:guid}/logo")]
+    public async Task<IActionResult> GetBranchGalleryImage(Guid organizationId, CancellationToken cancellationToken)
+    {
+        var query = new GetLogoQuery(organizationId);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToActionResult();
+
+        var file = result.Value;
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+
+    [HttpGet("exists")]
+    public async Task<IActionResult> NameExists([FromQuery] string Name, CancellationToken cancellation)
+    {
+        var query = new OrganizationNameExistsQuery(Name);
+        var result = await sender.Send(query, cancellation);
         return result.ToActionResult();
     }
 }

@@ -26,8 +26,10 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
     public async Task<IEnumerable<Appointment>> GetByDateRangeAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
         return await DbContext.Set<Appointment>()
-            .Where(appointment => appointment.ServiceId == serviceId && appointment.StaffId == staffId && appointment.ReservationDate >= startDate && appointment.EndTime <= endDate)
-            .AsNoTracking()
+            .Where(appointment => appointment.ServiceId == serviceId &&
+            appointment.StaffId == staffId &&
+            appointment.ReservationDate >= startDate &&
+            appointment.ReservationDate.AddMinutes(appointment.EstimatedDuration.Minutes) <= endDate)
             .ToListAsync(cancellationToken);
     }
 
@@ -59,7 +61,10 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
     public async Task<bool> OverlapsAsync(Guid serviceId, Guid staffId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
         var overlappingAppointments = await DbContext.Set<Appointment>()
-            .Where(appointment => appointment.ServiceId == serviceId && appointment.StaffId == staffId && appointment.ReservationDate < endDate && appointment.EndTime > startDate)
+            .Where(appointment => appointment.ServiceId == serviceId &&
+            appointment.StaffId == staffId &&
+            appointment.ReservationDate < endDate &&
+            appointment.ReservationDate.AddMinutes(appointment.EstimatedDuration.Minutes) > startDate)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

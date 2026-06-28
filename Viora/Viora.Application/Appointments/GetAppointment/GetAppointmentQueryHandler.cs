@@ -1,5 +1,6 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
+using Viora.Application.Appointments.GetAppointment;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 

@@ -1,4 +1,5 @@
 ﻿using Viora.Application.Abstractions.Media;
+using Viora.Domain.Organizations.LegalPapers.Internals;
 
 namespace Viora.Application.Organizations.GetApplicationDetails;
 
@@ -29,6 +30,7 @@ public sealed record LegalPaper(
     string Name,
     MediaResponse Media,
     Approval? ActionBy,
+    AcceptanceStatus Status,
     DateTime SubmittedOnUtc,
     DateTime ExpiryDateUtc);
 

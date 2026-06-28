@@ -56,7 +56,7 @@ public class SubscriptionOrder : Order
             createdAt,
             plan.Id,
             SubscriptionOrderType.NewSubscription,
-            OrderStatus.Pending
+            OrderStatus.Draft
         );
         // Raise the orderPaidEvent 
         return Result.Success(newSubscriptionOrder);
@@ -77,7 +77,7 @@ public class SubscriptionOrder : Order
             createdAt,
             planId,
             SubscriptionOrderType.Renewal,
-            OrderStatus.Pending
+            OrderStatus.Draft
         );
         // Raise the orderPaidEvent 
         return Result.Success(newSubscriptionOrder);
@@ -92,7 +92,7 @@ public class SubscriptionOrder : Order
             createdAt,
             newPlan.Id,
             SubscriptionOrderType.ChangeSubscription,
-            OrderStatus.Pending
+            OrderStatus.Draft
         );
         // Raise the orderPaidEvent 
         return Result.Success(changeSubscriptionOrder);
