@@ -117,16 +117,23 @@ try
         app.MapOpenApi();
         app.MapScalarApiReference();
 
-        using var scope = app.Services.CreateScope(); // apply pending migrations on startup
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
+        using (var scope = app.Services.CreateScope()) // apply pending migrations + reference data
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await dbContext.Database.MigrateAsync();
 
-        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
-        await seeder.SeedAsync();
+            var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+            await seeder.SeedAsync();
+        }
 
-        // Dev-only scenario data (loginable personas across entity states). Runs after reference data.
-        var devSeeder = scope.ServiceProvider.GetRequiredService<IDevDataSeeder>();
-        await devSeeder.SeedAsync();
+        // Dev-only scenario data in its OWN scope -> a fresh DbContext. Otherwise the Role singletons
+        // it attaches collide with the Role rows the reference seeder just inserted+tracked on a fresh
+        // database ("another instance with the same key is already being tracked").
+        using (var devScope = app.Services.CreateScope())
+        {
+            var devSeeder = devScope.ServiceProvider.GetRequiredService<IDevDataSeeder>();
+            await devSeeder.SeedAsync();
+        }
     }
 
     // Emits one structured log per HTTP request (method, path, status, elapsed).
