@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Orders;
 using Viora.Domain.Orders.Internal;
 using Viora.Domain.Plans;
@@ -10,14 +11,29 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<SubscriptionOrder> builder)
     {
+        builder.ToTable("SubscriptionOrder");
+
         builder.Property(s => s.Status)
             .HasConversion(
             v => v.id,
             v => OrderStatus.FromId(v)
             );
 
-        builder.Property(s => s.TotalPrice)
-            .HasPrecision(18, 2);
+        builder.ComplexProperty(s => s.TotalPrice, mb =>
+        {
+            mb.Property(m => m.Amount)
+                .HasColumnName("TotalPriceAmount")
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            mb.ComplexProperty(m => m.Currency, cb =>
+            {
+                cb.Property(c => c.Code)
+                    .HasColumnName("TotalPriceCurrency")
+                    .HasMaxLength(3)
+                    .IsRequired();
+            });
+        });
 
         builder.Property(s => s.PlanId)
             .IsRequired();
@@ -31,6 +47,11 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
         builder.HasOne<Plan>()
             .WithMany()
             .HasForeignKey(s => s.PlanId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Invoice>()
+            .WithMany()
+            .HasForeignKey(o => o.InvoiceId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

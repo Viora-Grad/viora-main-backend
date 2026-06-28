@@ -1,5 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Orders.Internal;
+using Viora.Domain.Shared;
 using Viora.Domain.Subscriptions.Addons;
 
 namespace Viora.Domain.Orders;
@@ -15,21 +16,31 @@ public class AddonOrder : Order
         // Required by EF Core
     }
 
-    private AddonOrder(Guid id, Guid organizationId, double totalPrice, DateTime createdDate, Guid subscriptionId, OrderStatus status)
+    private AddonOrder(Guid id, Guid organizationId, Money totalPrice, DateTime createdDate, Guid subscriptionId, OrderStatus status)
         : base(id, organizationId, subscriptionId, totalPrice, createdDate, status)
     {
     }
 
     public static Result<AddonOrder> CreateAddonOrder(Guid organizationId, Guid subscriptionId, List<LimitedFeatureAddon> addons, DateTime createdDate)
     {
-        var totalPrice = addons.Sum(a => a.Price);
+        if (addons is null || addons.Count == 0)
+        {
+            return Result.Failure<AddonOrder>(
+                OrderError.NoAddon);
+        }
+        Money totalPrice = addons[0].Price;
+
+        foreach (var addon in addons.Skip(1))
+        {
+            totalPrice += addon.Price;
+        }
         var newAddonOrder = new AddonOrder(
             Guid.NewGuid(),
             organizationId,
             totalPrice,
             createdDate,
             subscriptionId,
-            OrderStatus.Pending
+            OrderStatus.Draft
         );
         newAddonOrder._addons.AddRange(addons);
         // Raise the orderPaidEvent 

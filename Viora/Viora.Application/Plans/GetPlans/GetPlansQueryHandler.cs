@@ -3,7 +3,6 @@ using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Plans.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Plans;
-using Viora.Domain.Plans.Features;
 
 namespace Viora.Application.Plans.GetPlans;
 
@@ -20,47 +19,13 @@ namespace Viora.Application.Plans.GetPlans;
 /// </summary>
 
 public class GetPlansQueryHandler(
-    IPlanFeatureRepository planFeatureRepository,
-    IPlanRepository planRepository,
-    IFeatureRepository featureRepository,
-    ILimitedFeatureRepository limitedFeatureRepository) : IQueryHandler<GetPlansQuery, List<PlanResponse>>
+    IPlanRepository planRepository) : IQueryHandler<GetPlansQuery, List<PlanResponse>>
 {
     public async Task<Result<List<PlanResponse>>> Handle(GetPlansQuery request, CancellationToken cancellationToken)
     {
         var plans = await planRepository.GetAllAsNoTrackingAsync(cancellationToken);
         if (!plans.Any())
             throw new NotFoundException("No plans found.");
-        /*
-        var planIds = plans.Select(p => p.Id).ToList();
-
-        var planFeatures = await planFeatureRepository.GetByPlanIdsAsync(planIds, cancellationToken);
-        var featureIds = planFeatures.Select(pf => pf.FeatureId).Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
-        var limitedFeatureIds = planFeatures.Select(pf => pf.LimitedFeatureId).Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
-
-        var features = await featureRepository.GetByIdsAsync(featureIds, cancellationToken);
-        var limitedFeatures = await limitedFeatureRepository.GetByIdsAsync(limitedFeatureIds, cancellationToken);
-
-        // 2. Build lookup dictionaries — O(1) access instead of repeated queries
-        var featureLookup = features.ToDictionary(f => f.Id);
-        var limitedFeatureLookup = limitedFeatures.ToDictionary(lf => lf.Id);
-        var planFeatureLookup = planFeatures.GroupBy(pf => pf.PlanId)
-                                               .ToDictionary(g => g.Key, g => g.ToList());
-*/
-        // 3. Map in memory
-        /*var planDtos = plans.Select(plan =>
-        {
-            var features = planFeatureLookup.GetValueOrDefault(plan.Id, []);
-            var featureDtos = features
-                                    .Where(pf => pf.FeatureId.HasValue && featureLookup.ContainsKey(pf.FeatureId.Value))
-                                    .Select(pf => FeatureResponse.MapToDTO(featureLookup[pf.FeatureId.Value]))
-                                    .ToList();
-            var limitedFeatureDtos = features
-                                    .Where(pf => pf.LimitedFeatureId.HasValue && limitedFeatureLookup.ContainsKey(pf.LimitedFeatureId.Value))
-                                    .Select(pf => LimitedFeatureResponse.MapToDTO(limitedFeatureLookup[pf.LimitedFeatureId.Value]))
-                                    .ToList();
-
-            return PlanResponse.MapToDTO(plan, featureDtos, limitedFeatureDtos);
-        }).ToList();*/
 
         var planDtos = plans.Select(plan =>
         {
@@ -68,15 +33,15 @@ public class GetPlansQueryHandler(
             var featureDTOs = plan.PlanFeatures
             .Select(pf => new FeatureResponse(
                  pf.Feature.Id,
-                 pf.Feature.FeatureKey.ToString(),
-                 pf.Feature.Description.ToString()
+                 pf.Feature.FeatureKey.value,
+                 pf.Feature.Description.value
              )).ToList();
 
             var limitedFeatureDTOs = plan.PlanLimitedFeatures
             .Select(plf => new LimitedFeatureResponse(
                    plf.LimitedFeature.Id,
-                   plf.LimitedFeature.Key.ToString(),
-                   plf.LimitedFeature.Description.ToString(),
+                   plf.LimitedFeature.Key.value,
+                   plf.LimitedFeature.Description.value,
                    plf.LimitValue
            )).ToList();
             return PlanResponse.MapToDTO(plan, featureDTOs, limitedFeatureDTOs);

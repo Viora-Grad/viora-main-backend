@@ -20,9 +20,12 @@ public static class AuthorizationPolicies
     public const string SubscriptionsManage = "subscriptions:manage";
     public const string FeaturesRead = "features:read";
     public const string FeaturesWrite = "features:write";
+    public const string AppointmentsRead = "appointments:read";
+    public const string AppointmentsWrite = "appointments:write";
     public static readonly string[] All =
     [
-        UsersRead, UsersWrite, RolesRead, RolesWrite, PlansRead, PlansWrite, SubscriptionsManage, FeaturesRead, FeaturesWrite
+        UsersRead, UsersWrite, RolesRead, RolesWrite, PlansRead, PlansWrite,
+        SubscriptionsManage, FeaturesRead, FeaturesWrite, AppointmentsRead, AppointmentsWrite
     ];
 
     public static string Permission(string permission) => $"Permission:{permission}";

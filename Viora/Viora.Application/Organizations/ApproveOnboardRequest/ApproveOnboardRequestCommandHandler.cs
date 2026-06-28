@@ -1,5 +1,6 @@
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
+using Viora.Application.Abstractions.Mail;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Organizations.OnBoardings;
@@ -15,7 +16,8 @@ internal class ApproveOnboardRequestCommandHandler(
     IOwnerRepository ownerRepository,
     IUserRepository userRepository,
     IUnitOfWork unitOfWork,
-    IDateTimeProvider dateTimeProvider) : ICommandHandler<ApproveOnboardRequestCommand, Guid>
+    IDateTimeProvider dateTimeProvider,
+    IEmailSender emailSender) : ICommandHandler<ApproveOnboardRequestCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(ApproveOnboardRequestCommand request, CancellationToken cancellationToken)
     {
@@ -61,6 +63,11 @@ internal class ApproveOnboardRequestCommandHandler(
         organizationRepository.Add(orgResult.Value);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await emailSender.SendAsync(
+            owner.UserProfile.Email.Value,
+            EmailTemplateFactory.ApplicationAccepted($"{owner.PersonalInfo.FirstName} {owner.PersonalInfo.LastName}"),
+            cancellationToken);
 
         return Result.Success(orgResult.Value.Id);
     }

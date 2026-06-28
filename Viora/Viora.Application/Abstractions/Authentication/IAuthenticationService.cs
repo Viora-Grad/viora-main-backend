@@ -6,6 +6,8 @@ namespace Viora.Application.Abstractions.Authentication;
 public interface IAuthenticationService
 {
     Task<Result<string>> RegisterAsync(User user, string password, CancellationToken cancellationToken = default); // Returns the user ID of the newly registered user
+    Task<Result> UpdatePassword(string email, string password, CancellationToken cancellationToken);
+    Task<Result> ChangePassword(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken);
     Task<Result<AuthResult>> LocalLoginAsync(string email, string password, CancellationToken cancellationToken = default);
     Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
     Task<Result<string>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);

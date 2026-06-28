@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
+using Viora.Application.Plans.GetLimitedFeature;
 using Viora.Application.Plans.GetPlanById;
 using Viora.Application.Plans.GetPlans;
 using Viora.Application.Subscriptions.GetFeatureAddon;
@@ -47,6 +48,17 @@ public class PlanController : ControllerBase
         CancellationToken cancellationToken)
     {
         var query = new GetAllAddonsQuery();
+        var result = await _sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpGet]
+    [Route("api/limited-feature/get/{featureId}")]
+    public async Task<IActionResult> GetLimitedFeature(
+        Guid featureId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetLimitedFeatureByIdQuery(featureId);
         var result = await _sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }

@@ -1,4 +1,5 @@
-﻿using Viora.Domain.Subscriptions.Addons;
+﻿using Viora.Domain.Shared;
+using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Subscriptions.Addons.Internal;
 
 namespace Viora.Infrastructure.Seeding.Data;
@@ -12,7 +13,7 @@ internal class AddonData
             new Guid("F1A2B3C4-0001-0000-0000-000000000001"),
             AddonType.OneTime,
             10,
-            29.99
+            new Money((decimal)22.9,Currency.Egp)
         ),
 
         LimitedFeatureAddon.Create(
@@ -20,7 +21,7 @@ internal class AddonData
             new Guid("F1A2B3C4-0002-0000-0000-000000000002"),
             AddonType.OneTime,
             25,
-            59.99
+            new Money((decimal)54.9,Currency.Egp)
         ),
 
         LimitedFeatureAddon.Create(
@@ -28,7 +29,7 @@ internal class AddonData
             new Guid("F1A2B3C4-0003-0000-0000-000000000003"),
             AddonType.TimeBase,
             50,
-            99.99
+            new Money((decimal)99.9,Currency.Egp)
         ),
 
         LimitedFeatureAddon.Create(
@@ -36,7 +37,7 @@ internal class AddonData
             new Guid("F1A2B3C4-0004-0000-0000-000000000004"),
             AddonType.TimeBase,
             100,
-            149.99
+            new Money((decimal)149.9,Currency.Egp)
         )
     ];
 }

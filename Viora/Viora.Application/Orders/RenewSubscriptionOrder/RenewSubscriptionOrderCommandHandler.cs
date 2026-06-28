@@ -29,9 +29,11 @@ public class RenewSubscriptionOrderCommandHandler(
             ?? throw new NotFoundException($"Plan with id {subscription.PlanId} not found.");
 
         var limitedFeatureAddonIds = subscription.Addons.Select(x => x.LimitedFeatureAddonId).ToList();
-        var limitedFeatureAddon = await limitedFeatureAddonRepository.GetByIdsAsync(limitedFeatureAddonIds, cancellationToken);
+        var limitedFeatureAddons = await limitedFeatureAddonRepository.GetByIdsAsync(limitedFeatureAddonIds, cancellationToken);
 
-        var totalPrice = plan.Price + limitedFeatureAddon.Sum(x => x.Price);
+        var totalPrice = plan.Price;
+        foreach (var limitedFeatureAddon in limitedFeatureAddons)
+            totalPrice += limitedFeatureAddon.Price;
 
         var subscriptionOrder = SubscriptionOrder.CreateRenewSubscriptionOrder(
             organization.Id,

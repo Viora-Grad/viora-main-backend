@@ -2,6 +2,7 @@
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches.Internals;
 using Viora.Domain.Medias;
+using Viora.Domain.Medias.Internals;
 using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 
@@ -100,6 +101,30 @@ public sealed class Branch : Entity
     public Result UpdateStatus(BranchStatus status)
     {
         Status = status;
+        return Result.Success();
+    }
+
+    public Result AddToGallery(MediaFile image, int maxImageInBranch)
+    {
+        if (image.CategoryType != MediaType.Image)
+            return Result.Failure(BranchErrors.MediaIsNotImage);
+
+        if (_gallery.Count > maxImageInBranch)
+            return Result.Failure(BranchErrors.GalleryLimitReached);
+
+        _gallery.Add(image);
+
+        return Result.Success();
+    }
+
+    public Result RemoveFromGallery(Guid imageId)
+    {
+        var image = _gallery.Find(x => x.Id == imageId);
+        if (image is null)
+            return Result.Failure(BranchErrors.ImageNotInGallery);
+
+        _gallery.Remove(image);
+
         return Result.Success();
     }
 }

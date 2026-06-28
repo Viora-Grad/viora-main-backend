@@ -4,7 +4,7 @@ using Viora.Domain.Branches.Internals;
 
 namespace Viora.Application.Branches.SearchBranches;
 
-internal sealed record SearchBranchesQuery(
+public sealed record SearchBranchesQuery(
     Guid? BranchId,
     Guid? OrganizationId,
     double? Longitude,

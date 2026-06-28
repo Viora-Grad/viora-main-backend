@@ -1,10 +1,5 @@
-﻿using Viora.Application.Abstractions.Caching;
+﻿using Viora.Application.Abstractions.Messaging;
 
 namespace Viora.Application.Organizations.GetOrganizationDetails;
 
-public record GetOrganizationDetailsQuery(Guid OrganizationId) : ICachedQuery<OrganizationDetailsResponse>
-{
-    public string CacheKey => $"OrganizationDetails-{OrganizationId}";
-
-    public TimeSpan? Expiration => TimeSpan.FromHours(3);
-}
+public record GetOrganizationDetailsQuery(Guid OrganizationId) : IQuery<OrganizationDetailsResponse>;

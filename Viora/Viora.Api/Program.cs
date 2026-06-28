@@ -1,107 +1,157 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Serilog;
 using Viora.Api.Middleware;
+using Viora.Api.OpenApi;
 using Viora.Application;
 using Viora.Application.Abstractions.Mail;
-using Viora.Application.AiRag.Ingestion;
 using Viora.Application.Abstractions.Media;
+using Viora.Application.AiRag.Ingestion;
+using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
 using Viora.Infrastructure;
 using Viora.Infrastructure.AiRag;
+using Viora.Infrastructure.RealTime.Hubs;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Settings;
 
+// Bootstrap logger: captures anything that fails during startup, before the
+// configuration-driven logger is wired up. Replaced once the host is built.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Load .env first
-var cwd = Directory.GetCurrentDirectory();
-var envPath = Path.Combine(cwd, ".env");
-Env.Load(envPath);
-
-
-var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
-
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddAiRagServices(builder.Configuration);
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-builder.Services.AddSignalR();
-
-
-#region Settings
-builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
-    builder.Configuration, "Scheduling");
-builder.Services.AddInterfacedOptions<IStorageSettings, StorageConfigurations>(
-    builder.Configuration, "Storage");
-builder.Services.AddInterfacedOptions<IOnboardingSettings, OnboardingSettings>(
-    builder.Configuration, "Onboarding");
-builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
-    builder.Configuration, "Suspension");
-builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
-    builder.Configuration, "Service");
-builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
-    builder.Configuration, "Email");
-#endregion Settings
-
-var app = builder.Build();
-
-// Offline bulk ingestion: `dotnet run -- ingest-specialty [path]`.
-// Runs the full streaming/batched ingest outside the HTTP pipeline (no request
-// timeout) and exits. Falls back to AiRag:SpecialtyBase:FilePath when no path given.
-if (args.Length > 0 && args[0] == "ingest-specialty")
+try
 {
-    using var scope = app.Services.CreateScope();
-    var sp = scope.ServiceProvider;
-    var command = sp.GetRequiredService<IngestSpecialtyCommand>();
-    var cfg = sp.GetRequiredService<IConfiguration>();
+    // Load .env first
+    var cwd = Directory.GetCurrentDirectory();
+    var envPath = Path.Combine(cwd, ".env");
+    Env.Load(envPath);
 
-    var path = args.Length > 1 ? args[1] : cfg["AiRag:SpecialtyBase:FilePath"];
-    if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Read the full Serilog configuration from appsettings (sinks, levels, enrichers)
+    // and let it resolve services from DI. This becomes the app's ILogger provider.
+    builder.Logging.ClearProviders(); // drop the default providers so Serilog is the sole sink
+    builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
+    // Add services to the container.
+
+    builder.Services.AddApplication();
+    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddControllers(options =>
     {
-        Console.Error.WriteLine($"Specialty file not found: {path ?? "(null)"}");
+        options.Conventions.Add(new ProducesResponseConvention());
+    });
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddSchemaTransformer<EnumSchemaTransformer>();
+    });
+    builder.Services.AddAiRagServices(builder.Configuration);
+    builder.Services.AddControllers();
+    builder.Services.AddOpenApi();
+    builder.Services.AddSignalR();
+
+
+    #region Settings
+    builder.Services.AddInterfacedOptions<ISchedulingSettings, SchedulingSettings>(
+        builder.Configuration, "Scheduling");
+    builder.Services.AddInterfacedOptions<IStorageSettings, StorageConfigurations>(
+        builder.Configuration, "Storage");
+    builder.Services.AddInterfacedOptions<IOnboardingSettings, OnboardingSettings>(
+        builder.Configuration, "Onboarding");
+    builder.Services.AddInterfacedOptions<ISuspensionSettings, SuspensionSettings>(
+        builder.Configuration, "Suspension");
+    builder.Services.AddInterfacedOptions<IServiceSettings, ServiceSettings>(
+        builder.Configuration, "Service");
+    builder.Services.AddInterfacedOptions<IEmailSettings, EmailSettings>(
+        builder.Configuration, "Email");
+    builder.Services.AddInterfacedOptions<IAdminMessagingSettings, AdminMessagingSettings>(
+        builder.Configuration, "Admins");
+    builder.Services.AddInterfacedOptions<IBranchSettings, BranchSettings>(
+        builder.Configuration, "Branch");
+    #endregion Settings
+
+    var app = builder.Build();
+
+    app.MapHub<ScheduleHub>("/hubs/dashboard");
+
+    // Offline bulk ingestion: `dotnet run -- ingest-specialty [path]`.
+    // Runs the full streaming/batched ingest outside the HTTP pipeline (no request
+    // timeout) and exits. Falls back to AiRag:SpecialtyBase:FilePath when no path given.
+    if (args.Length > 0 && args[0] == "ingest-specialty")
+    {
+        using var scope = app.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        var command = sp.GetRequiredService<IngestSpecialtyCommand>();
+        var cfg = sp.GetRequiredService<IConfiguration>();
+
+        var path = args.Length > 1 ? args[1] : cfg["AiRag:SpecialtyBase:FilePath"];
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            Log.Error("Specialty file not found: {Path}", path ?? "(null)");
+            return;
+        }
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        Log.Information("Ingesting specialty inquiries from {Path} ...", path);
+
+        await using var stream = File.OpenRead(path);
+        await command.ExecuteAsync(SpecialtyInquiryParser.ParseAsync(stream), CancellationToken.None);
+
+        sw.Stop();
+        Log.Information("Done in {Elapsed}.", sw.Elapsed);
         return;
     }
 
-    var sw = System.Diagnostics.Stopwatch.StartNew();
-    Console.WriteLine($"Ingesting specialty inquiries from {path} ...");
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference();
 
-    await using var stream = File.OpenRead(path);
-    await command.ExecuteAsync(SpecialtyInquiryParser.ParseAsync(stream), CancellationToken.None);
+        using var scope = app.Services.CreateScope(); // apply pending migrations on startup
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
 
-    sw.Stop();
-    Console.WriteLine($"Done in {sw.Elapsed}.");
-    return;
+        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+        await seeder.SeedAsync();
+
+        // Dev-only scenario data (loginable personas across entity states). Runs after reference data.
+        var devSeeder = scope.ServiceProvider.GetRequiredService<IDevDataSeeder>();
+        await devSeeder.SeedAsync();
+    }
+
+    // Emits one structured log per HTTP request (method, path, status, elapsed).
+    app.UseSerilogRequestLogging();
+
+    // Skipped in Docker — no dev cert available
+    // app.UseHttpsRedirection();
+    app.UseMiddleware<GlobalExceptionMiddleware>();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? throw new InvalidOperationException("AllowedOrigins configuration is missing.");
+    app.UseCors(corsBuilder =>
+        corsBuilder.WithOrigins(allowedOrigins)
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials());
+    app.Run();
 }
-
-if (app.Environment.IsDevelopment())
+catch (Exception ex)
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-
-    using var scope = app.Services.CreateScope(); // apply pending migrations on startup
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
-
-    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
-    await seeder.SeedAsync();
+    Log.Fatal(ex, "Application terminated unexpectedly");
 }
-
-// Skipped in Docker — no dev cert available
-// app.UseHttpsRedirection();
-app.UseMiddleware<GlobalExceptionMiddleware>();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? throw new InvalidOperationException("AllowedOrigins configuration is missing.");
-app.UseCors(builder =>
-    builder.WithOrigins(allowedOrigins)
-           .AllowAnyHeader()
-           .AllowAnyMethod()
-           .AllowCredentials());
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}

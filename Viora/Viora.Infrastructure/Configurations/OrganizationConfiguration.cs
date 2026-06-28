@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viora.Domain.Medias;
 using Viora.Domain.Organizations.OrganizationDetails;
-using Viora.Domain.Organizations.OrganizationDetails.Internal;
 using Viora.Domain.Shared;
 
 namespace Viora.Infrastructure.Configurations;
@@ -27,13 +26,16 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
 
         builder.Property(o => o.LogoId);
 
-        builder.Property(o => o.Name)
-            .HasConversion(
-                v => v.Value,
-                v => new Name(v))
-            .HasColumnName("Name")
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.OwnsOne(o => o.Name, name =>
+        {
+            name.Property(n => n.Value)
+                .HasColumnName("Name")
+                .HasMaxLength(255)
+                .IsRequired();
+
+            name.HasIndex(n => n.Value)
+                .HasDatabaseName("IX_Organizations_Name");
+        });
 
         builder.ComplexProperty(o => o.About, about =>
         {
@@ -114,6 +116,5 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
 
         builder.HasIndex(o => o.CountryId);
         builder.HasIndex(o => o.Status);
-        builder.HasIndex(o => o.Name);    // for names violation
     }
 }

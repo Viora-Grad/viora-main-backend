@@ -16,7 +16,7 @@ internal class OrganizationSearchSpecification : BaseSpecification<Organization>
             AddCriteria(o => o.CountryId == p.CountryId.Value);
 
         if (!string.IsNullOrWhiteSpace(p.Name))
-            AddCriteria(o => o.Name.Value.Contains(p.Name, StringComparison.CurrentCultureIgnoreCase));
+            AddCriteria(o => o.Name.Value.Contains(p.Name));
 
         if (p.MinRating.HasValue)
             AddCriteria(o => o.Rating.AverageOutOfTen >= p.MinRating.Value);
@@ -28,11 +28,11 @@ internal class OrganizationSearchSpecification : BaseSpecification<Organization>
 
         switch (p.SortBy?.ToLower())
         {
-            case string s when s.Equals(nameof(Organization.Rating), StringComparison.CurrentCultureIgnoreCase):
+            case string s when s.Equals(nameof(Organization.Rating), StringComparison.OrdinalIgnoreCase):
                 ApplyOrderByDescending(o => o.Rating.AverageOutOfTen);
                 break;
 
-            case string s when s.Equals(nameof(Organization.Name), StringComparison.CurrentCultureIgnoreCase):
+            case string s when s.Equals(nameof(Organization.Name), StringComparison.OrdinalIgnoreCase):
                 ApplyOrderBy(o => o.Name);
                 break;
 
