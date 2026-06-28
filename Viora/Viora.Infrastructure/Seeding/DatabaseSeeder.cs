@@ -2,9 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
-using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Shared;
-using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Seeding.Data;
@@ -213,57 +211,6 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             logger.LogInformation("Addon seed: inserted {Count} new addons.", missingAddons.Count);
         }
         #endregion Addons
-
-        #region Staff 
-        var existingStaff = await db.Set<Staff>()
-            .Select(f => f.Id)
-            .ToListAsync(cancellationToken);
-
-        var missingStaff = StaffData.All
-            .Where(f => !existingStaff.Contains(f.Id))
-            .ToList();
-
-        if (missingStaff.Count == 0)
-            logger.LogInformation("Addon seed: all {Count} addons already present.", StaffData.All.Count);
-        else
-        {
-            await db.Set<Staff>().AddRangeAsync(missingStaff, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Addon seed: inserted {Count} new addons.", missingStaff.Count);
-        }
-        #endregion
-
-        #region Schedule
-        var existingSchedule = await db.Set<Schedule>()
-            .Select(f => new { f.BranchId, f.DayOfWeek })
-            .ToListAsync(cancellationToken);
-
-        var missingSchedule = ScheduleData.All
-            .Where(f => !existingSchedule
-            .Any(e => e.BranchId == f.BranchId && e.DayOfWeek == f.DayOfWeek))
-            .ToList();
-
-        if (missingSchedule.Count == 0)
-            logger.LogInformation("Schedule seed: all {Count} schedules already present.", ScheduleData.All.Count);
-        else
-        {
-            await db.Set<Schedule>().AddRangeAsync(missingSchedule, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Schedule seed: inserted {Count} new schedules.", missingSchedule.Count);
-        }
-        #endregion
-        #region Shifts
-        var ShiftExists = await db.Set<Shift>().CountAsync(cancellationToken);
-
-        if (ShiftExists != 0)
-            logger.LogInformation("Shift seed: all {Count} shifts already present.", ShiftsData.All.Count);
-        else
-        {
-            await db.Set<Shift>().AddRangeAsync(ShiftsData.All, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Shift seed: inserted {Count} new shifts.", ShiftsData.All.Count);
-        }
-        #endregion
     }
 
 }
