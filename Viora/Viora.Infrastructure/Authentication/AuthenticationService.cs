@@ -45,7 +45,8 @@ internal class AuthenticationService(IUserRepository userRepository,
         localCredential.ResetFailedLoginAttempts();
         var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
         var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
-        var allClaims = permissionClaims.Concat(RoleClaims);
+        var typeClaim = new Claim("type", "user");
+        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
@@ -98,7 +99,8 @@ internal class AuthenticationService(IUserRepository userRepository,
             }
             var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
             var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
-            var allClaims = permissionClaims.Concat(RoleClaims);
+            var typeClaim = new Claim("type", "user");
+            var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
 
             var authResult = new AuthResult(
                 UserId: user.Id,
@@ -186,9 +188,10 @@ internal class AuthenticationService(IUserRepository userRepository,
     {
         identity.RecordLogin(dateTimeProvider.UtcNow);
         var permissions = user.Roles.SelectMany(r => r.Permissions).Distinct().ToList();
-        var permissionClaims = permissions.Select(p => new Claim("permission", p.Name));
+        var permissionClaims = permissions.Select(p => new Claim("permission", p.Name)).Distinct();
         var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
-        var allClaims = permissionClaims.Concat(RoleClaims);
+        var typeClaim = new Claim("type", "user");
+        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
