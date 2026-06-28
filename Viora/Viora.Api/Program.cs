@@ -6,8 +6,9 @@ using Viora.Api.Middleware;
 using Viora.Api.OpenApi;
 using Viora.Application;
 using Viora.Application.Abstractions.Mail;
-using Viora.Application.AiRag.Ingestion;
 using Viora.Application.Abstractions.Media;
+using Viora.Application.AiRag.Ingestion;
+using Viora.Domain.Billings;
 using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
@@ -77,6 +78,8 @@ try
         builder.Configuration, "Admins");
     builder.Services.AddInterfacedOptions<IBranchSettings, BranchSettings>(
         builder.Configuration, "Branch");
+    builder.Services.AddInterfacedOptions<IPaymentSettings, PaymentSettings>(
+        builder.Configuration, "Payment");
     #endregion Settings
 
     var app = builder.Build();
