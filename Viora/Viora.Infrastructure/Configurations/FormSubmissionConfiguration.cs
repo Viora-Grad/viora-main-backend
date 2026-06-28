@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
+using Viora.Domain.Appointments;
 using Viora.Domain.Forms;
 
 namespace Viora.Infrastructure.Configurations;
@@ -17,9 +20,13 @@ internal class FormSubmissionConfiguration : IEntityTypeConfiguration<FormSubmis
 
         builder.Property(f => f.FormId)
             .IsRequired();
+        var jsonConverter = new ValueConverter<JsonDocument, string>(
+            v => v.RootElement.GetRawText(),
+            v => JsonDocument.Parse(v));
 
         builder.Property(f => f.Submission)
-            .HasColumnType("nvarchar(max)") // SQL Server
+            .HasConversion(jsonConverter)
+            .HasColumnType("nvarchar(max)")
             .IsRequired();
 
         builder.Property(f => f.CreatedAt)
@@ -30,10 +37,10 @@ internal class FormSubmissionConfiguration : IEntityTypeConfiguration<FormSubmis
             .HasForeignKey(f => f.FormId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        //builder.HasOne<Appointment>()
-        //    .WithMany()
-        //    .HasForeignKey(f => f.AppointmentId)
-        //    .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Appointment>()
+            .WithMany()
+            .HasForeignKey(f => f.AppointmentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(f => f.AppointmentId);
 

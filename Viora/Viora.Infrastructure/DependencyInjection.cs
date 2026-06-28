@@ -27,6 +27,7 @@ using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Services;
 using Viora.Domain.Shared;
 using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
@@ -117,6 +118,7 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         #endregion
 
+        services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
