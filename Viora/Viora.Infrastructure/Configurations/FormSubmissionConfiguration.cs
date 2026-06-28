@@ -38,8 +38,8 @@ internal class FormSubmissionConfiguration : IEntityTypeConfiguration<FormSubmis
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne<Appointment>()
-            .WithMany()
-            .HasForeignKey(f => f.AppointmentId)
+            .WithOne()
+            .HasForeignKey<FormSubmission>(fs => fs.AppointmentId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(f => f.AppointmentId);

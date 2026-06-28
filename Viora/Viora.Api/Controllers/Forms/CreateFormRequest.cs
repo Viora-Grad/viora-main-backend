@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Viora.Api.Controllers.Form;
+namespace Viora.Api.Controllers.Forms;
 
 public class CreateFormRequest
 {

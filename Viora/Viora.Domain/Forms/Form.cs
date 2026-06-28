@@ -16,7 +16,7 @@ public class Form : Entity
     private Form(Guid id, Guid serviceId, Guid staffId, FormName name, JsonDocument fields) : base(id)
     {
         ServiceId = serviceId;
-        StaffId = StaffId;
+        StaffId = staffId;
         Name = name;
         Fields = fields;
     }
