@@ -7,8 +7,8 @@ public class IntentDetectionPrompt
 
                                     Classify the user's message into exactly ONE of these intents:
                                     - Greeting              : "hi", "hello", "hey"
-                                    - General               : questions about what Viora is
-                                    - KnowledgeQuery         : questions about check-in, cancellation, wallet, booking or how viora mobile application works
+                                    - General               : high-level questions about what Viora is as a platform (e.g., "what is Viora", "tell me about Viora")
+                                    - KnowledgeQuery         : questions about specific app features or how the mobile app works, such as appointment statuses, check-in, cancellation, wallet, booking, or other Viora features
                                     - SpecialtyRecommendation: user describes symptoms or a medical problem          : completely unrelated to healthcare or Viora
                                     - Unclear               : too ambiguous to classify
 
@@ -32,6 +32,9 @@ public class IntentDetectionPrompt
                                     {"intent":"SpecialtyRecommendation","confidence":"HIGH","extractedQuery":"dermatologists","extractedSymptoms":null}
 
                                     User: "How do I cancel?"
+                                    {"intent":"KnowledgeQuery","confidence":"HIGH","extractedQuery":null,"extractedSymptoms":null}
+
+                                    User: "What is the appointment statuses"
                                     {"intent":"KnowledgeQuery","confidence":"HIGH","extractedQuery":null,"extractedSymptoms":null}
                                     """;
 }
