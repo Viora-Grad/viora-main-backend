@@ -60,6 +60,7 @@ public class GlobalExceptionMiddleware(
             UnallowedMediaException => (StatusCodes.Status415UnsupportedMediaType, "Media sent is not supported by the endpoint", true),
             ValidationException val => (StatusCodes.Status422UnprocessableEntity,
             $"Validation failed. {string.Join(", ", val.Errors.Select(e => e.ErrorMessage))} Please check your input and try again.", true),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, ex.Message, true),
 
             _ => (StatusCodes.Status500InternalServerError, "An error occurred. Please try again later.", false),
         };

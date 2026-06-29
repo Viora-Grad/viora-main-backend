@@ -15,7 +15,13 @@ public sealed class Role
         Description = description;
         TenantId = tenantId;
     }
+    public Role(string name, string? description = null, Guid? tenantId = null) // let EF Core handle the Id generation for new roles
+    {
+        Name = name;
+        Description = description;
+        TenantId = tenantId;
 
+    }
     public int Id { get; init; }
 
     public string Name { get; init; }

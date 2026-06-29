@@ -4,6 +4,7 @@ using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Staffs;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Repositories.Authentication;
 
@@ -18,6 +19,7 @@ internal class AuthenticationService(IUserRepository userRepository,
     RefreshTokenService refreshTokenService,
     LocalCredentialRepository localCredentialRepository,
     RefreshTokenRepository refreshTokenRepository,
+    StaffRefreshTokenRepository staffRefreshTokenRepository,
     ApplicationDbContext dbContext) : IAuthenticationService
 {
     public async Task<Result<AuthResult>> LocalLoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -227,5 +229,33 @@ internal class AuthenticationService(IUserRepository userRepository,
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(user.Id.ToString());
+    }
+
+    public async Task<Result<AuthResult>> AuthenticateStaffAsync(Staff staff, CancellationToken cancellationToken = default)
+    {
+        var rawToken = refreshTokenService.GenerateRefreshToken();
+        var hashedRefreshToken = refreshTokenService.HashToken(rawToken);
+        var expiry = refreshTokenService.GetExpiryDate();
+
+        var staffToken = StaffRefreshToken.Create(staff.Id, hashedRefreshToken, expiry, dateTimeProvider.UtcNow);
+
+        var activeToken = await staffRefreshTokenRepository.GetActiveStaffTokenByStaffIdAsync(staff.Id, cancellationToken);
+        activeToken?.Revoke();
+
+        var permissionClaims = staff.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+        var typeClaim = new Claim("type", "staff");
+        var allClaims = permissionClaims.Concat([typeClaim]);
+
+        var authResult = new AuthResult(
+            UserId: staff.Id,
+            AccessToken: jwtService.GenerateToken(staff.Id, allClaims),
+            RefreshToken: rawToken,
+            Roles: staff.Roles.Select(r => r.Name).ToList(),
+            Permissions: staff.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
+        );
+        staffRefreshTokenRepository.Add(staffToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success(authResult);
+
     }
 }

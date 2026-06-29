@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="Abstractions\Billing\" />
     <Folder Include="Feedbacks\AddFeedback\" />
+    <Folder Include="Owners\" />
   </ItemGroup>
 
 </Project>

@@ -22,13 +22,19 @@ public static class AuthorizationPolicies
     public const string FeaturesWrite = "features:write";
     public const string AppointmentsRead = "appointments:read";
     public const string AppointmentsWrite = "appointments:write";
+    public const string InvitationsCreate = "invitations:create";
+    public const string InvitationsRead = "invitations:read";
+    public const string InvitationsDelete = "invitations:delete";
     public static readonly string[] All =
     [
         UsersRead, UsersWrite, RolesRead, RolesWrite, PlansRead, PlansWrite,
-        SubscriptionsManage, FeaturesRead, FeaturesWrite, AppointmentsRead, AppointmentsWrite
+        SubscriptionsManage, FeaturesRead, FeaturesWrite, AppointmentsRead, AppointmentsWrite, InvitationsCreate, InvitationsRead, InvitationsDelete
     ];
 
     public static string Permission(string permission) => $"Permission:{permission}";
+
+    // Custom Policies 
+    public const string CreateStaffInvitation = "CreateStaffInvitation";
 
     public static void AddPermissionPolicies(this AuthorizationBuilder builder)
     {
@@ -36,3 +42,4 @@ public static class AuthorizationPolicies
             builder.AddPolicy(permission, policy => policy.RequireClaim("permission", permission));
     }
 }
+

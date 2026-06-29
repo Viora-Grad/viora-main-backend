@@ -19,8 +19,8 @@ using Viora.Domain.Plans;
 using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
-using Viora.Domain.Staffs;
 using Viora.Domain.Shared.Internal;
+using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
@@ -61,6 +61,9 @@ internal sealed class DevDataSeeder(
     private static readonly Guid StarterPlanId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static readonly Guid EgyptCountryId = Guid.Parse("a1b2c3d4-0001-0000-0000-000000000003");
 
+    // the seeded Organization Id is pinned to a fixed id so its operational data 
+
+    private static readonly Guid OrganizationId = new("c8f5a2b4-9d3e-4e2a-8f7a-2c6f9b1d4e7a");
     // The dev branch is pinned to a fixed id so its operational data (services, staff, schedules)
     // can reference it deterministically across runs and machines.
     private static readonly Guid BranchId = Guid.Parse("9D88C6E0-7B53-434A-82AC-83F1AB9B5C19");
@@ -138,6 +141,8 @@ internal sealed class DevDataSeeder(
             "A multi-specialty clinic in Cairo.", "General and specialized outpatient care.",
             new List<ServiceType> { ServiceType.Cardiology, ServiceType.Dermatology },
             now, ReferralSource.Website, "billing@nilecare.dev", "support@nilecare.dev"), "organization");
+        SetEntityId(organization, OrganizationId); // pin so dev branch can reference it
+
         db.Set<Organization>().Add(organization);
 
         var subscription = Unwrap(Subscription.Create(StarterPlanId, organization.Id, now, now.AddMonths(1)), "subscription");
@@ -301,7 +306,16 @@ internal sealed class DevDataSeeder(
         db.Set<Service>().AddRange(BuildServices());
 
         foreach (var staffId in StaffIds)
-            db.Set<Staff>().Add(new Staff(staffId, BranchId));
+            db.Set<Staff>().Add(
+                Staff.SeedActiveStaff(
+                staffId,
+                OrganizationId,
+                "John",
+                "Doe",
+                clock.UtcNow,
+                new DateOnly(1990, 1, 1),
+                Domain.Staffs.Internal.Gender.Male,
+                new PhoneNumber("+1234567890")));
 
         // Weekly schedule (Mon–Fri), pinned to known ids so the shifts below resolve their FK.
         var days = new[]

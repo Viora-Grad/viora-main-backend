@@ -4,5 +4,5 @@ public enum StaffStatus
 {
     Active,
     Pending,
-    Suspended
+    Suspended,
 }

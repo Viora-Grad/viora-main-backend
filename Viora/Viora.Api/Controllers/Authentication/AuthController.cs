@@ -6,14 +6,19 @@ using Viora.Api.Extensions;
 using Viora.Application.Authentication.ChangePassword;
 using Viora.Application.Authentication.ConfirmForgetPassword;
 using Viora.Application.Authentication.ConsumeRefreshToken;
+using Viora.Application.Authentication.CreateStaffRole;
 using Viora.Application.Authentication.ForgetPassword;
+using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Authentication.ValidateEmail;
+using Viora.Application.Authentication.ValidateUsername;
+using Viora.Application.Staffs.RegisterStaff;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
 using Viora.Application.Users.OAuthLoginUser;
 using Viora.Application.Users.OAuthRegisterUser;
 using Viora.Application.Users.OAuthValidateToken;
 using Viora.Application.Users.RegisterUser;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Api.Controllers.Authentication;
 
@@ -168,6 +173,55 @@ public class AuthController : ControllerBase
             : "Unknown";
 
         var command = new ChangePasswordCommand(request.CurrentPassword, request.NewPassword, ipv4Address);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPost("organization/{organizationId:guid}/validate-username")]
+    public async Task<IActionResult> ValidateUsername(Guid organizationId, ValidateUsernameRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new ValidateUsernameCommand(organizationId, request.Value);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPost("organization/{organizationId:guid}/staff/register")]
+    public async Task<IActionResult> RegisterStaff(Guid organizationId, RegisterStaffRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new RegisterStaffCommand(
+            organizationId,
+            request.Token,
+            request.FirstName,
+            request.LastName,
+            request.DateOfBirth,
+            request.Gender,
+            request.PhoneNumber,
+            request.Username,
+            request.Password);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("permissions")]
+    [Authorize(Policy = "permissions:read")]
+    public IActionResult GetPermissions(CancellationToken cancellationToken = default)
+    {
+        return Ok(Permission.All);
+    }
+    [HttpGet("organization/{organizationId:guid}/roles")]
+    [Authorize(Policy = "roles:read")]
+    public async Task<IActionResult> GetRoles(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        var query = new GetOrganizationRolesQuery(organizationId);
+        var result = await _sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPost("organizations/{organizationId:guid}/role")]
+    [Authorize(Policy = "roles:write")]
+    public async Task<IActionResult> CreateStaffRole(Guid organizationId, CreateStaffRoleRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateStaffRoleCommand(
+            organizationId,
+            request.RoleName,
+            request.RoleDescription,
+            [.. request.PermissionsIds]);
         var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
