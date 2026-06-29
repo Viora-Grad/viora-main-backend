@@ -3,4 +3,4 @@
 namespace Viora.Application.Orders.RenewSubscriptionOrder;
 
 public sealed record RenewSubscriptionOrderCommand(
-    Guid SubscriptionId) : ICommand;
+    Guid SubscriptionId) : ICommand<Guid>;

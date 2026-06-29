@@ -13,9 +13,9 @@ public class CreateSubscriptionOrderCommandHandler(
     IPlanRepository planRepository,
     IDateTimeProvider dateTimeProvider,
     ISubscriptionOrderRepository orderRepository,
-    IUnitOfWork unitOfWork) : ICommandHandler<CreateSubscriptionOrderCommand>
+    IUnitOfWork unitOfWork) : ICommandHandler<CreateSubscriptionOrderCommand, Guid>
 {
-    public async Task<Result> Handle(CreateSubscriptionOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateSubscriptionOrderCommand request, CancellationToken cancellationToken)
     {
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"Organization with id {request.OrganizationId} not found.");
@@ -24,10 +24,10 @@ public class CreateSubscriptionOrderCommandHandler(
         var subscriptionOrder = SubscriptionOrder.CreateNewSubscriptionOrder(organization.Id, plan, dateTimeProvider.UtcNow);
 
         if (subscriptionOrder.IsFailure)
-            return Result.Failure(subscriptionOrder.Error);
+            return Result.Failure<Guid>(subscriptionOrder.Error);
         orderRepository.Add(subscriptionOrder.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Success(subscriptionOrder.Value.Id);
 
     }
 }
