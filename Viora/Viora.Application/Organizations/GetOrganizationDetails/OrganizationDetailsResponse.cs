@@ -10,7 +10,8 @@ public record OrganizationDetailsResponse(
     string ServiceDescription,
     string ContactEmail,
     DateTime JoinedOnUtc,
-    IEnumerable<MinimalBranch> Branches);
+    IEnumerable<MinimalBranch> Branches,
+    string SubDomain);
 
 public record MinimalBranch(
     Guid Id,
