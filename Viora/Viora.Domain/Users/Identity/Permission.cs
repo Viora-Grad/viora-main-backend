@@ -25,5 +25,13 @@ public sealed class Permission
     public static readonly Permission SubscriptionsManage = new(30, "subscriptions:manage");
     public static readonly Permission FeaturesRead = new(40, "features:read");
     public static readonly Permission FeaturesWrite = new(41, "features:write");
+    public static readonly Permission AppointmentsRead = new(50, "appointments:read");
+    public static readonly Permission AppointmentsWrite = new(51, "appointments:write");
+    public static readonly Permission ScheduleWrite = new(60, "schedule:write");
+    public static readonly Permission ScheduleRead = new(61, "schedule:read");
+    public static readonly Permission ShiftWrite = new(62, "shift:write");
+    public static readonly Permission ShiftRead = new(63, "shift:read");
+    public static readonly Permission FormWrite = new(70, "form:write");
+    public static readonly Permission FormRead = new(71, "form:read");
     #endregion Permission Values
 }

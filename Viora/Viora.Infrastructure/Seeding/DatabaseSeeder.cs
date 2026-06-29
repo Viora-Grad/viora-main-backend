@@ -195,8 +195,8 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
 
         #region Addons
         var existingAddon = await db.Set<LimitedFeatureAddon>()
-            .Select(f => f.Id)
-            .ToListAsync(cancellationToken);
+      .Select(f => f.Id)
+      .ToListAsync(cancellationToken);
 
         var missingAddons = AddonData.All
             .Where(f => !existingAddon.Contains(f.Id))
