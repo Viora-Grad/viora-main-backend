@@ -19,8 +19,8 @@ public class GetStaffShiftQeuryHandler(
         var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
             ?? throw new NotFoundException($"Staff with id {request.StaffId} not Found");
 
-        var branch = await branchRepository.GetByIdAsync(staff.BranchId, cancellationToken)
-            ?? throw new NotFoundException($"Branch with id {staff.BranchId} not found");
+        var branch = await branchRepository.GetByIdAsync(request.BranchId, cancellationToken)
+            ?? throw new NotFoundException($"Branch with id {request.BranchId} not found");
 
         var branchSchedules = await scheduleRepository.getByBranchIdAsync(branch.Id, cancellationToken)
             ?? throw new NotFoundException($"branch with Id {branch.Id} does not havve schedule");
