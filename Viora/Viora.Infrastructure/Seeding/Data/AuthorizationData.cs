@@ -22,6 +22,8 @@ internal static class AuthorizationData
         Permission.ScheduleWrite,
         Permission.ShiftRead,
         Permission.ShiftWrite,
+        Permission.FormWrite,
+        Permission.FormRead
     ];
 
     public static IReadOnlyList<RolePermission> RolePermissions =>

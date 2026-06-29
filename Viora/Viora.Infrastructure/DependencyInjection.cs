@@ -17,6 +17,7 @@ using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
+using Viora.Domain.Forms;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
@@ -26,6 +27,7 @@ using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Services;
 using Viora.Domain.Shared;
 using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
@@ -42,6 +44,7 @@ using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
+using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
@@ -110,6 +113,12 @@ public static class DependencyInjection
         services.AddScoped<IStaffRepository, StaffRepository>();
         #endregion
 
+        #region Form 
+        services.AddScoped<IFormRepository, FormRepository>();
+        services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
+        #endregion
+
+        services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
         #endregion ReposRegisters
