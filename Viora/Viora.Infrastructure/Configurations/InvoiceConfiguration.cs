@@ -120,5 +120,16 @@ internal sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
 
             item.UsePropertyAccessMode(PropertyAccessMode.Field);
         });
+
+        builder.ComplexProperty(x => x.ExternalPayment, complex =>
+        {
+            complex.Property(p => p.Id)
+                .HasColumnName("ExternalPaymentId")
+                .HasMaxLength(50);
+
+            complex.Property(p => p.Url)
+                .HasColumnName("ExternalPaymentUrl")
+                .HasMaxLength(300);
+        });
     }
 }

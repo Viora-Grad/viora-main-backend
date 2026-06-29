@@ -18,6 +18,8 @@ public sealed class Invoice : Entity
     private long Sequence { get; set; }
     public Number Number => $"INV-{CreatedAtUtc:yyyy}-{Sequence:D6}";
 
+    public ExternalPayment? ExternalPayment { get; set; }
+
     public IReadOnlyList<InvoiceItem> Items => _items.AsReadOnly();
     private readonly List<InvoiceItem> _items = [];
 

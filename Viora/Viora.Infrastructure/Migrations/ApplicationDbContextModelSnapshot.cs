@@ -193,6 +193,21 @@ namespace Viora.Infrastructure.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("decimal(18,6)");
 
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "ExternalPayment", "Viora.Domain.Billings.Invoices.Invoice.ExternalPayment#ExternalPayment", b1 =>
+                        {
+                            b1.Property<string>("Id")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("ExternalPaymentId");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("nvarchar(300)")
+                                .HasColumnName("ExternalPaymentUrl");
+                        });
+
                     b.HasKey("Id");
 
                     b.ToTable("Invoices", (string)null);
@@ -353,6 +368,71 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Feedback", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Forms.Form", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Fields")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Viora.Domain.Forms.Form.Name#FormName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("value")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Name");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId")
+                        .IsUnique();
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Forms", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Forms.FormSubmission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FormId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Submission")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId")
+                        .IsUnique();
+
+                    b.HasIndex("FormId");
+
+                    b.ToTable("FormSubmissions", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Inventory.InventoryItem", b =>
@@ -794,12 +874,6 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid?>("LogoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("Name");
-
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -880,8 +954,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("CountryId");
 
                     b.HasIndex("LogoId");
-
-                    b.HasIndex("Name");
 
                     b.HasIndex("OwnerId")
                         .IsUnique();
@@ -2021,6 +2093,36 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Comment");
                 });
 
+            modelBuilder.Entity("Viora.Domain.Forms.Form", b =>
+                {
+                    b.HasOne("Viora.Domain.Services.Service", null)
+                        .WithOne()
+                        .HasForeignKey("Viora.Domain.Forms.Form", "ServiceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.Forms.FormSubmission", b =>
+                {
+                    b.HasOne("Viora.Domain.Appointments.Appointment", null)
+                        .WithOne()
+                        .HasForeignKey("Viora.Domain.Forms.FormSubmission", "AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Forms.Form", null)
+                        .WithMany()
+                        .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Viora.Domain.Inventory.InventoryItem", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
@@ -2186,6 +2288,57 @@ namespace Viora.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("LogoId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.OwnsOne("Viora.Domain.Organizations.OrganizationDetails.Internal.Name", "Name", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)")
+                                .HasColumnName("Name");
+
+                            b1.HasKey("OrganizationId");
+
+                            b1.HasIndex("Value")
+                                .HasDatabaseName("IX_Organizations_Name");
+
+                            b1.ToTable("Organizations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationId");
+                        });
+
+                    b.OwnsOne("Viora.Domain.Organizations.OrganizationDetails.Internal.SubDomain", "SubDomain", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("Subdomain");
+
+                            b1.HasKey("OrganizationId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("IX_Organizations_Subdomain");
+
+                            b1.ToTable("Organizations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationId");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
+
+                    b.Navigation("SubDomain")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Viora.Domain.Organizations.OrganizationHistory.OrganizationVisits", b =>

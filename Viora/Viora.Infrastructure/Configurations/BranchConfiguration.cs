@@ -58,7 +58,11 @@ internal class BranchConfiguration : IEntityTypeConfiguration<Branch>
                 .IsRequired();
         });
 
-        builder.PrimitiveCollection("_services")
+        // Map the public ServicesProvided collection (backed by the private _services field) so it is
+        // queryable in LINQ (e.g. b.ServicesProvided.Any(...)). Reads/writes go through the field.
+        builder.PrimitiveCollection(b => b.ServicesProvided)
+            .HasField("_services")
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
             .HasColumnName("Services")
             .ElementType(e => e
                 .HasConversion(new ValueConverter<ServiceType, string>(

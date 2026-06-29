@@ -32,7 +32,8 @@ internal class GetOrganizationDetailsQueryHandler(
             organization.ServiceDescription,
             organization.SupportEmail,
             organization.JoinedOnUtc,
-            branches.Select(x => new MinimalBranch(x.Id, x.Gallery.Count == 0 ? null : x.Gallery.First().Id, x.Address.Value, x.OpenedAtUtc)));
+            branches.Select(x => new MinimalBranch(x.Id, x.Gallery.Count == 0 ? null : x.Gallery.First().Id, x.Address.Value, x.OpenedAtUtc)),
+            organization.SubDomain);
 
         return Result.Success(response);
     }

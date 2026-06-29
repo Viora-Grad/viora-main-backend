@@ -14,7 +14,7 @@ internal sealed class AddonOrderConfiguration : IEntityTypeConfiguration<AddonOr
 
         builder.Property(s => s.Status)
             .HasConversion(
-            v => v.id,
+            v => v.Id,
             v => OrderStatus.FromId(v)
             );
 

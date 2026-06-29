@@ -60,17 +60,17 @@ public class RealTimeScheduleController : ControllerBase
 
 
     [HttpGet]
-    [Route("api/schedule/staff/{staffId}")]
-    public async Task<IActionResult> GetStaffShifts(Guid staffId)
+    [Route("api/branch/{branchId}/schedule/staff/{staffId}")]
+    public async Task<IActionResult> GetStaffShifts(Guid staffId, Guid branchId)
     {
-        var query = new GetStaffShiftQuery(staffId);
+        var query = new GetStaffShiftQuery(staffId, branchId);
         var result = await _sender.Send(query);
         return result.ToActionResult();
     }
 
     [HttpGet]
-    [Route("api/schedule/")]
-    public async Task<IActionResult> GetStaffShift(StaffShiftByDayRequest request)
+    [Route("api/schedule/staff")]
+    public async Task<IActionResult> GetStaffShift([FromBody] StaffShiftByDayRequest request)
     {
         var query = new GetStaffShiftByDayQuery(request.day, request.StaffId, request.ShiftId);
         var result = await _sender.Send(query);

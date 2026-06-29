@@ -17,9 +17,9 @@ public class RenewSubscriptionOrderCommandHandler(
     IPlanRepository planRepository,
     ISubscriptionOrderRepository subscriptionOrderRepository,
     ILimitedFeatureAddonRepository limitedFeatureAddonRepository,
-    IUnitOfWork unitOfWork) : ICommandHandler<RenewSubscriptionOrderCommand>
+    IUnitOfWork unitOfWork) : ICommandHandler<RenewSubscriptionOrderCommand, Guid>
 {
-    public async Task<Result> Handle(RenewSubscriptionOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(RenewSubscriptionOrderCommand request, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetByIdWithAddonAsync(request.SubscriptionId, cancellationToken)
             ?? throw new NotFoundException($"Subscription with id {request.SubscriptionId} not found.");
@@ -43,9 +43,9 @@ public class RenewSubscriptionOrderCommandHandler(
             dateTimeProvider.UtcNow);
 
         if (subscriptionOrder.IsFailure)
-            return Result.Failure(subscriptionOrder.Error);
+            return Result.Failure<Guid>(subscriptionOrder.Error);
         subscriptionOrderRepository.Add(subscriptionOrder.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Success(subscriptionOrder.Value.Id);
     }
 }

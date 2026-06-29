@@ -17,7 +17,13 @@ internal static class AuthorizationData
         Permission.PlansWrite,
         Permission.FeaturesRead,
         Permission.FeaturesWrite,
-        Permission.SubscriptionsManage
+        Permission.SubscriptionsManage,
+        Permission.ScheduleRead,
+        Permission.ScheduleWrite,
+        Permission.ShiftRead,
+        Permission.ShiftWrite,
+        Permission.FormWrite,
+        Permission.FormRead
     ];
 
     public static IReadOnlyList<RolePermission> RolePermissions =>

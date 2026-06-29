@@ -5,5 +5,5 @@ namespace Viora.Application.Orders.CreateAddonOrder;
 public sealed record CreateAddonOrderCommand(
     Guid OrganizationId,
     Guid SubscriptionId,
-    List<Guid> AddonIds) : ICommand;
+    List<Guid> AddonIds) : ICommand<Guid>;
 
