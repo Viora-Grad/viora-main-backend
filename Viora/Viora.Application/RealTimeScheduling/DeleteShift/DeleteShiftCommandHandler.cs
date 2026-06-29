@@ -12,6 +12,7 @@ public class DeleteShiftCommandHandler(
     IShiftRepository shiftRepository,
     IScheduleRepository scheduleRepository,
     IAppointmentsRepository appointmentsRepository,
+    IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<DeleteShiftCommand>
 {
     public async Task<Result> Handle(DeleteShiftCommand request, CancellationToken cancellationToken)
@@ -35,6 +36,8 @@ public class DeleteShiftCommandHandler(
 
         if (result)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
+        shiftRepository.Remove(shift.Id);
+        await unitOfWork.SaveChangesAsync();
 
         return Result.Success();
 
