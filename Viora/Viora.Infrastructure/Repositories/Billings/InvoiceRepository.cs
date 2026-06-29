@@ -12,6 +12,16 @@ internal sealed class InvoiceRepository : Repository<Invoice>, IInvoiceRepositor
     // v1: MAX(Sequence)+1. Sequence is a private member, read via EF.Property.
     // Note: Number has no unique index, so a race only yields a cosmetic duplicate display number.
     // Production should back this with a SQL SEQUENCE.
+    public async Task<List<Invoice>> GetAllByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken = default)
+    {
+        // Owned items are loaded with the aggregate; newest first.
+        return await DbContext.Set<Invoice>()
+            .AsNoTracking()
+            .Where(invoice => invoice.OrganizationId == organizationId)
+            .OrderByDescending(invoice => invoice.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<long> NextSequenceAsync(CancellationToken cancellationToken = default)
     {
         var hasAny = await DbContext.Set<Invoice>().AnyAsync(cancellationToken);

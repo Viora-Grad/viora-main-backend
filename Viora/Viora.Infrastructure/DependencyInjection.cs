@@ -43,6 +43,7 @@ using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
+using Viora.Infrastructure.Payments;
 using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Appointments;
