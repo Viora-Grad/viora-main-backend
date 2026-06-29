@@ -24,7 +24,7 @@ public class ChangeSubscriptionOrderCommandHandler(
         if (subscription.PlanId == request.NewPlanId)
             return Result.Failure(SubscriptionError.InvalidPlan);
 
-        var subscriptionOrder = SubscriptionOrder.CreateChangeSubscriptionOrder(subscription.OrganizationId, newPlan, dateTimeProvider.UtcNow);
+        var subscriptionOrder = SubscriptionOrder.CreateChangeSubscriptionOrder(subscription.OrganizationId, subscription.Id, newPlan, dateTimeProvider.UtcNow);
         if (subscriptionOrder.IsFailure)
             return Result.Failure(subscriptionOrder.Error);
         subscriptionOrderRepository.Add(subscriptionOrder.Value);

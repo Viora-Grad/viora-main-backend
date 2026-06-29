@@ -8,4 +8,6 @@ public class PaymentSettings : IPaymentSettings
     public string ApiKey { get; set; } = default!;
     public string BaseUrl { get; set; } = default!;
     public string Secret { get; set; } = default!;
+    public string PublicBaseUrl { get; set; } = default!;
+    public string ClientBaseUrl { get; set; } = default!;
 }

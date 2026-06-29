@@ -23,6 +23,7 @@ services:
       - AiRag__Onnx__VocabPath=Models/all-MiniLM-L6-V2/vocab.txt
       # Override the Seq sink's serverUrl (3rd entry, index 2, in Serilog:WriteTo) to reach the seq container.
       - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
+      - Payment__Secret=${PAYMENT__SECRET}
     depends_on:
       sql:
         condition: service_healthy

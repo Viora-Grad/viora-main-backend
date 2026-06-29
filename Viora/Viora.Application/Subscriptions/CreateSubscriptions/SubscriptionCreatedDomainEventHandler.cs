@@ -28,6 +28,11 @@ internal class SubscriptionCreatedDomainEventHandler(
 {
     public async Task Handle(SubscriptionCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
+        // Idempotency: if the org already has an active subscription, this event was already
+        // provisioned (or is a duplicate dispatch) — no-op.
+        var existing = await subscriptionRepository.GetByOrganizationIdAsync(notification.OrganizationId, cancellationToken);
+        if (existing is not null)
+            return;
 
         var plan = await planRepository.GetByIdAsync(notification.PlanId, cancellationToken)
            ?? throw new NotFoundException($"the plan with id {notification.PlanId} not found");

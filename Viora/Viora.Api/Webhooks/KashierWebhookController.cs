@@ -1,24 +1,42 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Viora.Application.Payments.Webhooks;
+using Viora.Domain.Abstractions;
 
 namespace Viora.Api.Webhooks;
 
 [ApiController]
 [Route("api/webhooks/kashier")]
-public sealed class KashierWebhookController(ILogger<KashierWebhookController> logger) : ControllerBase
+public sealed class KashierWebhookController(ISender sender, ILogger<KashierWebhookController> logger) : ControllerBase
 {
-    [HttpPost]
+    private const string SignatureHeader = "x-kashier-signature";
+
+    [HttpPost("subscription")]
     [AllowAnonymous]
-    public async Task<IActionResult> Receive(CancellationToken cancellationToken)
+    public Task<IActionResult> Subscription(CancellationToken cancellationToken)
+        => HandleAsync(WebhookKind.Subscription, cancellationToken);
+
+    [HttpPost("addon")]
+    [AllowAnonymous]
+    public Task<IActionResult> Addon(CancellationToken cancellationToken)
+        => HandleAsync(WebhookKind.Addon, cancellationToken);
+
+    private async Task<IActionResult> HandleAsync(WebhookKind kind, CancellationToken cancellationToken)
     {
-        Request.EnableBuffering();
-        using var reader = new StreamReader(Request.Body, leaveOpen: true);
+        using var reader = new StreamReader(Request.Body);
         var body = await reader.ReadToEndAsync(cancellationToken);
-        Request.Body.Position = 0;
+        var signature = Request.Headers.TryGetValue(SignatureHeader, out var values) ? values.ToString() : string.Empty;
 
-        var headers = string.Join(" | ", Request.Headers.Select(h => $"{h.Key}: {h.Value}"));
+        var result = await sender.Send(new HandleKashierWebhookCommand(kind, body, signature), cancellationToken);
 
-        logger.LogInformation("Kashier webhook received.\nHeaders: {Headers}\nBody: {Body}", headers, body);
+        // Invalid signature is the only case we reject; everything else returns 200 so Kashier
+        // stops retrying (the handler has already logged any internal anomaly).
+        if (result.IsFailure && result.Error.Category == ErrorCategory.Unauthorized)
+        {
+            logger.LogWarning("Kashier {Kind} webhook rejected: {Error}.", kind, result.Error.Name);
+            return Unauthorized();
+        }
 
         return Ok();
     }
