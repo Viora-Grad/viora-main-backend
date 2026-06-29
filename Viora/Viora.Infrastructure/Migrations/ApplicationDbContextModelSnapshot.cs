@@ -193,6 +193,21 @@ namespace Viora.Infrastructure.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("decimal(18,6)");
 
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "ExternalPayment", "Viora.Domain.Billings.Invoices.Invoice.ExternalPayment#ExternalPayment", b1 =>
+                        {
+                            b1.Property<string>("Id")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("ExternalPaymentId");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("nvarchar(300)")
+                                .HasColumnName("ExternalPaymentUrl");
+                        });
+
                     b.HasKey("Id");
 
                     b.ToTable("Invoices", (string)null);
@@ -2296,7 +2311,33 @@ namespace Viora.Infrastructure.Migrations
                                 .HasForeignKey("OrganizationId");
                         });
 
+                    b.OwnsOne("Viora.Domain.Organizations.OrganizationDetails.Internal.SubDomain", "SubDomain", b1 =>
+                        {
+                            b1.Property<Guid>("OrganizationId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("Subdomain");
+
+                            b1.HasKey("OrganizationId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique()
+                                .HasDatabaseName("IX_Organizations_Subdomain");
+
+                            b1.ToTable("Organizations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrganizationId");
+                        });
+
                     b.Navigation("Name")
+                        .IsRequired();
+
+                    b.Navigation("SubDomain")
                         .IsRequired();
                 });
 

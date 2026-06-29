@@ -12,6 +12,7 @@ using Viora.Application.Organizations.OrganizationNameExists;
 using Viora.Application.Organizations.SearchOrganizations;
 using Viora.Application.Organizations.SuspendOrganization;
 using Viora.Application.Organizations.UpdateLogo;
+using Viora.Application.Organizations.UpdateOrganizationProfile;
 using Viora.Domain.Organizations.OrganizationDetails.Internal;
 
 namespace Viora.Api.Controllers.Oganizations;
@@ -98,6 +99,22 @@ public class OrganizationsController(ISender sender) : ControllerBase
     public async Task<IActionResult> HideOrganization(Guid organizationId, CancellationToken cancellationToken)
     {
         var command = new HideOrganizationCommand(organizationId);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPut("{organizationId:guid}/profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile(Guid organizationId, UpdateOrganizationProfileRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateOrganizationProfileCommand(
+            organizationId,
+            request.SubDomain,
+            request.SupportEmail,
+            request.BillingEmail,
+            request.ServiceDescription,
+            request.ServicesProvided,
+            request.About);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }

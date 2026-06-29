@@ -9,6 +9,14 @@ internal class AddonOrderRepository : Repository<AddonOrder>, IAddonOrderReposit
     {
     }
 
+    // Tracked + includes Addons so a paid webhook can both mutate the order and read its addon ids.
+    public override async Task<AddonOrder?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<AddonOrder>()
+            .Include(order => order.Addons)
+            .FirstOrDefaultAsync(order => order.Id == id, cancellationToken);
+    }
+
     public async Task<List<AddonOrder>> GetAllByOrganizationIdAsync(Guid organizationId, CancellationToken cancellationToken)
     {
         return await DbContext.Set<AddonOrder>()

@@ -24,6 +24,8 @@ public sealed class Organization : Entity
     public BillingEmail BillingEmail { get; private set; } = default!;
     public SupportEmail SupportEmail { get; private set; } = default!;
 
+    public SubDomain SubDomain { get; private set; } = Guid.NewGuid().ToString();
+
     private Organization(
         Guid id,
         Guid ownerId,
@@ -91,6 +93,31 @@ public sealed class Organization : Entity
             return Result.Failure(OrganizationErrors.OrganizationMustBeActiveToUpdateLogo);
 
         LogoId = mediaId;
+        return Result.Success();
+    }
+
+    // Replaces the editable profile fields in one atomic change.
+    public Result UpdateProfile(
+        string subDomain,
+        string supportEmail,
+        string billingEmail,
+        string serviceDescription,
+        ICollection<ServiceType> servicesProvided,
+        string about)
+    {
+        if (string.IsNullOrWhiteSpace(subDomain) || subDomain.Any(char.IsWhiteSpace))
+            return Result.Failure(OrganizationErrors.InvalidSubDomain);
+
+        if (servicesProvided is null || servicesProvided.Count == 0)
+            return Result.Failure(OrganizationErrors.NoServicesProvided);
+
+        SubDomain = subDomain;
+        SupportEmail = supportEmail;
+        BillingEmail = billingEmail;
+        ServiceDescription = serviceDescription;
+        ServicesProvided = servicesProvided.Distinct().ToList();
+        About = about;
+
         return Result.Success();
     }
 

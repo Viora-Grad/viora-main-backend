@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Billings;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
@@ -13,6 +14,8 @@ using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Billings;
+using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
@@ -40,10 +43,12 @@ using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
+using Viora.Infrastructure.Payments;
 using Viora.Infrastructure.RealTime;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
+using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
@@ -121,6 +126,10 @@ public static class DependencyInjection
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+
+        #region BillingRepos
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        #endregion BillingRepos
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -142,6 +151,18 @@ public static class DependencyInjection
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
         #endregion ServicesRegisters
+
+        #region Payments
+        services.AddHttpClient<IPaymentService, KashierPaymentService>((sp, client) =>
+        {
+            var paymentSettings = sp.GetRequiredService<IPaymentSettings>();
+            client.BaseAddress = new Uri(paymentSettings.BaseUrl);
+            // Kashier server-side REST: Authorization = Secret (Payment API) key, api-key = GUID API key.
+            client.DefaultRequestHeaders.Add("Authorization", paymentSettings.Secret);
+            client.DefaultRequestHeaders.Add("api-key", paymentSettings.ApiKey);
+            client.DefaultRequestHeaders.Connection.Add("keep-alive");
+        });
+        #endregion Payments
 
         #region HostedWorkers
         services.AddHostedService<ScheduledEventDispatcherService>();
