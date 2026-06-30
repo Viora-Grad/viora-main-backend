@@ -22,6 +22,8 @@ using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Forms;
+using Viora.Domain.Inventory;
+using Viora.Domain.InventoryMovements;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
@@ -51,6 +53,7 @@ using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
+using Viora.Infrastructure.Repositories.Inventories;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
@@ -136,6 +139,11 @@ public static class DependencyInjection
         #region BillingRepos
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
         #endregion BillingRepos
+
+        #region InventoryRepos
+        services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
+        services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
+        #endregion InventoryRepos
         #endregion ReposRegisters
 
         #region ServicesRegisters

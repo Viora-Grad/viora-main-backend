@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Owners\**" />
+    <EmbeddedResource Remove="Owners\**" />
+    <None Remove="Owners\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Google.Apis.Auth" Version="1.74.0" />
@@ -24,7 +30,6 @@
 
   <ItemGroup>
     <Folder Include="Feedbacks\AddFeedback\" />
-    <Folder Include="Owners\" />
   </ItemGroup>
 
 </Project>
