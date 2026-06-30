@@ -45,7 +45,7 @@ public sealed class InventoryItem : Entity
         Quantity = newQuantity;
 
         if (Quantity.Value <= MinimumThreshold.Value)
-            RaiseDomainEvent(new MinimumThresholdReachedEvent(Id));
+            RaiseDomainEvent(new MinimumThresholdReachedEvent(Id, Quantity));
 
         RaiseDomainEvent(new InventoryQuantityChangeEvent(Id, userId, -amount));
         return Result.Success();
