@@ -626,4 +626,173 @@ internal static class EmailTemplateFactory
         </body>
         </html>
         """);
+
+    public static EmailMessage AcceptInvitation(string organizationName, string inviteUrl, DateTime expiry) =>
+    new(
+        $"Invitation to join {organizationName} on Viora",
+        $"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Invitation</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+                  <!-- Header -->
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);padding:40px 48px;text-align:center;">
+                      <h1 style="margin:0;color:#e94560;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">VIORA</h1>
+                      <p style="margin:6px 0 0;color:#a0aec0;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Healthcare Management Platform</p>
+                    </td>
+                  </tr>
+
+                  <!-- Invitation Badge -->
+                  <tr>
+                    <td align="center" style="padding:36px 48px 0;">
+                      <span style="display:inline-block;background-color:#dbeafe;color:#1e40af;font-size:13px;font-weight:600;padding:6px 20px;border-radius:999px;letter-spacing:0.5px;">
+                        ✉ &nbsp; Invitation to Register
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:28px 48px 0;">
+                      <h2 style="margin:0 0 12px;color:#1a1a2e;font-size:22px;font-weight:600;">You’re invited to {organizationName}!</h2>
+                      <p style="margin:0 0 16px;color:#4a5568;font-size:15px;line-height:1.7;">
+                        The owner of <strong>{organizationName}</strong> has invited you to register as a staff member within their organization’s workspace on <strong>Viora</strong>.
+                      </p>
+                      <p style="margin:0 0 24px;color:#4a5568;font-size:15px;line-height:1.7;">
+                        By accepting this invitation, you’ll be redirected to a registration form where you can set up your login credentials and provide required metadata.
+                      </p>
+                      <p style="margin:0 0 24px;color:#4a5568;font-size:15px;line-height:1.7;">
+                        This invitation will expire on <strong>{expiry:MMMM dd, yyyy}</strong>.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- CTA -->
+                  <tr>
+                    <td align="center" style="padding:32px 48px;">
+                      <a href="{inviteUrl}" style="display:inline-block;background-color:#e94560;color:#ffffff;font-size:15px;font-weight:600;padding:14px 40px;border-radius:8px;text-decoration:none;letter-spacing:0.5px;">
+                        Accept & Register
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- Divider -->
+                  <tr>
+                    <td style="padding:0 48px;">
+                      <hr style="border:none;border-top:1px solid #e2e8f0;margin:0;" />
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding:24px 48px 36px;text-align:center;">
+                      <p style="margin:0 0 6px;color:#a0aec0;font-size:12px;">
+                        Please note: Viora communicates directly with your organization’s owner. Staff members will not receive direct communication from Viora.
+                      </p>
+                      <p style="margin:0 0 6px;color:#a0aec0;font-size:12px;">
+                        If you have any questions, contact your organization owner or reach out to
+                        <a href="mailto:support@viora.com" style="color:#e94560;text-decoration:none;">support@viora.com</a>.
+                      </p>
+                      <p style="margin:0;color:#cbd5e0;font-size:11px;">© 2026 Viora. All rights reserved.</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """);
+
+    public static EmailMessage MinimumThresholdReached(string itemName, string branchAddress, int currentQuantity) =>
+        new("Inventory Alert: Minimum Threshold Reached", $"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Inventory Alert</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);padding:40px 48px;text-align:center;">
+                      <h1 style="margin:0;color:#e94560;font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">VIORA</h1>
+                      <p style="margin:6px 0 0;color:#a0aec0;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Healthcare Management Platform</p>
+                    </td>
+                  </tr>
+                  <!-- Status Badge -->
+                  <tr>
+                    <td align="center" style="padding:36px 48px 0;">
+                      <span style="display:inline-block;background-color:#fff7ed;color:#c2410c;font-size:13px;font-weight:600;padding:6px 20px;border-radius:999px;letter-spacing:0.5px;">
+                        ⚠️ &nbsp; Low Stock Notice
+                      </span>
+                    </td>
+                  </tr>
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:28px 48px 0;">
+                      <h2 style="margin:0 0 12px;color:#1a1a2e;font-size:22px;font-weight:600;">Inventory Warning</h2>
+                      <p style="margin:0 0 16px;color:#4a5568;font-size:15px;line-height:1.7;">
+                        An item within your branch inventory has fallen below its designated safety threshold. Please review the details below to determine if a restock order is required.
+                      </p>
+                    </td>
+                  </tr>
+                  <!-- Event Details Table -->
+                  <tr>
+                    <td style="padding:0 48px 24px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;border-radius:10px;padding:20px;margin-bottom:8px;">
+                        <tr>
+                          <td style="color:#718096;font-size:13px;font-weight:600;width:140px;padding:6px 0;">Item Name:</td>
+                          <td style="color:#1a1a2e;font-size:14px;font-weight:600;padding:6px 0;">{itemName}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#718096;font-size:13px;font-weight:600;width:140px;padding:6px 0;">Branch / Location:</td>
+                          <td style="color:#1a1a2e;font-size:14px;font-weight:500;padding:6px 0;">{branchAddress}</td>
+                        </tr>
+                        <tr>
+                          <td style="color:#718096;font-size:13px;font-weight:600;width:140px;padding:6px 0;">Current Quantity:</td>
+                          <td style="color:#e94560;font-size:14px;font-weight:700;padding:6px 0;">{currentQuantity} units</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <!-- Divider -->
+                  <tr>
+                    <td style="padding:0 48px;">
+                      <hr style="border:none;border-top:1px solid #e2e8f0;margin:0;" />
+                    </td>
+                  </tr>
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding:24px 48px 36px;text-align:center;">
+                      <p style="margin:0 0 6px;color:#a0aec0;font-size:12px;">
+                        If you have any questions, contact us at
+                        <a href="mailto:{ContactEmail}" style="color:#e94560;text-decoration:none;">support@viora.com</a>
+                      </p>
+                      <p style="margin:0;color:#cbd5e0;font-size:11px;">© 2026 Viora. All rights reserved.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        """);
 }

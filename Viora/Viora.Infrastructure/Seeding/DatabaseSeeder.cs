@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
@@ -61,18 +62,39 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             .Select(r => r.Id)
             .ToListAsync(cancellationToken);
 
-        var missingRoles = AuthorizationData.Roles
+        var missingRoles = Role.All
             .Where(r => !existingRoleIds.Contains(r.Id))
-            .Select(r => new Role(r.Id, r.Name))
             .ToList();
 
         if (missingRoles.Count == 0)
-            logger.LogInformation("Role seed: all {Count} roles already present.", AuthorizationData.Roles.Count);
+        {
+            logger.LogInformation("Role seed: roles already present.");
+        }
         else
         {
-            await db.Set<Role>().AddRangeAsync(missingRoles, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Role seed: inserted {Count} new roles.", missingRoles.Count);
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Role ON", cancellationToken);
+                foreach (var role in missingRoles)
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        "INSERT INTO Role (Id, Name, Description, TenantId) VALUES (@id, @name, @description, @tenantId)",
+                        new SqlParameter("@id", role.Id),
+                        new SqlParameter("@name", role.Name),
+                        new SqlParameter("@description", (object?)role.Description ?? DBNull.Value),
+                        new SqlParameter("@tenantId", (object?)role.TenantId ?? DBNull.Value));
+                }
+                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Role OFF", cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                logger.LogError(ex, "Role seed: error occurred while inserting roles.");
+                throw;
+
+            }
         }
         #endregion Roles
 
@@ -211,6 +233,8 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             logger.LogInformation("Addon seed: inserted {Count} new addons.", missingAddons.Count);
         }
         #endregion Addons
+
+        static object NullOrValue(object? value) => value ?? DBNull.Value;
     }
 
 }

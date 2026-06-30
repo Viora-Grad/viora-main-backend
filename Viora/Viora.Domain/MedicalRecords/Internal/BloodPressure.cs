@@ -1,4 +1,4 @@
 ﻿namespace Viora.Domain.MedicalRecords.Internal;
 
-public sealed record BloodPressure(uint Systolic, uint Diastolic);
+public sealed record BloodPressure(int Systolic, int Diastolic);
 

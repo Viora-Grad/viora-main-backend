@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Billings;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
@@ -13,15 +12,20 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
+using Viora.Application.Billings;
+using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
-using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
 using Viora.Domain.Forms;
+using Viora.Domain.Inventory;
+using Viora.Domain.InventoryMovements;
 using Viora.Domain.Medias;
+using Viora.Domain.MedicalRecords;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.OnBoardings;
@@ -50,15 +54,19 @@ using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
+using Viora.Infrastructure.Repositories.Inventories;
+using Viora.Infrastructure.Repositories.MedicalRecords;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
+using Viora.Infrastructure.Repositories.SystemRoles;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
+using Viora.Infrastructure.Staffs;
 
 namespace Viora.Infrastructure;
 
@@ -123,13 +131,22 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         #endregion
 
+        services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
+        services.AddScoped<StaffRefreshTokenRepository>();
+        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
         #region BillingRepos
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
         #endregion BillingRepos
+
+        #region InventoryRepos
+        services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
+        services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
+        #endregion InventoryRepos
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -137,6 +154,7 @@ public static class DependencyInjection
         services.AddTransient<ICipher, Cipher>();
         services.AddTransient<IHasher, Hasher>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IStaffInvitationService, StaffInvitationService>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();

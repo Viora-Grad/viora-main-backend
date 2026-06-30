@@ -1,9 +1,5 @@
-﻿using Viora.Application.Abstractions.Caching;
+﻿using Viora.Application.Abstractions.Messaging;
 
 namespace Viora.Application.Branches.GetBranchDetails;
 
-public record GetBranchDetailsQuery(Guid Id) : ICachedQuery<BranchDetailsResponse>
-{
-    public string CacheKey => $"BranchDetails-{Id}";
-    public TimeSpan? Expiration => TimeSpan.FromMinutes(30);
-}
+public record GetBranchDetailsQuery(Guid Id) : IQuery<BranchDetailsResponse>;

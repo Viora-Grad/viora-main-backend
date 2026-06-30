@@ -14,6 +14,12 @@ internal class UserContext(IHttpContextAccessor httpContextAccessor) : IUserCont
         .GetUserId() ??
         throw new InvalidOperationException("User is not authenticated or does not have a 'sub' claim.");
 
+    public string UserType =>
+        httpContextAccessor
+        .HttpContext?
+        .User
+        .FindFirstValue("type") ??
+        throw new InvalidOperationException("User is not authenticated or does not have a 'type' claim.");
 
 }
 internal static class ClaimsPrincipalExtensions

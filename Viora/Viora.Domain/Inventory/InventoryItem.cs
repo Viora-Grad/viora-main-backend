@@ -10,25 +10,33 @@ public sealed class InventoryItem : Entity
     public Guid? ItemImageId { get; private set; }
 
     public ItemName Name { get; private set; } = default!;
-    public Notes? Notes { get; private set; }
+    public Notes? Notes { get; private set; } = null;
 
     public Quantity Quantity { get; private set; } = default!;
     public MinimumThreshold MinimumThreshold { get; private set; } = default!;
 
     private InventoryItem() { }
 
-    public static InventoryItem Create(Guid branchId, string name, string notes, int quantity, int minimumThreshold, Guid? itemImageId = null)
+    public static InventoryItem Create(Guid branchId, string name, string? notes, int quantity, int minimumThreshold, Guid? itemImageId = null)
     {
         return new InventoryItem
         {
             Id = Guid.NewGuid(),
             BranchId = branchId,
             Name = name,
-            Notes = notes,
+            Notes = notes is null ? null : new(notes),
             Quantity = quantity,
             MinimumThreshold = minimumThreshold,
             ItemImageId = itemImageId
         };
+    }
+
+    public void Update(string name, string? notes, int minimumThreshold, Guid? itemImageId = null)
+    {
+        Name = name;
+        Notes = notes is null ? null : new(notes);
+        MinimumThreshold = minimumThreshold;
+        ItemImageId = itemImageId;
     }
 
     public Result Restock(int amount, Guid userId)
@@ -43,9 +51,11 @@ public sealed class InventoryItem : Entity
         var newQuantity = Quantity.Value - amount;
 
         Quantity = newQuantity;
+        if (Quantity < 0)
+            return Result.Failure(InventoryItemErrors.QuantityNegative);
 
         if (Quantity.Value <= MinimumThreshold.Value)
-            RaiseDomainEvent(new MinimumThresholdReachedEvent(Id));
+            RaiseDomainEvent(new MinimumThresholdReachedEvent(Id, BranchId, Quantity));
 
         RaiseDomainEvent(new InventoryQuantityChangeEvent(Id, userId, -amount));
         return Result.Success();

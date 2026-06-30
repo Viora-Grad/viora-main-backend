@@ -1,3 +1,3 @@
 ﻿namespace Viora.Domain.MedicalRecords.Internal;
 
-public sealed record HeartRate(uint Value);
+public sealed record HeartRate(int Value);
