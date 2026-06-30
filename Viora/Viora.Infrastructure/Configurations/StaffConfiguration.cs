@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OrganizationDetails;
+using Viora.Domain.Services;
 using Viora.Domain.Shared.Internal;
 using Viora.Domain.Staffs;
 using Viora.Domain.Staffs.Internal;
@@ -27,6 +28,11 @@ internal class StaffConfiguration : IEntityTypeConfiguration<Staff>
                 j => j.HasOne<Branch>().WithMany().HasForeignKey("BranchId"),
                 j => j.HasOne<Staff>().WithMany().HasForeignKey("StaffId")
             );
+
+        builder.Navigation(st => st.Branches)
+            .HasField("_branches")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.HasMany(st => st.Roles)
             .WithMany()
             .UsingEntity<Dictionary<string, object>>(
@@ -35,13 +41,29 @@ internal class StaffConfiguration : IEntityTypeConfiguration<Staff>
                 j => j.HasOne<Staff>().WithMany().HasForeignKey("StaffId")
             );
 
+        builder.Navigation(st => st.Roles)
+            .HasField("_roles")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(st => st.Services)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "StaffService",
+                j => j.HasOne<Service>().WithMany().HasForeignKey("ServiceId"),
+                j => j.HasOne<Staff>().WithMany().HasForeignKey("StaffId")
+            );
+
+        builder.Navigation(st => st.Services)
+            .HasField("_services")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.Property(x => x.OrganizationId)
             .IsRequired();
 
         builder.HasOne<Organization>()
             .WithMany()
             .HasForeignKey(x => x.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction); // set to NoAction cuz ef broke down 
 
         builder.Property(x => x.FirstName)
             .HasConversion(
@@ -91,6 +113,6 @@ internal class StaffConfiguration : IEntityTypeConfiguration<Staff>
         builder.HasIndex(x => x.Username).IsUnique();
         builder.HasIndex(x => x.OrganizationId);
 
-        builder.HasQueryFilter(x => !x.IsDeleted);
+        builder.HasQueryFilter(x => x.DeletedAt == null);
     }
 }

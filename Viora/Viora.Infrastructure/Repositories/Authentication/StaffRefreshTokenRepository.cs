@@ -15,4 +15,10 @@ public class StaffRefreshTokenRepository(ApplicationDbContext dbContext)
             .Where(rt => rt.StaffId == staffId && !rt.IsRevoked)
             .FirstOrDefaultAsync(cancellationToken);
     }
+    public async Task<StaffRefreshToken?> GetByTokenAsync(string tokenHash, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Set<StaffRefreshToken>()
+            .Where(rt => rt.TokenHash == tokenHash)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

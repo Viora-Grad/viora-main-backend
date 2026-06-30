@@ -1,4 +1,4 @@
-﻿namespace Viora.Api.Controllers.Authentication;
+﻿namespace Viora.Api.Controllers.Staffs;
 
 public sealed record CreateStaffRoleRequest(
     string RoleName,

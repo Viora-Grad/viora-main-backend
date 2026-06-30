@@ -258,4 +258,42 @@ internal class AuthenticationService(IUserRepository userRepository,
         return Result.Success(authResult);
 
     }
+    public async Task<Result<AuthResult>> RefreshStaffTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var refreshTokenHash = refreshTokenService.HashToken(refreshToken);
+        var existingToken = await staffRefreshTokenRepository.GetByTokenAsync(refreshTokenHash, cancellationToken);
+        if (existingToken is not null)
+        {
+            var isValid = refreshTokenHash == existingToken.TokenHash;
+            if (!isValid || existingToken.Expires < dateTimeProvider.UtcNow)
+            {
+                return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
+            }
+            existingToken.Revoke();
+            var staffId = existingToken.StaffId;
+            var newRefreshTokenValue = refreshTokenService.GenerateRefreshToken();
+            var hashedNewRefreshToken = refreshTokenService.HashToken(newRefreshTokenValue);
+            var expiry = refreshTokenService.GetExpiryDate();
+            var newRefreshToken = StaffRefreshToken.Create(staffId, hashedNewRefreshToken, expiry, dateTimeProvider.UtcNow);
+            var staff = await dbContext.Set<Staff>().FindAsync([staffId], cancellationToken);
+            if (staff is null)
+            {
+                return Result.Failure<AuthResult>(UserErrors.NotFound);
+            }
+            var permissionClaims = staff.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+            var typeClaim = new Claim("type", "staff");
+            var allClaims = permissionClaims.Concat([typeClaim]);
+            var authResult = new AuthResult(
+                UserId: staff.Id,
+                AccessToken: jwtService.GenerateToken(staff.Id, allClaims),
+                RefreshToken: newRefreshTokenValue,
+                Roles: staff.Roles.Select(r => r.Name).ToList(),
+                Permissions: staff.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
+            );
+            staffRefreshTokenRepository.Add(newRefreshToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result.Success(authResult);
+        }
+        return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
+    }
 }

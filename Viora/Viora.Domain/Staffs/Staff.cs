@@ -1,5 +1,6 @@
 ﻿using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
+using Viora.Domain.Services;
 using Viora.Domain.Shared.Internal;
 using Viora.Domain.Staffs.Internal;
 using Viora.Domain.Users.Identity;
@@ -10,6 +11,7 @@ public sealed class Staff : Entity
 {
     private readonly List<Role> _roles = new();
     private readonly List<Branch> _branches = new();
+    private readonly List<Service> _services = new();
     public Guid OrganizationId { get; private set; }
     public FirstName? FirstName { get; private set; }
     public LastName? LastName { get; private set; }
@@ -25,6 +27,7 @@ public sealed class Staff : Entity
 
     public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
     public IReadOnlyCollection<Branch> Branches => _branches.AsReadOnly();
+    public IReadOnlyCollection<Service> Services => _services.AsReadOnly();
     private Staff() { } // For EF Core
     private Staff(Guid id, Guid organizationId, DateTime createdAt) : base(id)
     {

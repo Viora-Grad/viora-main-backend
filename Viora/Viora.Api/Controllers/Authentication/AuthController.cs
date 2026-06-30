@@ -6,11 +6,11 @@ using Viora.Api.Extensions;
 using Viora.Application.Authentication.ChangePassword;
 using Viora.Application.Authentication.ConfirmForgetPassword;
 using Viora.Application.Authentication.ConsumeRefreshToken;
-using Viora.Application.Authentication.CreateStaffRole;
+using Viora.Application.Authentication.ConsumeStaffRefreshToken;
 using Viora.Application.Authentication.ForgetPassword;
-using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Authentication.ValidateEmail;
 using Viora.Application.Authentication.ValidateUsername;
+using Viora.Application.Staffs.LoginStaff;
 using Viora.Application.Staffs.RegisterStaff;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
@@ -199,30 +199,29 @@ public class AuthController : ControllerBase
         var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
+
+    [HttpPost("organization/{organizationId:guid}/login")]
+    public async Task<IActionResult> OrganizationLogin(Guid organizationId, OrganizationLoginRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new LoginStaffCommand(organizationId, request.Username, request.Password);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
     [HttpGet("permissions")]
     [Authorize(Policy = "permissions:read")]
     public IActionResult GetPermissions(CancellationToken cancellationToken = default)
     {
         return Ok(Permission.All);
     }
-    [HttpGet("organization/{organizationId:guid}/roles")]
-    [Authorize(Policy = "roles:read")]
-    public async Task<IActionResult> GetRoles(Guid organizationId, CancellationToken cancellationToken = default)
+    [HttpPost("staff/refresh-token")]
+    public async Task<IActionResult> StaffRefreshToken(StaffRefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
-        var query = new GetOrganizationRolesQuery(organizationId);
-        var result = await _sender.Send(query, cancellationToken);
-        return result.ToActionResult();
-    }
-    [HttpPost("organizations/{organizationId:guid}/role")]
-    [Authorize(Policy = "roles:write")]
-    public async Task<IActionResult> CreateStaffRole(Guid organizationId, CreateStaffRoleRequest request, CancellationToken cancellationToken)
-    {
-        var command = new CreateStaffRoleCommand(
-            organizationId,
-            request.RoleName,
-            request.RoleDescription,
-            [.. request.PermissionsIds]);
+        var command = new ConsumeStaffRefreshTokenCommand(request.RefreshToken);
         var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
+
+
+
 }

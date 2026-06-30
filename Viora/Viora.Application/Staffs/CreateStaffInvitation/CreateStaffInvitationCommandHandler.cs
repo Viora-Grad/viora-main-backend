@@ -6,8 +6,6 @@ using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OrganizationDetails;
-using Viora.Domain.Plans.Features;
-using Viora.Domain.Plans.Services;
 using Viora.Domain.Staffs;
 using Viora.Domain.Users.Identity;
 
@@ -19,7 +17,7 @@ internal class CreateStaffInvitationCommandHandler(
     IStaffRepository staffRepository,
     IStaffTokenRepository staffTokenRepository,
     IBranchRepository branchRepository,
-    ILimitedFeatureUsageService limitedFeatureUsageService,
+    // ILimitedFeatureUsageService limitedFeatureUsageService,
     IRoleRepository roleRepository,
     IStaffInvitationService staffService,
     IUserContext userContext,
@@ -41,7 +39,8 @@ internal class CreateStaffInvitationCommandHandler(
                 throw new UnauthorizedAccessException("User is not authorized to create staff invitations.");
             }
         }
-
+        /* 
+         * commented out cuz Feature Usage Limitation is not seeded with existing organizations, so it will always return false for existing organizations
         var allowed = await limitedFeatureUsageService.CheckLimitAsync(
             organization.Id,
             LimitedFeature.StaffMembers.Id,
@@ -50,7 +49,7 @@ internal class CreateStaffInvitationCommandHandler(
         if (allowed.IsFailure)
         {
             return Result.Failure<string>(allowed.Error);
-        }
+        }*/
         var orgRoles = await roleRepository.GetOrganizationRolesAsync(organization.Id, cancellationToken);
         var roles = orgRoles.Where(r => request.RoleIds.Contains(r.Id)).ToList();
 
@@ -62,10 +61,15 @@ internal class CreateStaffInvitationCommandHandler(
         var branches = await branchRepository.GetByOrganizationIdAsync(organization.Id, cancellationToken);
         var selectedBranches = branches.Where(b => request.BranchIds.Contains(b.Id)).ToList();
 
+
+
         if (selectedBranches.Count != request.BranchIds.Count)
         {
             throw new NotFoundException("One or more requested branches not found.");
         }
+
+        foreach (var branch in selectedBranches)
+            branchRepository.Attach(branch);
 
         var staff = Staff.Create(
             organization.Id,
@@ -77,8 +81,8 @@ internal class CreateStaffInvitationCommandHandler(
         var staffToken = StaffToken.Create(
             staff.Id,
             tokenHash,
-            expiry,
-            dateTimeProvider.UtcNow);
+            dateTimeProvider.UtcNow,
+            expiry);
 
         staff.AddRoles(roles);
         staff.AssignBranches(selectedBranches);

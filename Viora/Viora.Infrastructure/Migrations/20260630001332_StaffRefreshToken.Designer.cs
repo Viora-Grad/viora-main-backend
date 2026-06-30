@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Viora.Infrastructure;
@@ -13,9 +14,11 @@ using Viora.Infrastructure;
 namespace Viora.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260630001332_StaffRefreshToken")]
+    partial class StaffRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,21 +93,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("StaffId");
 
                     b.ToTable("StaffRole");
-                });
-
-            modelBuilder.Entity("StaffService", b =>
-                {
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StaffId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ServiceId", "StaffId");
-
-                    b.HasIndex("StaffId");
-
-                    b.ToTable("StaffService");
                 });
 
             modelBuilder.Entity("UserRole", b =>
@@ -1973,21 +1961,6 @@ namespace Viora.Infrastructure.Migrations
                     b.HasOne("Viora.Domain.Users.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Viora.Domain.Staffs.Staff", null)
-                        .WithMany()
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("StaffService", b =>
-                {
-                    b.HasOne("Viora.Domain.Services.Service", null)
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
