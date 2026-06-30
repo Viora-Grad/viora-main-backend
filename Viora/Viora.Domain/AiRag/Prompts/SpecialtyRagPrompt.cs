@@ -26,6 +26,13 @@ public static class SpecialtyRagPrompt
             - If you are unsure between two specialties, choose the one that is more general and can handle a wider range of conditions, and then mention the other as a possible alternative. For example:
                 "Based on your symptoms, I recommend seeing an internist, who can handle a wide range of conditions. You might also consider a rheumatologist if your symptoms are related to joints."
             - If both specialties are equally relevant, show both options to the user.
+            - CRITICAL: At the very end of your response, on a new line, output the exact specialty name(s)
+                from the CONTEXT that you recommend in this format (nothing else on that line):
+                [RECOMMENDED_SPECIALTIES: SpecialtyName1, SpecialtyName2]
+                Use the EXACT spelling from the "Specialty:" field in CONTEXT.
+                Example: if CONTEXT says "Specialty: Cardiology", write [RECOMMENDED_SPECIALTIES: Cardiology]
+                Do NOT use doctor names like "cardiologist" — use the exact category name like "Cardiology".
+                If you recommend more than one, separate with commas.
 
             CONTEXT:
             {context}
