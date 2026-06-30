@@ -33,6 +33,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.Prescriptions;
 using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
@@ -58,6 +59,7 @@ using Viora.Infrastructure.Repositories.Inventories;
 using Viora.Infrastructure.Repositories.MedicalRecords;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
+using Viora.Infrastructure.Repositories.Prescriptions;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
@@ -129,6 +131,14 @@ public static class DependencyInjection
         #region Form 
         services.AddScoped<IFormRepository, FormRepository>();
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
+        #endregion
+
+
+        #region Prescription 
+        services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+        services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
+        services.AddScoped<IPrescriptionTemplateRepository, PrescriptionTemplateRepository>();
+
         #endregion
 
         services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
