@@ -24,7 +24,9 @@ public class AppointmentsController(
     ) : ControllerBase
 {
     [HttpPost]
+    //[Authorize]
     [Authorize(Roles = "Staff,Customer")]
+    [AllowAnonymous]
     public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateAppointmentCommand(

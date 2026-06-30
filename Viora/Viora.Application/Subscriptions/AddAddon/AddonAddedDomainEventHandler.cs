@@ -23,9 +23,15 @@ public class AddonAddedDomainEventHandler(
         var subscription = await subscriptionRepository.GetByIdWithAddonAsync(notification.SubscriptionId, cancellationToken)
             ?? throw new NotFoundException($"Subscription with id {notification.SubscriptionId} not found.");
 
-        var addons = await limitedFeatureAddonRepository.GetByIdsAsync(notification.AddonIds, cancellationToken);
+        // Idempotency: skip addons already attached to this subscription (duplicate dispatch).
+        var alreadyAttached = subscription.Addons.Select(a => a.LimitedFeatureAddonId).ToHashSet();
+        var newAddonIds = notification.AddonIds.Where(id => !alreadyAttached.Contains(id)).ToList();
+        if (newAddonIds.Count == 0)
+            return;
+
+        var addons = await limitedFeatureAddonRepository.GetByIdsAsync(newAddonIds, cancellationToken);
         if (addons is null || !addons.Any())
-            throw new NotFoundException($"Addons with ids {string.Join(", ", notification.AddonIds)} not found.");
+            throw new NotFoundException($"Addons with ids {string.Join(", ", newAddonIds)} not found.");
 
         var organization = await organizationRepository.GetByIdAsync(subscription.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"Organization with id {subscription.OrganizationId} not found.");
@@ -34,7 +40,7 @@ public class AddonAddedDomainEventHandler(
         if (featureUsages is null || !featureUsages.Any())
             throw new NotFoundException($"Feature usage for organization with id {organization.Id} not found.");
 
-        var result = subscription.AddAddons(notification.AddonIds);
+        var result = subscription.AddAddons(newAddonIds);
 
         if (result.IsFailure)
             throw new InvalidOperationException("Failed to add addons to subscription: " + result.Error);

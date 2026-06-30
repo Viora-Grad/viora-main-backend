@@ -43,7 +43,6 @@ public class AddonOrder : Order
             OrderStatus.Draft
         );
         newAddonOrder._addons.AddRange(addons);
-        // Raise the orderPaidEvent 
         return Result.Success(newAddonOrder);
     }
 }

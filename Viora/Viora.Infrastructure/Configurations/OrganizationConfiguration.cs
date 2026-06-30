@@ -45,6 +45,18 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
                 .IsRequired();
         });
 
+        builder.OwnsOne(o => o.SubDomain, sub =>
+        {
+            sub.Property(s => s.Value)
+                .HasColumnName("Subdomain")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            sub.HasIndex(s => s.Value)
+                .IsUnique()
+                .HasDatabaseName("IX_Organizations_Subdomain");
+        });
+
         builder.ComplexProperty(o => o.ServiceDescription, desc =>
         {
             desc.Property(d => d.Value)
@@ -108,7 +120,6 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
             .WithMany()
             .HasForeignKey(o => o.LogoId)
             .OnDelete(DeleteBehavior.SetNull);
-
 
 
         builder.HasIndex(o => o.OwnerId)

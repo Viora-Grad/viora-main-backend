@@ -15,7 +15,7 @@ internal sealed class SubscriptionOrderConfiguration : IEntityTypeConfiguration<
 
         builder.Property(s => s.Status)
             .HasConversion(
-            v => v.id,
+            v => v.Id,
             v => OrderStatus.FromId(v)
             );
 

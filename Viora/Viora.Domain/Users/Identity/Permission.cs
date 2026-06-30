@@ -33,6 +33,13 @@ public sealed class Permission
     public static readonly Permission InvitationsCreate = new(60, "invitations:create", "Create staff members invitations");
     public static readonly Permission InvitationsRead = new(61, "invitations:read", "Read staff members invitations");
     public static readonly Permission InvitationsDelete = new(62, "invitations:delete", "Delete staff members invitations");
+
+    public static readonly Permission ScheduleWrite = new(70, "schedule:write");
+    public static readonly Permission ScheduleRead = new(71, "schedule:read");
+    public static readonly Permission ShiftWrite = new(72, "shift:write");
+    public static readonly Permission ShiftRead = new(73, "shift:read");
+    public static readonly Permission FormWrite = new(80, "form:write");
+    public static readonly Permission FormRead = new(81, "form:read");
     public static List<Permission> All =>
     [
         UsersRead,
@@ -49,6 +56,12 @@ public sealed class Permission
         InvitationsCreate,
         InvitationsRead,
         InvitationsDelete,
+        ScheduleWrite,
+        ScheduleRead,
+        ShiftRead, 
+        ShiftWrite,
+        FormRead,
+        FormWrite,
     ];
     #endregion Permission Values
 }

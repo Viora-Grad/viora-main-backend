@@ -58,7 +58,6 @@ public class SubscriptionOrder : Order
             SubscriptionOrderType.NewSubscription,
             OrderStatus.Draft
         );
-        // Raise the orderPaidEvent 
         return Result.Success(newSubscriptionOrder);
     }
 
@@ -79,22 +78,23 @@ public class SubscriptionOrder : Order
             SubscriptionOrderType.Renewal,
             OrderStatus.Draft
         );
-        // Raise the orderPaidEvent 
         return Result.Success(newSubscriptionOrder);
     }
 
-    public static Result<SubscriptionOrder> CreateChangeSubscriptionOrder(Guid organizationId, Plan newPlan, DateTime createdAt)
+    // Carries the existing subscriptionId so a paid change order can resolve which
+    // subscription to move (and derive the old plan id at provisioning time).
+    public static Result<SubscriptionOrder> CreateChangeSubscriptionOrder(Guid organizationId, Guid subscriptionId, Plan newPlan, DateTime createdAt)
     {
         var changeSubscriptionOrder = new SubscriptionOrder(
             Guid.NewGuid(),
             organizationId,
+            subscriptionId,
             newPlan.Price,
             createdAt,
             newPlan.Id,
             SubscriptionOrderType.ChangeSubscription,
             OrderStatus.Draft
         );
-        // Raise the orderPaidEvent 
         return Result.Success(changeSubscriptionOrder);
     }
 }

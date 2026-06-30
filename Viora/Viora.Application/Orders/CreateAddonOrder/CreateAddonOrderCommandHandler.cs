@@ -15,9 +15,9 @@ public class CreateAddonOrderCommandHandler(
     ILimitedFeatureAddonRepository limitedFeatureAddonRepository,
     IAddonOrderRepository addonOrderRepository,
     IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork) : ICommandHandler<CreateAddonOrderCommand>
+    IUnitOfWork unitOfWork) : ICommandHandler<CreateAddonOrderCommand, Guid>
 {
-    public async Task<Result> Handle(CreateAddonOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateAddonOrderCommand request, CancellationToken cancellationToken)
     {
         var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
             ?? throw new NotFoundException($"Organization with id {request.OrganizationId} not found.");
@@ -25,7 +25,7 @@ public class CreateAddonOrderCommandHandler(
         var subscription = await subscriptionRepository.GetByIdAsync(request.SubscriptionId, cancellationToken)
             ?? throw new NotFoundException($"Subscription with id {request.SubscriptionId} not found.");
         if (subscription.OrganizationId != organization.Id)
-            return Result.Failure(SubscriptionError.InvalidData);
+            return Result.Failure<Guid>(SubscriptionError.InvalidData);
 
         var addons = await limitedFeatureAddonRepository.GetByIdsAsync(request.AddonIds, cancellationToken);
         if (addons is null || !addons.Any())
@@ -34,9 +34,9 @@ public class CreateAddonOrderCommandHandler(
         var addon = AddonOrder.CreateAddonOrder(organization.Id, subscription.Id, addons, dateTimeProvider.UtcNow);
 
         if (addon.IsFailure)
-            return Result.Failure(addon.Error);
+            return Result.Failure<Guid>(addon.Error);
         addonOrderRepository.Add(addon.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Success(addon.Value.Id);
     }
 }
