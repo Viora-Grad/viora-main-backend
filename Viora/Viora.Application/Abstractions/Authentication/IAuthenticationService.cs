@@ -1,4 +1,5 @@
 ﻿using Viora.Domain.Abstractions;
+using Viora.Domain.Staffs;
 using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Abstractions.Authentication;
@@ -12,6 +13,8 @@ public interface IAuthenticationService
     Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
     Task<Result<string>> SocialRegisterAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default);
     Task<Result<AuthResult>> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<Result<AuthResult>> RefreshStaffTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<Result<AuthResult>> AuthenticateStaffAsync(Staff staff, CancellationToken cancellationToken = default);
 
 }
 

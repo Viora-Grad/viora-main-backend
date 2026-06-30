@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Notification;
 using Viora.Domain.Appointments.Events;
 using Viora.Domain.Staffs;
@@ -13,7 +12,7 @@ public class AppointmentDelayedEventHandler(
     ) : INotificationHandler<AppointmentDelayedEvent>
 {
     public async Task Handle(AppointmentDelayedEvent notification, CancellationToken cancellationToken)
-    {
+    {/*
         var staff = await staffRepository.GetByIdAsync(notification.StaffId, cancellationToken)
             ?? throw new NotFoundException($"the staff wit id {notification.StaffId} not found");
 
@@ -24,7 +23,7 @@ public class AppointmentDelayedEventHandler(
             notification.AppointmentId,
             notification.status,
             newTime,
-            cancellationToken);
+            cancellationToken);*/
 
         // send notification 
         /*await notificationService.SendNotificationAsync(

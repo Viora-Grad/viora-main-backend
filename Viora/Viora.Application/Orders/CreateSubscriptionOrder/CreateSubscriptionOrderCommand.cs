@@ -4,4 +4,4 @@ namespace Viora.Application.Orders.CreateSubscriptionOrder;
 
 public sealed record CreateSubscriptionOrderCommand(
     Guid OrganizationId,
-    Guid PlanId) : ICommand;
+    Guid PlanId) : ICommand<Guid>;

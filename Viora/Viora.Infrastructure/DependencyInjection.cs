@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
+using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
@@ -55,10 +56,12 @@ using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
+using Viora.Infrastructure.Repositories.SystemRoles;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
+using Viora.Infrastructure.Staffs;
 
 namespace Viora.Infrastructure;
 
@@ -124,6 +127,9 @@ public static class DependencyInjection
         #endregion
 
         services.AddScoped<IServiceRepository, ServiceRepository>();
+        services.AddScoped<StaffRefreshTokenRepository>();
+        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
@@ -137,6 +143,7 @@ public static class DependencyInjection
         services.AddTransient<ICipher, Cipher>();
         services.AddTransient<IHasher, Hasher>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IStaffInvitationService, StaffInvitationService>();
         services.AddScoped<IHasher, Hasher>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserContext, UserContext>();

@@ -22,4 +22,9 @@
     <ProjectReference Include="..\Viora.Domain\Viora.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Feedbacks\AddFeedback\" />
+    <Folder Include="Owners\" />
+  </ItemGroup>
+
 </Project>
