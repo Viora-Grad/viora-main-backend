@@ -20,7 +20,7 @@ internal sealed class GetOrganizationPrescriptionTemplateQueryHandler(
 
         var organizationPrescriptions = await prescriptionTemplateRepository.GetByOrganizationAsync(organization.Id, cancellationToken);
 
-        if (organizationPrescriptions == null || organizationPrescriptions.Any())
+        if (organizationPrescriptions == null || !organizationPrescriptions.Any())
             return Result.Failure<List<TemplateResponse>>(PrescriptionError.PrescriptionTemplateNotFound);
 
         var templateResponses = organizationPrescriptions.Select(op => new TemplateResponse(
