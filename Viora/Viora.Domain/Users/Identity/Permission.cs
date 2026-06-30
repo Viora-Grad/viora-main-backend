@@ -40,6 +40,11 @@ public sealed class Permission
     public static readonly Permission ShiftRead = new(73, "shift:read");
     public static readonly Permission FormWrite = new(80, "form:write");
     public static readonly Permission FormRead = new(81, "form:read");
+    public static readonly Permission PrescriptionTemplateWrite = new(90, "prescription:write");
+    public static readonly Permission PerscriptionTemplateRead = new(91, "perscription:read");
+    public static readonly Permission PerscriptionWrite = new(92, "perscription:write");
+    public static readonly Permission PrescriptionRead = new(93, "perscription:read");
+
     public static List<Permission> All =>
     [
         UsersRead,
@@ -58,7 +63,7 @@ public sealed class Permission
         InvitationsDelete,
         ScheduleWrite,
         ScheduleRead,
-        ShiftRead, 
+        ShiftRead,
         ShiftWrite,
         FormRead,
         FormWrite,

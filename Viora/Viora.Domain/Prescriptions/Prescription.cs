@@ -7,7 +7,10 @@ public class Prescription : Entity
     public Guid AppointmentId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public IReadOnlyCollection<PrescriptionItem> items = new List<PrescriptionItem>();
+    private readonly List<PrescriptionItem> _items = new();
+    public IReadOnlyCollection<PrescriptionItem> Items => _items.AsReadOnly();
+
+    public void AddItems(IEnumerable<PrescriptionItem> items) => _items.AddRange(items);
 
     protected Prescription() { }
 

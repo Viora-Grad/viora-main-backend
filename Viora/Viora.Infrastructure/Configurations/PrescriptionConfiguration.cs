@@ -29,7 +29,7 @@ internal class PrescriptionConfiguration : IEntityTypeConfiguration<Prescription
             .WithOne()
             .HasForeignKey<Prescription>(x => x.AppointmentId);
 
-        builder.HasMany(x => x.items)
+        builder.HasMany(x => x.Items)
             .WithOne()
             .HasForeignKey(x => x.PrescriptionId)
             .OnDelete(DeleteBehavior.Cascade);

@@ -41,9 +41,8 @@ internal class CreatePrescriptionCommandHandler(
 
         var prescriptionItems = prescriptionItemsResult.Select(pi => pi.Value).ToList();
 
-
+        prescriptionResult.Value.AddItems(prescriptionItems);
         prescriptionRepository.Add(prescriptionResult.Value);
-        prescriptionItemRepository.AddRange(prescriptionItems);
         await unitOfWork.SaveChangesAsync();
 
         return Result.Success(prescriptionResult.Value.Id);

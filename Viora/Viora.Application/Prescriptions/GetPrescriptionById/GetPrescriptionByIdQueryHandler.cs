@@ -18,7 +18,7 @@ internal class GetPrescriptionByIdQueryHandler(
             prescription.Id,
             prescription.AppointmentId,
             prescription.CreatedAt,
-            prescription.items.Select(
+            prescription.Items.Select(
                 i => new PrescriptionItemDTO(
                   i.Name.Value,
                   i.Note?.Value,

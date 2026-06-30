@@ -133,6 +133,15 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         #endregion
 
+
+        #region Prescription 
+        services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+        services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
+        services.AddScoped<IPrescriptionTemplateRepository, PrescriptionTemplateRepository>();
+
+        #endregion
+
+        services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<StaffRefreshTokenRepository>();
         services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
