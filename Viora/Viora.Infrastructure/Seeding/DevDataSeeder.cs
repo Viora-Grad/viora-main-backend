@@ -5,7 +5,11 @@ using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
+using Viora.Domain.Appointments.Internal;
 using Viora.Domain.Branches;
+using Viora.Domain.Inventory;
+using Viora.Domain.InventoryMovements;
 using Viora.Domain.Medias;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
@@ -22,6 +26,7 @@ using Viora.Domain.Shared;
 using Viora.Domain.Shared.Internal;
 using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
+using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Internal;
 using Viora.Domain.Users.Owners;
@@ -89,6 +94,19 @@ internal sealed class DevDataSeeder(
         Guid.Parse("AE77FCBF-048F-47CA-A358-88F6BD0B75BC"),
     ];
 
+    // Pinned customer persona id (shared between User and Customer aggregates) so seeded
+    // appointments can reference it deterministically. Login: customer@viora.dev / Dev123!Pass
+    private static readonly Guid CustomerUserId = Guid.Parse("d4e5f6a7-0002-0000-0000-000000000001");
+
+    // Pinned ids for the Alexandria dental persona (dental.owner@viora.dev).
+    private static readonly Guid AlexDentalOrgId     = new("aed00001-0000-0000-0000-000000000001");
+    private static readonly Guid AlexDentalBranch1Id  = new("aed00002-0000-0000-0000-000000000001");
+    private static readonly Guid AlexDentalBranch2Id  = new("aed00003-0000-0000-0000-000000000001");
+
+    // Pinned ids for the Giza physiotherapy persona (physio.owner@viora.dev).
+    private static readonly Guid GizaPhysioOrgId    = new("f1c00001-0000-0000-0000-000000000002");
+    private static readonly Guid GizaPhysioBranchId  = new("f1c00002-0000-0000-0000-000000000002");
+
     private const string DefaultPassword = "Dev123!Pass";
 
     // A minimal but valid 1x1 transparent PNG and a tiny valid PDF, used as placeholder blobs.
@@ -107,9 +125,13 @@ internal sealed class DevDataSeeder(
         // reference the existing rows instead of trying to re-insert the roles.
         db.Attach(Role.Registered);
         db.Attach(Role.Owner);
+        db.Attach(Role.Customer);
 
         await SeedActiveOwnerAsync(cancellationToken);
         await SeedPendingOwnerAsync(cancellationToken);
+        await SeedAlexDentalAsync(cancellationToken);
+        await SeedGizaPhysioAsync(cancellationToken);
+        await SeedSharmEyeAsync(cancellationToken);
     }
 
     /// <summary>
@@ -203,6 +225,11 @@ internal sealed class DevDataSeeder(
         // Kept under this persona's gate so it can never run without its branch present.
         await SeedBranchOperationsAsync(cancellationToken);
 
+        // Inventory (items + movement history) and appointments for the dev branch. Both depend on the
+        // branch/services/staff committed above, so they run last under this persona's gate.
+        await SeedInventoryAsync(ownerId, organization.Id, cancellationToken);
+        await SeedAppointmentsAsync(cancellationToken);
+
         logger.LogInformation("DevData: seeded active owner persona ({Email}).", email);
     }
 
@@ -239,13 +266,200 @@ internal sealed class DevDataSeeder(
         logger.LogInformation("DevData: seeded pending owner persona ({Email}).", email);
     }
 
-    private Result<OrganizationApplication> BuildApplication(Guid ownerId, string proposedName, DateTime now) =>
+    /// <summary>
+    /// "Alex Dental" owner: approved application, active org + subscription, two branches in Alexandria
+    /// (City Centre and Sidi Gaber) with dental services.
+    /// Login: dental.owner@viora.dev / Dev123!Pass
+    /// </summary>
+    private async Task SeedAlexDentalAsync(CancellationToken cancellationToken)
+    {
+        const string email = "dental.owner@viora.dev";
+        if (await PersonaExistsAsync(email, cancellationToken))
+        {
+            logger.LogInformation("DevData: dental owner persona ({Email}) already present, skipping.", email);
+            return;
+        }
+
+        var now = clock.UtcNow;
+        var ownerId = await SeedLoginableOwnerAsync(email, "Sara", "Mostafa", cancellationToken);
+
+        var application = Unwrap(BuildApplication(
+            ownerId, "Alex Dental Smile", now,
+            new List<ServiceType> { ServiceType.DentistryAndOralHealth }), "application");
+        Check(application.MarkAccepted(now), "mark application accepted");
+        db.Set<OrganizationApplication>().Add(application);
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        var organization = Unwrap(Organization.Create(
+            ownerId, EgyptCountryId, "Alex Dental Smile",
+            "A leading dental clinic network in Alexandria.",
+            "Comprehensive oral health, restorations, and orthodontics.",
+            new List<ServiceType> { ServiceType.DentistryAndOralHealth },
+            now, ReferralSource.SocialMedia,
+            "billing@alexdentalsmile.dev", "support@alexdentalsmile.dev"), "organization");
+        SetEntityId(organization, AlexDentalOrgId);
+        db.Set<Organization>().Add(organization);
+
+        var subscription = Unwrap(Subscription.Create(StarterPlanId, organization.Id, now, now.AddMonths(1)), "subscription");
+        db.Set<Subscription>().Add(subscription);
+
+        var plan = await db.Set<Plan>().FindAsync([StarterPlanId], cancellationToken)
+            ?? throw new InvalidOperationException("DevData: Starter plan not seeded; run reference seeder first.");
+        db.Set<SubscriptionOrder>().Add(
+            Unwrap(SubscriptionOrder.CreateNewSubscriptionOrder(organization.Id, plan, now), "subscription order"));
+
+        // Branch 1 — Alexandria City Centre (El-Horreya Rd)
+        var branch1 = Unwrap(Branch.Create(
+            organization.Id,
+            new Address(5, "El-Horreya Road", "Alexandria", "Alexandria", EgyptCountryId, 21500),
+            new Point(29.9187, 31.2001) { SRID = 4326 },
+            new BranchEmail("downtown@alexdentalsmile.dev"),
+            new List<ServiceType> { ServiceType.DentistryAndOralHealth },
+            now), "branch 1");
+        SetEntityId(branch1, AlexDentalBranch1Id);
+        db.Set<Branch>().Add(branch1);
+
+        // Branch 2 — Sidi Gaber district
+        var branch2 = Unwrap(Branch.Create(
+            organization.Id,
+            new Address(12, "Victor Emmanuel Square", "Alexandria", "Alexandria", EgyptCountryId, 21600),
+            new Point(29.9547, 31.2069) { SRID = 4326 },
+            new BranchEmail("sidigaber@alexdentalsmile.dev"),
+            new List<ServiceType> { ServiceType.DentistryAndOralHealth },
+            now), "branch 2");
+        SetEntityId(branch2, AlexDentalBranch2Id);
+        db.Set<Branch>().Add(branch2);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        db.Set<Service>().AddRange(
+        [
+            Unwrap(Service.Create(branch1.Id, "Dental Consultation", "Initial examination and treatment plan.", 30, ServiceType.DentistryAndOralHealth, new Money(150.00m, Currency.Egp), serviceSettings), "Dental Consultation"),
+            Unwrap(Service.Create(branch1.Id, "Teeth Cleaning", "Professional scaling and polishing.", 40, ServiceType.DentistryAndOralHealth, new Money(250.00m, Currency.Egp), serviceSettings), "Teeth Cleaning"),
+            Unwrap(Service.Create(branch1.Id, "Tooth Filling", "Composite resin restoration.", 60, ServiceType.DentistryAndOralHealth, new Money(350.00m, Currency.Egp), serviceSettings), "Tooth Filling"),
+            Unwrap(Service.Create(branch1.Id, "Tooth Extraction", "Simple extraction under local anaesthesia.", 50, ServiceType.DentistryAndOralHealth, new Money(400.00m, Currency.Egp), serviceSettings), "Tooth Extraction"),
+            Unwrap(Service.Create(branch2.Id, "Orthodontic Consultation", "Braces or aligner assessment.", 30, ServiceType.DentistryAndOralHealth, new Money(200.00m, Currency.Egp), serviceSettings), "Orthodontic Consultation"),
+            Unwrap(Service.Create(branch2.Id, "Teeth Whitening", "Professional in-office whitening.", 60, ServiceType.DentistryAndOralHealth, new Money(800.00m, Currency.Egp), serviceSettings), "Teeth Whitening"),
+            Unwrap(Service.Create(branch2.Id, "Dental X-Ray", "Full-mouth digital radiograph.", 20, ServiceType.DentistryAndOralHealth, new Money(180.00m, Currency.Egp), serviceSettings), "Dental X-Ray"),
+        ]);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded dental owner persona ({Email}).", email);
+    }
+
+    /// <summary>
+    /// "Giza Physio" owner: approved application, active org + subscription, one branch in Mohandessin
+    /// specialising in orthopaedics, sports medicine, and neurology.
+    /// Login: physio.owner@viora.dev / Dev123!Pass
+    /// </summary>
+    private async Task SeedGizaPhysioAsync(CancellationToken cancellationToken)
+    {
+        const string email = "physio.owner@viora.dev";
+        if (await PersonaExistsAsync(email, cancellationToken))
+        {
+            logger.LogInformation("DevData: physio owner persona ({Email}) already present, skipping.", email);
+            return;
+        }
+
+        var now = clock.UtcNow;
+        var ownerId = await SeedLoginableOwnerAsync(email, "Karim", "Saber", cancellationToken);
+
+        var application = Unwrap(BuildApplication(
+            ownerId, "Giza Physio and Rehab", now,
+            new List<ServiceType> { ServiceType.OrthopedicSurgery, ServiceType.SportsMedicine, ServiceType.Neurology }), "application");
+        Check(application.MarkAccepted(now), "mark application accepted");
+        db.Set<OrganizationApplication>().Add(application);
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        var organization = Unwrap(Organization.Create(
+            ownerId, EgyptCountryId, "Giza Physio & Rehab",
+            "A specialised physiotherapy and rehabilitation centre in Mohandessin.",
+            "Orthopaedic assessment, neurological rehab, and sports-injury recovery.",
+            new List<ServiceType> { ServiceType.OrthopedicSurgery, ServiceType.SportsMedicine, ServiceType.Neurology },
+            now, ReferralSource.GoogleSearch,
+            "billing@gizaphysio.dev", "support@gizaphysio.dev"), "organization");
+        SetEntityId(organization, GizaPhysioOrgId);
+        db.Set<Organization>().Add(organization);
+
+        var subscription = Unwrap(Subscription.Create(StarterPlanId, organization.Id, now, now.AddMonths(1)), "subscription");
+        db.Set<Subscription>().Add(subscription);
+
+        var plan = await db.Set<Plan>().FindAsync([StarterPlanId], cancellationToken)
+            ?? throw new InvalidOperationException("DevData: Starter plan not seeded; run reference seeder first.");
+        db.Set<SubscriptionOrder>().Add(
+            Unwrap(SubscriptionOrder.CreateNewSubscriptionOrder(organization.Id, plan, now), "subscription order"));
+
+        // Single branch in Mohandessin, Giza
+        var branch = Unwrap(Branch.Create(
+            organization.Id,
+            new Address(20, "El-Sudan Street", "Giza", "Giza", EgyptCountryId, 12311),
+            new Point(31.2000, 30.0600) { SRID = 4326 },
+            new BranchEmail("mohandessin@gizaphysio.dev"),
+            new List<ServiceType> { ServiceType.OrthopedicSurgery, ServiceType.SportsMedicine },
+            now), "branch");
+        SetEntityId(branch, GizaPhysioBranchId);
+        db.Set<Branch>().Add(branch);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        db.Set<Service>().AddRange(
+        [
+            Unwrap(Service.Create(branch.Id, "Physiotherapy Session", "Manual therapy and tailored exercise programme.", 60, ServiceType.OrthopedicSurgery, new Money(300.00m, Currency.Egp), serviceSettings), "Physiotherapy Session"),
+            Unwrap(Service.Create(branch.Id, "Sports Injury Assessment", "Biomechanical screening and treatment plan.", 40, ServiceType.SportsMedicine, new Money(350.00m, Currency.Egp), serviceSettings), "Sports Injury Assessment"),
+            Unwrap(Service.Create(branch.Id, "Electrotherapy", "TENS/ultrasound pain-relief treatment.", 30, ServiceType.OrthopedicSurgery, new Money(200.00m, Currency.Egp), serviceSettings), "Electrotherapy"),
+            Unwrap(Service.Create(branch.Id, "Post-Operative Rehab", "Structured recovery programme after surgery.", 90, ServiceType.OrthopedicSurgery, new Money(500.00m, Currency.Egp), serviceSettings), "Post-Operative Rehab"),
+            Unwrap(Service.Create(branch.Id, "Neurological Rehabilitation", "Motor re-education and coordination training.", 60, ServiceType.Neurology, new Money(450.00m, Currency.Egp), serviceSettings), "Neurological Rehabilitation"),
+        ]);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded physio owner persona ({Email}).", email);
+    }
+
+    /// <summary>
+    /// "Sharm Eye" owner: submitted application still awaiting review — exercises the pending-with-papers
+    /// state for an ophthalmology clinic. Login: eye.owner@viora.dev / Dev123!Pass
+    /// </summary>
+    private async Task SeedSharmEyeAsync(CancellationToken cancellationToken)
+    {
+        const string email = "eye.owner@viora.dev";
+        if (await PersonaExistsAsync(email, cancellationToken))
+        {
+            logger.LogInformation("DevData: eye owner persona ({Email}) already present, skipping.", email);
+            return;
+        }
+
+        var now = clock.UtcNow;
+        var ownerId = await SeedLoginableOwnerAsync(email, "Nadia", "Farouk", cancellationToken);
+
+        var application = Unwrap(BuildApplication(
+            ownerId, "Sharm Eye Clinic", now,
+            new List<ServiceType> { ServiceType.Ophthalmology }), "application");
+        db.Set<OrganizationApplication>().Add(application);
+
+        foreach (var type in new[] { LegalPaperType.CommercialRegistration, LegalPaperType.TaxCard })
+        {
+            var media = await SeedMediaAsync(
+                $"{type}.pdf", $"legal-papers/{application.Id}/{Guid.NewGuid()}.pdf",
+                "application/pdf", PlaceholderPdf, organizationId: null, cancellationToken);
+            var paper = Unwrap(LegalPaper.Create(
+                media.Id, application.Id, $"{type} document",
+                AcceptanceStatus.UnderReview, type, now, now.AddYears(1)), $"legal paper {type}");
+            db.Set<LegalPaper>().Add(paper);
+        }
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded eye owner persona ({Email}).", email);
+    }
+
+    private Result<OrganizationApplication> BuildApplication(
+        Guid ownerId, string proposedName, DateTime now,
+        List<ServiceType>? serviceTypes = null) =>
         OrganizationApplication.Create(
             ownerId, EgyptCountryId,
             new Name(proposedName),
             new Letter("We are a healthcare provider seeking to onboard with Viora."),
             new About($"{proposedName} provides outpatient care."),
-            new List<ServiceType> { ServiceType.Cardiology, ServiceType.Dermatology },
+            serviceTypes ?? new List<ServiceType> { ServiceType.Cardiology, ServiceType.Dermatology },
             new ServiceDescription("General and specialized outpatient care."),
             ReferralSource.Website,
             new BillingEmail("billing@" + Slug(proposedName) + ".dev"),
@@ -356,6 +570,171 @@ internal sealed class DevDataSeeder(
         Unwrap(Service.Create(BranchId, "Makeup Application", "A professional makeup application service.", 60, ServiceType.Cardiology, new Money(80.00m, Currency.Egp), serviceSettings), "service Makeup Application"),
         Unwrap(Service.Create(BranchId, "Waxing", "A complete waxing service.", 30, ServiceType.Cardiology, new Money(25.00m, Currency.Egp), serviceSettings), "service Waxing"),
     ];
+
+    /// <summary>
+    /// Dev-only inventory for the pinned branch: a handful of items (one with a placeholder image,
+    /// one intentionally at/below its threshold) plus a realistic movement history per item.
+    /// Gated on any inventory item already existing for the branch so re-runs are a no-op.
+    /// </summary>
+    private async Task SeedInventoryAsync(Guid performedByUserId, Guid organizationId, CancellationToken cancellationToken)
+    {
+        if (await db.Set<InventoryItem>().AnyAsync(item => item.BranchId == BranchId, cancellationToken))
+        {
+            logger.LogInformation("DevData: inventory already seeded, skipping.");
+            return;
+        }
+
+        var now = clock.UtcNow;
+
+        // (name, notes, quantity, minimumThreshold, withImage)
+        var specs = new[]
+        {
+            ("Surgical Gloves (Box)", "Latex-free, medium.", 120, 30, true),
+            ("Disposable Syringes 5ml", "Single-use, sterile.", 75, 25, false),
+            ("Gauze Rolls", "Sterile cotton gauze.", 18, 20, false),   // below threshold -> exercises low-stock UI
+            ("Alcohol Swabs (Pack)", "70% isopropyl.", 200, 50, false),
+            ("Examination Couch Paper", "Roll, 60cm.", 40, 15, false),
+        };
+
+        foreach (var (name, notes, quantity, threshold, withImage) in specs)
+        {
+            Guid? imageId = null;
+            if (withImage)
+            {
+                var image = await SeedMediaAsync(
+                    "inventory-item.png", $"inventory/{BranchId}/{Guid.NewGuid()}.png",
+                    "image/png", PlaceholderPng, organizationId, cancellationToken);
+                imageId = image.Id;
+            }
+
+            var item = InventoryItem.Create(BranchId, name, notes, quantity, threshold, imageId);
+            db.Set<InventoryItem>().Add(item);
+
+            // A movement history that nets to the current quantity: an initial restock, then some consumption.
+            var consumed = Math.Max(0, (quantity / 3));
+            var initialRestock = quantity + consumed;
+
+            db.Set<InventoryMovement>().Add(
+                Unwrap(InventoryMovement.Restock(item.Id, performedByUserId, initialRestock, now.AddDays(-14)), $"restock {name}"));
+
+            if (consumed > 0)
+            {
+                db.Set<InventoryMovement>().Add(
+                    Unwrap(InventoryMovement.Consume(item.Id, performedByUserId, consumed, now.AddDays(-3)), $"consume {name}"));
+            }
+        }
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded inventory items and movement history.");
+    }
+
+    /// <summary>
+    /// Dev-only appointments for the pinned branch across a spread of statuses, dates, staff and payment
+    /// methods. Seeds a loginable customer to satisfy the appointment -> customer FK. Gated on any
+    /// appointment already existing for the branch so re-runs are a no-op.
+    /// </summary>
+    private async Task SeedAppointmentsAsync(CancellationToken cancellationToken)
+    {
+        if (await db.Set<Appointment>().AnyAsync(appointment => appointment.BranchId == BranchId, cancellationToken))
+        {
+            logger.LogInformation("DevData: appointments already seeded, skipping.");
+            return;
+        }
+
+        var customerId = await SeedLoginableCustomerAsync("customer@viora.dev", "Mona", "Said", cancellationToken);
+
+        var serviceIds = await db.Set<Service>()
+            .Where(service => service.BranchId == BranchId)
+            .Select(service => service.Id)
+            .Take(4)
+            .ToListAsync(cancellationToken);
+
+        if (serviceIds.Count == 0)
+        {
+            logger.LogWarning("DevData: no services found for the dev branch; skipping appointment seeding.");
+            return;
+        }
+
+        var now = clock.UtcNow;
+
+        // (dayOffset, status, payMethod, platform, durationMinutes)
+        var plan = new (int DayOffset, CustomerStatus Status, PaymentMethod PayMethod, Platform Platform, int Minutes)[]
+        {
+            (-7, CustomerStatus.Completed, PaymentMethod.Cash,   Platform.Web,    30),
+            (-2, CustomerStatus.NoShow,    PaymentMethod.Online, Platform.Mobile, 45),
+            ( 0, CustomerStatus.InProgress,PaymentMethod.Wallet, Platform.Web,    30),
+            ( 1, CustomerStatus.NotArrived,PaymentMethod.Cash,   Platform.Mobile, 60),
+            ( 3, CustomerStatus.Waiting,   PaymentMethod.Online, Platform.Web,    30),
+            ( 5, CustomerStatus.NotArrived,PaymentMethod.Cash,   Platform.Mobile, 90),
+        };
+
+        for (var i = 0; i < plan.Length; i++)
+        {
+            var (dayOffset, status, payMethod, platform, minutes) = plan[i];
+            var serviceId = serviceIds[i % serviceIds.Count];
+            var staffId = StaffIds[i % StaffIds.Length];
+
+            var appointment = Appointment.Book(
+                customerId: customerId,
+                serviceId: serviceId,
+                staffId: staffId,
+                branchId: BranchId,
+                paymentId: null,
+                reservationDate: now.AddDays(dayOffset),
+                appointmentQueueNumber: i + 1,
+                payMethod: payMethod,
+                status: status,
+                createdBy: Creator.Customer,
+                requestPlatform: platform,
+                estimatedDuration: TimeSpan.FromMinutes(minutes),
+                createdAt: now.AddDays(dayOffset - 1));
+
+            db.Set<Appointment>().Add(appointment);
+        }
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded appointments for the dev branch.");
+    }
+
+    /// <summary>Creates a User with local credentials + Customer role, then the Customer aggregate (shared id).</summary>
+    private async Task<Guid> SeedLoginableCustomerAsync(string email, string firstName, string lastName, CancellationToken cancellationToken)
+    {
+        if (await PersonaExistsAsync(email, cancellationToken))
+        {
+            var existing = await db.Set<AuthIdentity>()
+                .Where(identity => identity.Provider == "local" && identity.ProviderKey == email.ToLowerInvariant().Trim())
+                .Select(identity => identity.UserId)
+                .FirstAsync(cancellationToken);
+            return existing;
+        }
+
+        var now = clock.UtcNow;
+
+        var personalInfo = new PersonalInfo(firstName, lastName, new DateOnly(1995, 6, 15), Gender.Female);
+        var user = User.Create(personalInfo, new Domain.Users.Internal.Email(email), now);
+        SetEntityId(user, CustomerUserId); // pin so the customer aggregate shares the id
+
+        db.Set<LocalCredential>().Add(new LocalCredential(user.Id, hasher.Hash(DefaultPassword)));
+
+        var identity = AuthIdentity.Create("local", user.Id, user.Email.Value, now);
+        user.LinkIdentity(identity);
+        db.Set<AuthIdentity>().Add(identity);
+
+        Check(user.BecomeCustomer(Role.Customer), "promote user to customer");
+        db.Set<User>().Add(user);
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        db.Set<Customer>().Add(Customer.Create(
+            user.Id,
+            new UserName(Slug(firstName + lastName)),
+            personalInfo,
+            now,
+            new[] { new PhoneNumber("+201000000000") },
+            new[] { new Domain.Users.Internal.Email(email) }));
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+
+        return user.Id;
+    }
 
     private Task<bool> PersonaExistsAsync(string email, CancellationToken cancellationToken) =>
         db.Set<AuthIdentity>().AnyAsync(
