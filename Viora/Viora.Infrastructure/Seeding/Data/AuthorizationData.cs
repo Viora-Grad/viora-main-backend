@@ -24,14 +24,13 @@ internal static class AuthorizationData
         new() { RoleId = Role.Owner.Id, PermissionId = Permission.InvitationsDelete.Id },
 
         new() { RoleId = Role.Admin.Id, PermissionId = Permission.UsersRead.Id },
-        new() { RoleId = Role.Admin.Id, PermissionId = 2  },
-        new() { RoleId = Role.Admin.Id, PermissionId = 10 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 11 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 20 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 21 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 30 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 40 },
-        new() { RoleId = Role.Admin.Id, PermissionId = 41 },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.UsersWrite.Id  },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.RolesRead.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.RolesWrite.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.PlansRead.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.PlansWrite.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.FeaturesRead.Id },
+        new() { RoleId = Role.Admin.Id, PermissionId = Permission.FeaturesWrite.Id },
         new() { RoleId = Role.Customer.Id, PermissionId = Permission.UsersRead.Id },
     ];
 }
