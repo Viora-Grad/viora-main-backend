@@ -31,4 +31,9 @@ internal sealed class OrganziationRepository(ApplicationDbContext context) : Rep
         return await DbContext.Set<Organization>()
             .AnyAsync(o => o.Id != excludeOrganizationId && o.SubDomain.Value == subDomain, cancellationToken);
     }
+    public async Task<Organization?> GetByOwnerIdAsync(Guid ownerId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<Organization>()
+            .FirstOrDefaultAsync(o => o.OwnerId == ownerId, cancellationToken);
+    }
 }

@@ -4,6 +4,7 @@ using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Staffs;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Repositories.Authentication;
@@ -16,6 +17,7 @@ internal class AuthenticationService(IUserRepository userRepository,
     IUnitOfWork unitOfWork,
     IDateTimeProvider dateTimeProvider,
     IIdentityRepository identityRepository,
+    IOrganizationRepository organizationRepository,
     RefreshTokenService refreshTokenService,
     LocalCredentialRepository localCredentialRepository,
     RefreshTokenRepository refreshTokenRepository,
@@ -43,12 +45,16 @@ internal class AuthenticationService(IUserRepository userRepository,
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Failure<AuthResult>(UserErrors.InvalidCredentials);
         }
+        var isOwner = user.Roles.Any(r => r.Name == "Owner");
+        var org = isOwner ? await organizationRepository.GetByOwnerIdAsync(user.Id, cancellationToken) : null;
+
 
         localCredential.ResetFailedLoginAttempts();
         var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
         var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+        var orgClaim = isOwner && org is not null ? new Claim("organizationId", org.Id.ToString()) : null;
         var typeClaim = new Claim("type", "user");
-        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
+        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim, orgClaim]);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
@@ -99,10 +105,15 @@ internal class AuthenticationService(IUserRepository userRepository,
             {
                 return Result.Failure<AuthResult>(UserErrors.NotFound);
             }
+
+            var isOwner = user.Roles.Any(r => r.Name == "Owner");
+            var org = isOwner ? await organizationRepository.GetByOwnerIdAsync(user.Id, cancellationToken) : null;
+
             var permissionClaims = user.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
             var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+            var orgClaim = isOwner && org is not null ? new Claim("organizationId", org.Id.ToString()) : null;
             var typeClaim = new Claim("type", "user");
-            var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
+            var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim, orgClaim]);
 
             var authResult = new AuthResult(
                 UserId: user.Id,
@@ -189,11 +200,16 @@ internal class AuthenticationService(IUserRepository userRepository,
     public async Task<Result<AuthResult>> SocialLoginAsync(User user, AuthIdentity identity, CancellationToken cancellationToken = default)
     {
         identity.RecordLogin(dateTimeProvider.UtcNow);
+
+        var isOwner = user.Roles.Any(r => r.Name == "Owner");
+        var org = isOwner ? await organizationRepository.GetByOwnerIdAsync(user.Id, cancellationToken) : null;
+
         var permissions = user.Roles.SelectMany(r => r.Permissions).Distinct().ToList();
         var permissionClaims = permissions.Select(p => new Claim("permission", p.Name)).Distinct();
         var RoleClaims = user.Roles.Select(r => new Claim(ClaimTypes.Role, r.Name));
+        var orgClaim = isOwner && org is not null ? new Claim("organizationId", org.Id.ToString()) : null;
         var typeClaim = new Claim("type", "user");
-        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim]);
+        var allClaims = permissionClaims.Concat(RoleClaims).Concat([typeClaim, orgClaim]);
 
         var refreshTokenValue = refreshTokenService.GenerateRefreshToken();
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
@@ -243,8 +259,9 @@ internal class AuthenticationService(IUserRepository userRepository,
         activeToken?.Revoke();
 
         var permissionClaims = staff.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+        var orgClaim = new Claim("organizationId", staff.OrganizationId.ToString());
         var typeClaim = new Claim("type", "staff");
-        var allClaims = permissionClaims.Concat([typeClaim]);
+        var allClaims = permissionClaims.Concat([typeClaim, orgClaim]);
 
         var authResult = new AuthResult(
             UserId: staff.Id,
@@ -281,8 +298,9 @@ internal class AuthenticationService(IUserRepository userRepository,
                 return Result.Failure<AuthResult>(UserErrors.NotFound);
             }
             var permissionClaims = staff.Roles.SelectMany(r => r.Permissions).Distinct().Select(p => new Claim("permission", p.Name));
+            var orgClaim = new Claim("organizationId", staff.OrganizationId.ToString());
             var typeClaim = new Claim("type", "staff");
-            var allClaims = permissionClaims.Concat([typeClaim]);
+            var allClaims = permissionClaims.Concat([typeClaim, orgClaim]);
             var authResult = new AuthResult(
                 UserId: staff.Id,
                 AccessToken: jwtService.GenerateToken(staff.Id, allClaims),

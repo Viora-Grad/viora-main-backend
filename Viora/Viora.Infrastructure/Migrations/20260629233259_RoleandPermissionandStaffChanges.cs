@@ -107,7 +107,7 @@ namespace Viora.Infrastructure.Migrations
                 name: "Id",
                 table: "Role",
                 nullable: false)
-                .Annotation("SqlServer:Identity", "1, 1");
+                .Annotation("SqlServer:Identity", "0, 1");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Role",
