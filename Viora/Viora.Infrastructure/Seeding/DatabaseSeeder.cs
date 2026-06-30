@@ -58,7 +58,15 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
         #endregion LimitedFeatures
 
         #region Roles
-        if (await db.Set<Role>().AnyAsync(cancellationToken))
+        var existingRoleIds = await db.Set<Role>()
+            .Select(r => r.Id)
+            .ToListAsync(cancellationToken);
+
+        var missingRoles = Role.All
+            .Where(r => !existingRoleIds.Contains(r.Id))
+            .ToList();
+
+        if (missingRoles.Count == 0)
         {
             logger.LogInformation("Role seed: roles already present.");
         }
@@ -68,7 +76,7 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
             try
             {
                 await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Role ON", cancellationToken);
-                foreach (var role in Role.All)
+                foreach (var role in missingRoles)
                 {
                     await db.Database.ExecuteSqlRawAsync(
                         "INSERT INTO Role (Id, Name, Description, TenantId) VALUES (@id, @name, @description, @tenantId)",
