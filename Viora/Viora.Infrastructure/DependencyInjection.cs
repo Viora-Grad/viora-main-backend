@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Viora.Application.Abstractions.Authentication;
-using Viora.Application.Billings;
 using Viora.Application.Abstractions.Caching;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Mail;
@@ -13,10 +12,11 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
+using Viora.Application.Billings;
 using Viora.Domain.Abstractions;
+using Viora.Domain.Appointments;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
-using Viora.Domain.Appointments;
 using Viora.Domain.Branches;
 using Viora.Domain.ChatSessions;
 using Viora.Domain.Feedbacks;
@@ -29,6 +29,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
+using Viora.Domain.Prescriptions;
 using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
@@ -52,6 +53,7 @@ using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
+using Viora.Infrastructure.Repositories.Prescriptions;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
@@ -121,6 +123,14 @@ public static class DependencyInjection
         #region Form 
         services.AddScoped<IFormRepository, FormRepository>();
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
+        #endregion
+
+        #region Prescription
+
+        services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+        services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
+        services.AddScoped<IPrescriptionTemplateRepository, PrescriptionTemplateRepository>();
+
         #endregion
 
         services.AddScoped<IServiceRepository, ServiceRepository>();
