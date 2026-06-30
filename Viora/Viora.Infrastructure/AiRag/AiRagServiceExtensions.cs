@@ -60,6 +60,7 @@ public static class AiRagServiceExtensions
         services.AddScoped<IIntentHandler, UnclearHandler>();
         services.AddScoped<IIntentHandler, KnowledgeHandler>();
         services.AddScoped<IIntentHandler, SpecialtyHandler>();
+        services.AddScoped<IIntentHandler, OrganizationSearchHandler>();
 
         return services;
     }

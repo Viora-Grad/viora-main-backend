@@ -14,7 +14,7 @@ public class GreetingHandler : IIntentHandler
                 Message = "Hello! I'm Vivi 👋\n\n" +
                           "I can help you with:\n" +
                           "• Finding the right specialist based on your symptoms\n" +
-                          "• Searching for providers\n" +
+                          "• Searching for healthcare organizations by name, country, or service type\n" +
                           "• Answering questions about Viora's features\n\n" +
                           "What can I help you with today?",
             }
