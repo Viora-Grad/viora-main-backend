@@ -133,4 +133,15 @@ public sealed class Organization : Entity
         return Result.Success();
     }
 
+    public Result UpdateExistingRating(int newRating)
+    {
+        if (newRating > 10 || newRating < 0)
+            return Result.Failure(OrganizationErrors.RatingOutOfBound);
+
+        double totalScoreSum = (Rating.AverageOutOfTen * Rating.Count) - Rating.AverageOutOfTen + newRating;
+        double updatedAverage = totalScoreSum / Rating.Count;
+
+        Rating = new(Rating.Count, updatedAverage);
+        return Result.Success();
+    }
 }

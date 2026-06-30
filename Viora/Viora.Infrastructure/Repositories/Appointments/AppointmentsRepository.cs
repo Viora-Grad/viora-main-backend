@@ -71,5 +71,9 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
         return overlappingAppointments.Count != 0;
     }
 
+    public async Task<bool> UserHasAppointemtns(Guid UserId, Guid BranchId, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Set<Appointment>().AnyAsync(x => x.CustomerId == UserId && x.BranchId == BranchId, cancellationToken);
+    }
 
 }

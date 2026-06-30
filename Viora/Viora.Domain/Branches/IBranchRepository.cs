@@ -12,4 +12,6 @@ public interface IBranchRepository
     Task<IReadOnlyCollection<MediaFile>?> GetMediaByBranchId(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Branch>> ListAsync(ISpecification<Branch> spec, CancellationToken cancellationToken = default);
     Task<long> CountAsync(ISpecification<Branch> spec, CancellationToken cancellationToken = default);
+
+    void Attach(Branch branch);
 }

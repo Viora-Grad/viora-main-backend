@@ -62,6 +62,51 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("ServiceGallery", (string)null);
                 });
 
+            modelBuilder.Entity("StaffBranch", b =>
+                {
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BranchId", "StaffId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("StaffBranch");
+                });
+
+            modelBuilder.Entity("StaffRole", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RoleId", "StaffId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("StaffRole");
+                });
+
+            modelBuilder.Entity("StaffService", b =>
+                {
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ServiceId", "StaffId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("StaffService");
+                });
+
             modelBuilder.Entity("UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -341,6 +386,12 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("EditedOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("SubmittedOnUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -567,14 +618,14 @@ namespace Viora.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("BloodGlucose")
-                        .HasColumnType("bigint");
+                    b.Property<int>("BloodGlucose")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("HeartRate")
-                        .HasColumnType("bigint");
+                    b.Property<int>("HeartRate")
+                        .HasColumnType("int");
 
                     b.Property<float>("Weight")
                         .HasColumnType("real");
@@ -1589,14 +1640,85 @@ namespace Viora.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BranchId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HashedPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StaffStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasFilter("[Username] IS NOT NULL");
 
                     b.ToTable("Staff", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Staffs.StaffToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId")
+                        .IsUnique();
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("StaffInvitationTokens", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.AddonOrderLimitedFeature", b =>
@@ -1792,6 +1914,10 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1804,6 +1930,7 @@ namespace Viora.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
+                            Description = "Read user information",
                             Name = "users:read"
                         });
                 });
@@ -1811,14 +1938,26 @@ namespace Viora.Infrastructure.Migrations
             modelBuilder.Entity("Viora.Domain.Users.Identity.Role", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Role");
                 });
@@ -1955,6 +2094,41 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("RefreshToken");
                 });
 
+            modelBuilder.Entity("Viora.Infrastructure.Authentication.StaffRefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId")
+                        .IsUnique()
+                        .HasFilter("[IsRevoked] = 0");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("StaffRefreshTokens", (string)null);
+                });
+
             modelBuilder.Entity("BranchGallery", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
@@ -1981,6 +2155,51 @@ namespace Viora.Infrastructure.Migrations
                     b.HasOne("Viora.Domain.Services.Service", null)
                         .WithMany()
                         .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StaffBranch", b =>
+                {
+                    b.HasOne("Viora.Domain.Branches.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StaffRole", b =>
+                {
+                    b.HasOne("Viora.Domain.Users.Identity.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StaffService", b =>
+                {
+                    b.HasOne("Viora.Domain.Services.Service", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Staffs.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -2326,12 +2545,12 @@ namespace Viora.Infrastructure.Migrations
                             b1.Property<Guid>("MedicalRecordId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<long>("Diastolic")
-                                .HasColumnType("bigint")
+                            b1.Property<int>("Diastolic")
+                                .HasColumnType("int")
                                 .HasColumnName("BloodPressureDiastolic");
 
-                            b1.Property<long>("Systolic")
-                                .HasColumnType("bigint")
+                            b1.Property<int>("Systolic")
+                                .HasColumnType("int")
                                 .HasColumnName("BloodPressureSystolic");
 
                             b1.HasKey("MedicalRecordId");
@@ -2636,11 +2855,22 @@ namespace Viora.Infrastructure.Migrations
 
             modelBuilder.Entity("Viora.Domain.Staffs.Staff", b =>
                 {
-                    b.HasOne("Viora.Domain.Branches.Branch", null)
+                    b.HasOne("Viora.Domain.Organizations.OrganizationDetails.Organization", null)
                         .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.Staffs.StaffToken", b =>
+                {
+                    b.HasOne("Viora.Domain.Staffs.Staff", "Staff")
+                        .WithOne()
+                        .HasForeignKey("Viora.Domain.Staffs.StaffToken", "StaffId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("Viora.Domain.Subscriptions.Addons.AddonOrderLimitedFeature", b =>
@@ -2757,6 +2987,14 @@ namespace Viora.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Users.Identity.Role", b =>
+                {
+                    b.HasOne("Viora.Domain.Organizations.OrganizationDetails.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Viora.Domain.Users.Identity.RolePermission", b =>

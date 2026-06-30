@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Customers.CreateCustomerProfile;
+using Viora.Application.Customers.CreateMedicalRecord;
+using Viora.Application.Customers.GetMedicalRecord;
 using Viora.Application.Customers.UpdateCustomerPicture;
+using Viora.Application.Customers.UpdateMedicalRecord;
 
 namespace Viora.Api.Controllers.Customers;
 
@@ -35,8 +38,48 @@ public class CustomerController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
     [HttpGet]
-    public IActionResult AuthorizationTester()
+    [Route("/profile")]
+    public async Task<IActionResult> GetCustomerProfile(CancellationToken cancellationToken = default)
     {
-        return Ok("You are authorized to access this endpoint.");
+        // Implementation for fetching customer profile
+        return Ok();
+    }
+    [HttpPost("medicalrecord")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CreateMedicalRecord(CreateMedicalRecordRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new CreateMedicalRecordCommand(
+            request.Systolic,
+            request.Diastolic,
+            request.Weight,
+            request.HeartRate,
+            request.BloodGlucose,
+            [.. request.Allergies]
+        );
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("medicalrecord")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> UpdateMedicalRecord(UpdateMedicalRecordRequest request, CancellationToken cancellationToken = default)
+    {
+        var command = new UpdateMedicalRecordCommand(
+            request.Systolic,
+            request.Diastolic,
+            request.Weight,
+            request.HeartRate,
+            request.BloodGlucose,
+            [.. request.Allergies]
+        );
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet("medicalrecord")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetMedicalRecord(CancellationToken cancellationToken = default)
+    {
+        var query = new GetMedicalRecordQuery();
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
     }
 }

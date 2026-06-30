@@ -1,5 +1,4 @@
-﻿using Viora.Application.Abstractions.Exceptions;
-using Viora.Application.Abstractions.Messaging;
+﻿using Viora.Application.Abstractions.Messaging;
 using Viora.Application.RealTimeScheduling.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
@@ -13,7 +12,7 @@ public class GetStaffShiftByDayQueryHandler(
    IShiftRepository shiftRepository) : IQueryHandler<GetStaffShiftByDayQuery, StaffDayShiftResponse>
 {
     public async Task<Result<StaffDayShiftResponse>> Handle(GetStaffShiftByDayQuery request, CancellationToken cancellationToken)
-    {
+    {/*
         var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
               ?? throw new NotFoundException($"Staff with id {request.StaffId} not Found");
 
@@ -45,7 +44,8 @@ public class GetStaffShiftByDayQueryHandler(
                     ).ToList()
             );
 
-        return Result.Success(staffShiftResponse);
+        return Result.Success(staffShiftResponse);*/
+        throw new NotImplementedException();
     }
 }
 

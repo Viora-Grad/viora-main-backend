@@ -36,4 +36,8 @@ internal class BranchRepository(ApplicationDbContext dbContext) : Repository<Bra
 
         return branch?.Gallery;
     }
+    public void Attach(Branch branch)
+    {
+        DbContext.Set<Branch>().Attach(branch);
+    }
 }

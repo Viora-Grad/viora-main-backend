@@ -16,5 +16,9 @@ internal class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             .ValueGeneratedNever();
 
         builder.HasData(Permission.UsersRead);
+
+        builder.Property(p => p.Description)
+            .IsRequired(false)
+            .HasMaxLength(500);
     }
 }
