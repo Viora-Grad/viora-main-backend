@@ -14,5 +14,7 @@ public interface IUserContext
 {
     Guid UserId { get; }
     string UserType { get; }
+
+    Guid? OrganizationId { get; }
 }
 

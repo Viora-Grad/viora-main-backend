@@ -21,6 +21,12 @@ internal class UserContext(IHttpContextAccessor httpContextAccessor) : IUserCont
         .FindFirstValue("type") ??
         throw new InvalidOperationException("User is not authenticated or does not have a 'type' claim.");
 
+    public Guid? OrganizationId =>
+        httpContextAccessor
+        .HttpContext?
+        .User
+        .FindFirstValue("organizationId") is string orgIdValue && Guid.TryParse(orgIdValue, out var orgId) ?
+            orgId : null;
 }
 internal static class ClaimsPrincipalExtensions
 {
