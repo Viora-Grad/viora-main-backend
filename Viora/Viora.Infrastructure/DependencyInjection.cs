@@ -131,6 +131,7 @@ public static class DependencyInjection
         #region Form 
         services.AddScoped<IFormRepository, FormRepository>();
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
+        services.AddScoped<IFormSubmissionMediaRepository, FormSubmissionMediaRepository>();
         #endregion
 
 

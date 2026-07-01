@@ -486,6 +486,27 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("FormSubmissions", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.Forms.FormSubmissionMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FormSubmissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MediaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FormSubmissionId");
+
+                    b.HasIndex("MediaId");
+
+                    b.ToTable("FormSubmissionMedias", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Inventory.InventoryItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2456,6 +2477,21 @@ namespace Viora.Infrastructure.Migrations
                     b.HasOne("Viora.Domain.Forms.Form", null)
                         .WithMany()
                         .HasForeignKey("FormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.Forms.FormSubmissionMedia", b =>
+                {
+                    b.HasOne("Viora.Domain.Forms.FormSubmission", null)
+                        .WithMany()
+                        .HasForeignKey("FormSubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Viora.Domain.Medias.MediaFile", null)
+                        .WithMany()
+                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

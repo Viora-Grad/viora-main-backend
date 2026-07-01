@@ -10,7 +10,7 @@ public class FormSubmissionResponse
     public Guid FormId { get; set; }
     public JsonDocument Answers { get; set; }
     public DateTime CreatedAt { get; set; }
-    public List<MediaResponse> AnswersList { get; set; } = new List<MediaResponse>();
+    public List<MediaResponse> FileList { get; set; } = new List<MediaResponse>();
 
 
     public FormSubmissionResponse(Guid id, Guid appointmentId, Guid formId, JsonDocument answers, DateTime createdAt, List<MediaResponse> answersList)
@@ -20,7 +20,7 @@ public class FormSubmissionResponse
         FormId = formId;
         Answers = answers;
         CreatedAt = createdAt;
-        AnswersList = answersList;
+        FileList = answersList;
 
     }
 }

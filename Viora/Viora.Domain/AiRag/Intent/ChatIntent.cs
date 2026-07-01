@@ -8,6 +8,7 @@ public enum ChatIntent
     Greeting,
     General,
     SpecialtyRecommendation,
+    OrganizationSearch,
     KnowledgeQuery,
     Unclear,
 }

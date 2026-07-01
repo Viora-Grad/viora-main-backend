@@ -1,6 +1,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Viora.Application.AiRag.Abstractions;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 using Viora.Domain.AiRag.Prompts;
@@ -22,7 +23,7 @@ public sealed class KnowledgeHandler : IIntentHandler
         _kernel = kernel;
     }
 
-    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history)
+    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
     {
         var chunks = await _store.SearchAsync(message, topK: 3);
 
@@ -37,6 +38,11 @@ public sealed class KnowledgeHandler : IIntentHandler
 
         var ragHistory = new ChatHistory();
         ragHistory.AddSystemMessage(KnowledgeRagPrompt.Build(chunks));
+
+        var userContextMsg = BuildUserContextMessage(userContext);
+        if (userContextMsg is not null)
+            ragHistory.AddSystemMessage(userContextMsg);
+
         ragHistory.AddUserMessage(message);
 
         var result = await _chat.GetChatMessageContentAsync(ragHistory, kernel: _kernel);
@@ -46,5 +52,12 @@ public sealed class KnowledgeHandler : IIntentHandler
             Message = result.Content?.Trim() ?? "I'm sorry, I couldn't generate a response.",
             Intent = ChatIntent.KnowledgeQuery,
         };
+    }
+
+    private static string? BuildUserContextMessage(UserContext? userContext)
+    {
+        if (userContext is null) return null;
+
+        return $"The user's name is {userContext.FirstName}. Always address them by their name.";
     }
 }
