@@ -56,12 +56,20 @@ public class LegalPapersController(ISender sender) : ControllerBase
     // privileged) so the underlying media id is never an access primitive.
     [HttpGet("{legalPaperId:guid}/file")]
     [Authorize]
+
     public async Task<IActionResult> GetFile(Guid legalPaperId, CancellationToken cancellationToken)
     {
+        var roles = User.Claims
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Select(x => x.Value)
+            .ToList();
+
+        bool isAdmin = roles.Any(role => role.Contains("Admin"));
+
         var query = new GetLegalPaperFileQuery(
             legalPaperId,
             (Guid)UserId!,
-            User.IsInRole("Admin"));
+            isAdmin);
 
         var result = await sender.Send(query, cancellationToken);
 

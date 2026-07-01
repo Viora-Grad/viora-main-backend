@@ -54,6 +54,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpGet("me")]
+    [Authorize]
     public async Task<IActionResult> GetOrganizationDetails(CancellationToken cancellationToken)
     {
         var query = new GetMyOrganizationDetailsQuery((Guid)UserId!);
