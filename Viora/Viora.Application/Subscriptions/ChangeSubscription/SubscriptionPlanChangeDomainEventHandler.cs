@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
+using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Subscriptions;
@@ -12,6 +14,8 @@ public class SubscriptionPlanChangeDomainEventHandler(
     IPlanRepository planRepository,
     IFeatureUsageRepository featureUsageRepository,
     ISubscriptionRepository subscriptionRepository,
+    IOrganizationRepository organizationRepository,
+    ILogger<SubscriptionPlanChangeDomainEventHandler> logger,
     IDateTimeProvider dateTimeProvider) : INotificationHandler<SubscriptionPlanChangedDomainEvent>
 {
 
@@ -23,6 +27,18 @@ public class SubscriptionPlanChangeDomainEventHandler(
 
         var subscription = await subscriptionRepository.GetByIdAsync(notification.SubscriptionId, cancellationToken)
             ?? throw new NotFoundException($"the subscription with id {notification.SubscriptionId} not found");
+
+        // The feature-usage rows we insert below have a FK to Organizations. If the organization no
+        // longer exists (e.g. a stale/orphaned scheduled event after a DB reset), provisioning can
+        // never succeed — skip as a no-op instead of crashing the dispatcher with an FK violation.
+        var organizationExists = await organizationRepository.ExistsAsync(subscription.OrganizationId, cancellationToken);
+        if (!organizationExists)
+        {
+            logger.LogWarning(
+                "SubscriptionPlanChangedDomainEvent: organization {OrganizationId} for subscription {SubscriptionId} no longer exists; skipping provisioning.",
+                subscription.OrganizationId, subscription.Id);
+            return;
+        }
 
         var startTime = dateTimeProvider.UtcNow;
         var endTimeResult = newPlan.PlanPeriod.CalculateEndTime(startTime);
