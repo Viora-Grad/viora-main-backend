@@ -90,12 +90,7 @@ internal class AuthenticationService(IUserRepository userRepository,
             {
                 return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
             }
-            existingToken.Revoke();
             var userId = existingToken.UserId;
-            var newRefreshTokenValue = refreshTokenService.GenerateRefreshToken();
-            var hashedNewRefreshToken = refreshTokenService.HashToken(newRefreshTokenValue);
-            var expiry = refreshTokenService.GetExpiryDate();
-            var newRefreshToken = RefreshToken.Create(userId, hashedNewRefreshToken, expiry, dateTimeProvider.UtcNow);
 
             var user = await userRepository.GetByIdAsync(userId, cancellationToken);
             if (user is null)
@@ -115,13 +110,11 @@ internal class AuthenticationService(IUserRepository userRepository,
             var authResult = new AuthResult(
                 UserId: user.Id,
                 AccessToken: jwtService.GenerateToken(user.Id, allClaims),
-                RefreshToken: newRefreshTokenValue,
+                RefreshToken: null,
                 Roles: user.Roles.Select(r => r.Name).ToList(),
                 Permissions: user.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
             );
-            refreshTokenRepository.Add(newRefreshToken);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success(authResult);
 
         }

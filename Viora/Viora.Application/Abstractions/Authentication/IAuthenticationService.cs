@@ -22,7 +22,7 @@ public interface IAuthenticationService
 
 public sealed record AuthResult(Guid UserId,
     string AccessToken,
-    string RefreshToken,
+    string? RefreshToken,
     ICollection<string> Roles,
     ICollection<string> Permissions);
 
