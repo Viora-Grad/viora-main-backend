@@ -1,37 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Viora.Domain.Users.Identity;
 
 namespace Viora.Infrastructure.Authentication;
 
 // for defining authorization policies in the future (could go for another implementation but this can be useful)
 public static class AuthorizationPolicies
 {
-    // roles
-    public const string AdminOnly = "AdminOnly";
-    public const string OwnerOnly = "OwnerOnly";
-    public const string CustomerOnly = "CustomerOnly";
-    public const string StaffOnly = "StaffOnly";
-    // permissions
-    public const string UsersRead = "users:read";
-    public const string UsersWrite = "users:write";
-    public const string RolesRead = "roles:read";
-    public const string RolesWrite = "roles:write";
-    public const string PlansRead = "plans:read";
-    public const string PlansWrite = "plans:write";
-    public const string SubscriptionsManage = "subscriptions:manage";
-    public const string FeaturesRead = "features:read";
-    public const string FeaturesWrite = "features:write";
-    public const string AppointmentsRead = "appointments:read";
-    public const string AppointmentsWrite = "appointments:write";
-    public const string InvitationsCreate = "invitations:create";
-    public const string InvitationsRead = "invitations:read";
-    public const string InvitationsDelete = "invitations:delete";
-    public static readonly string[] All =
-    [
-        UsersRead, UsersWrite, RolesRead, RolesWrite, PlansRead, PlansWrite,
-        SubscriptionsManage, FeaturesRead, FeaturesWrite, AppointmentsRead, AppointmentsWrite, InvitationsCreate, InvitationsRead, InvitationsDelete
-    ];
+    public static IReadOnlyList<string> All => [.. Permission.All.Select(x => x.Name)];
 
-    public static string Permission(string permission) => $"Permission:{permission}";
 
     // Custom Policies 
     public const string CreateStaffInvitation = "CreateStaffInvitation";
