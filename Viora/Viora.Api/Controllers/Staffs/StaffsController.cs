@@ -72,6 +72,19 @@ public class StaffsController(ISender sender) : ControllerBase
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-
+    /*
+     * TODO: Implement UpdateStaff endpoint
+    [HttpPut("{staffId:guid}")]
+    [Authorize(Policy = "staffs:update")]
+    public async Task<IActionResult> UpdateStaff(Guid staffId, UpdateStaffRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateStaffCommand(staffId,
+            request.FirstName,
+            request.LastName,
+            request.Email,
+            request.PhoneNumber);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }*/
 
 }

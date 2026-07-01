@@ -20,8 +20,9 @@ internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken
         builder.Property(rt => rt.IsRevoked).IsRequired();
 
         builder.HasIndex(rt => rt.TokenHash).IsUnique();
-        builder.HasIndex(rt => rt.UserId)
-            .IsUnique()
-            .HasFilter("[IsRevoked] = 0"); // Ensure only one active refresh token per user
+
+        builder.HasIndex(rt => rt.UserId);
+
+        builder.HasQueryFilter(rt => !rt.IsRevoked);
     }
 }
