@@ -6,22 +6,22 @@ using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Shared;
 
-namespace Viora.Application.Organizations.GetOrganizationDetails;
+namespace Viora.Application.Organizations.GetOrganizationBySubdomain;
 
-internal class GetOrganizationDetailsQueryHandler(
+internal class GetOrganizationDetailsBySubdomainQueryHandler(
     IOrganizationRepository organizationRepository,
     IBranchRepository branchRepository,
     IReadOnlyList<Country> countries
-    ) : IQueryHandler<GetOrganizationDetailsQuery, OrganizationDetailsResponse>
+    ) : IQueryHandler<GetOrganizationDetailsBySubdomainQuery, OrganizationDetailsResponse>
 {
-    public async Task<Result<OrganizationDetailsResponse>> Handle(GetOrganizationDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<OrganizationDetailsResponse>> Handle(GetOrganizationDetailsBySubdomainQuery request, CancellationToken cancellationToken)
     {
-        var organization = await organizationRepository.GetByIdAsync(request.OrganizationId, cancellationToken)
-            ?? throw new NotFoundException($"Organization with ID {request.OrganizationId} not found.");
+        var organization = await organizationRepository.GetBySubdomainAsync(request.Subdomain, cancellationToken)
+            ?? throw new NotFoundException($"Organization with subdomain {request.Subdomain} not found.");
 
         var country = countries.First(c => c.Id == organization.CountryId);
 
-        var branches = await branchRepository.GetByOrganizationIdAsync(request.OrganizationId, cancellationToken);
+        var branches = await branchRepository.GetByOrganizationIdAsync(organization.Id, cancellationToken);
 
         var response = new OrganizationDetailsResponse(
             organization.Id,
