@@ -9,7 +9,7 @@ internal sealed class OrganziationRepository(ApplicationDbContext context) : Rep
         string name,
         CancellationToken cancellationToken = default)
     {
-        return await DbContext.Set<Organization>().FirstOrDefaultAsync(o => o.Name == name, cancellationToken);
+        return await DbContext.Set<Organization>().FirstOrDefaultAsync(o => o.Name.Value == name, cancellationToken);
     }
 
     public async Task<bool> IsOrganizationExistForOwnerAsync(
@@ -23,7 +23,7 @@ internal sealed class OrganziationRepository(ApplicationDbContext context) : Rep
     public async Task<bool> NameExistsAsync(string Name, CancellationToken cancellation = default)
     {
         return await DbContext.Set<Organization>()
-            .AnyAsync(o => o.Name == Name, cancellation);
+            .AnyAsync(o => o.Name.Value == Name, cancellation);
     }
 
     public async Task<bool> SubDomainExistsAsync(string subDomain, Guid excludeOrganizationId, CancellationToken cancellationToken = default)
