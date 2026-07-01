@@ -2108,9 +2108,7 @@ namespace Viora.Infrastructure.Migrations
                     b.HasIndex("TokenHash")
                         .IsUnique();
 
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[IsRevoked] = 0");
+                    b.HasIndex("UserId");
 
                     b.ToTable("RefreshToken");
                 });

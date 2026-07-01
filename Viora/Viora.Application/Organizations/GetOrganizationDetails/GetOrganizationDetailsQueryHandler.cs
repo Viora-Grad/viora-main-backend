@@ -1,5 +1,6 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
+using Viora.Application.Organizations.Shared;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Branches;
 using Viora.Domain.Organizations.OrganizationDetails;

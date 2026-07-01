@@ -55,6 +55,7 @@ try
     builder.Services.AddOpenApi(options =>
     {
         options.AddSchemaTransformer<EnumSchemaTransformer>();
+        options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     });
     builder.Services.AddAiRagServices(builder.Configuration);
     builder.Services.AddControllers();
@@ -118,7 +119,12 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
-        app.MapScalarApiReference();
+        app.MapScalarApiReference(options =>
+        {
+            // Auto-select the Bearer scheme so the token entered once in the Auth panel
+            // is attached to every request (persisted by Scalar across reloads).
+            options.AddPreferredSecuritySchemes("Bearer");
+        });
 
         using (var scope = app.Services.CreateScope()) // apply pending migrations + reference data
         {

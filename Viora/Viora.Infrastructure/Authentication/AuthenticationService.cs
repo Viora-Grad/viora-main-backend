@@ -61,9 +61,6 @@ internal class AuthenticationService(IUserRepository userRepository,
         var refreshTokenExpiry = refreshTokenService.GetExpiryDate();
         var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, refreshTokenExpiry, dateTimeProvider.UtcNow);
 
-        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
-        activeToken?.Revoke();
-
 
 
         var authResult = new AuthResult(
@@ -93,12 +90,7 @@ internal class AuthenticationService(IUserRepository userRepository,
             {
                 return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
             }
-            existingToken.Revoke();
             var userId = existingToken.UserId;
-            var newRefreshTokenValue = refreshTokenService.GenerateRefreshToken();
-            var hashedNewRefreshToken = refreshTokenService.HashToken(newRefreshTokenValue);
-            var expiry = refreshTokenService.GetExpiryDate();
-            var newRefreshToken = RefreshToken.Create(userId, hashedNewRefreshToken, expiry, dateTimeProvider.UtcNow);
 
             var user = await userRepository.GetByIdAsync(userId, cancellationToken);
             if (user is null)
@@ -118,13 +110,11 @@ internal class AuthenticationService(IUserRepository userRepository,
             var authResult = new AuthResult(
                 UserId: user.Id,
                 AccessToken: jwtService.GenerateToken(user.Id, allClaims),
-                RefreshToken: newRefreshTokenValue,
+                RefreshToken: null,
                 Roles: user.Roles.Select(r => r.Name).ToList(),
                 Permissions: user.Roles.SelectMany(r => r.Permissions).Select(p => p.Name).Distinct().ToList()
             );
-            refreshTokenRepository.Add(newRefreshToken);
 
-            await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success(authResult);
 
         }
@@ -215,9 +205,6 @@ internal class AuthenticationService(IUserRepository userRepository,
         var hashedRefreshToken = refreshTokenService.HashToken(refreshTokenValue);
         var refreshTokenExpiry = refreshTokenService.GetExpiryDate();
         var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, refreshTokenExpiry, dateTimeProvider.UtcNow);
-
-        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
-        activeToken?.Revoke();
 
 
         var authResult = new AuthResult(
@@ -313,5 +300,17 @@ internal class AuthenticationService(IUserRepository userRepository,
             return Result.Success(authResult);
         }
         return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
+    }
+
+    public async Task<Result> LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var refreshTokenHash = refreshTokenService.HashToken(refreshToken);
+
+        var existingToken = await refreshTokenRepository.GetByTokenAsync(refreshTokenHash, cancellationToken) ??
+            throw new NotFoundException("Refresh token not found");
+
+        existingToken.Revoke();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }

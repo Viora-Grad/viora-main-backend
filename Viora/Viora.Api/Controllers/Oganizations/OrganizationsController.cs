@@ -6,6 +6,8 @@ using Viora.Api.Extensions;
 using Viora.Application.Abstractions.Media;
 using Viora.Application.Organizations.AddToGallery;
 using Viora.Application.Organizations.GetLogo;
+using Viora.Application.Organizations.GetMyOrganization;
+using Viora.Application.Organizations.GetOrganizationBySubdomain;
 using Viora.Application.Organizations.GetOrganizationDetails;
 using Viora.Application.Organizations.HideOrganization;
 using Viora.Application.Organizations.OrganizationNameExists;
@@ -39,6 +41,22 @@ public class OrganizationsController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetOrganizationDetails(Guid organizationId, CancellationToken cancellationToken)
     {
         var query = new GetOrganizationDetailsQuery(organizationId);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpGet("subdomain/{organizationSubDomain}")]
+    public async Task<IActionResult> GetOrganizationDetailsByName(string organizationSubDomain, CancellationToken cancellationToken)
+    {
+        var query = new GetOrganizationDetailsBySubdomainQuery(organizationSubDomain);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetOrganizationDetails(CancellationToken cancellationToken)
+    {
+        var query = new GetMyOrganizationDetailsQuery((Guid)UserId!);
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }

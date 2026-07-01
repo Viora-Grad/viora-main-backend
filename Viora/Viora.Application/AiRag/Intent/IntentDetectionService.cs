@@ -49,6 +49,10 @@ public class IntentDetectionService
                 : IntentConfidence.High;
             var query = root.TryGetProperty("extractedQuery", out var q) ? q.GetString() : null;
             var symptoms = root.TryGetProperty("extractedSymptoms", out var s) ? s.GetString() : null;
+            var orgName = root.TryGetProperty("extractedOrgName", out var o) ? o.GetString() : null;
+            var country = root.TryGetProperty("extractedCountry", out var co) ? co.GetString() : null;
+            var serviceType = root.TryGetProperty("extractedServiceType", out var st) ? st.GetString() : null;
+            double? minRating = root.TryGetProperty("extractedMinRating", out var mr) && mr.ValueKind == JsonValueKind.Number ? mr.GetDouble() : null;
 
             if (!Enum.TryParse<ChatIntent>(intentStr, true, out var intent))
                 intent = ChatIntent.Unclear;
@@ -59,6 +63,10 @@ public class IntentDetectionService
                 Confidence = confidence,
                 ExtractedQuery = query,
                 ExtractedSymptoms = symptoms,
+                ExtractedOrgName = orgName,
+                ExtractedCountry = country,
+                ExtractedServiceType = serviceType,
+                ExtractedMinRating = minRating,
             };
         }
         catch

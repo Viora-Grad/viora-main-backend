@@ -29,14 +29,9 @@ public sealed class Service : Entity
 
     public static Result<Service> Create(Guid branchId, string name, string description, int durationInMinutes, ServiceType type, Money cost, IServiceSettings serviceSettings)
     {
-        if (durationInMinutes % serviceSettings.SlotSizeInMinutes != 0)
-            return Result.Failure<Service>(ServiceErrors.DurationNotSlotAligned);
-
-        if (durationInMinutes < serviceSettings.MinimumDurationInMinutes)
-            return Result.Failure<Service>(ServiceErrors.MinimumDurationNotMet);
-
-        if (durationInMinutes > serviceSettings.MaximumDurationInMinutes)
-            return Result.Failure<Service>(ServiceErrors.MaximumDurationAllowedSurpassed);
+        var durationValidation = ValidateDuration(durationInMinutes, serviceSettings);
+        if (durationValidation.IsFailure)
+            return Result.Failure<Service>(durationValidation.Error);
 
         return Result.Success(new Service
         {
@@ -49,6 +44,39 @@ public sealed class Service : Entity
             Duration = TimeSpan.FromMinutes(durationInMinutes),
             Cost = cost,
         });
+    }
+
+    /// <summary>
+    /// Updates the mutable details of the service. The service <see cref="Type"/> must still be a
+    /// specialty offered by the owning organization; that check is enforced by the application layer.
+    /// </summary>
+    public Result Update(string name, string description, int durationInMinutes, ServiceType type, Money cost, IServiceSettings serviceSettings)
+    {
+        var durationValidation = ValidateDuration(durationInMinutes, serviceSettings);
+        if (durationValidation.IsFailure)
+            return durationValidation;
+
+        Name = name;
+        Description = description;
+        Type = type;
+        Duration = TimeSpan.FromMinutes(durationInMinutes);
+        Cost = cost;
+
+        return Result.Success();
+    }
+
+    private static Result ValidateDuration(int durationInMinutes, IServiceSettings serviceSettings)
+    {
+        if (durationInMinutes % serviceSettings.SlotSizeInMinutes != 0)
+            return Result.Failure(ServiceErrors.DurationNotSlotAligned);
+
+        if (durationInMinutes < serviceSettings.MinimumDurationInMinutes)
+            return Result.Failure(ServiceErrors.MinimumDurationNotMet);
+
+        if (durationInMinutes > serviceSettings.MaximumDurationInMinutes)
+            return Result.Failure(ServiceErrors.MaximumDurationAllowedSurpassed);
+
+        return Result.Success();
     }
 
     public Result AddToGallery(MediaFile media, IServiceSettings serviceSettings)
@@ -65,4 +93,18 @@ public sealed class Service : Entity
         var item = _gallery.FirstOrDefault(m => m.Id == mediaId);
         return Result.Success(_gallery.Remove(item!));
     }
+
+    public Result AddDiscount(int discountOutOf100, string reason, TimeSpan duration, DateTime currentDateTime)
+    {
+        if (discountOutOf100 > 100 || discountOutOf100 < 0)
+            return Result.Failure(ServiceErrors.DiscountRangeUnallowed);
+
+        var discount = new Discount(discountOutOf100, reason, currentDateTime, currentDateTime + duration);
+        Discount = discount;
+
+        return Result.Success();
+    }
+
+    /// <summary>Clears the active discount. Invoked when the scheduled <c>DiscountEndedEvent</c> fires.</summary>
+    public void EndDiscount() => Discount = null;
 }

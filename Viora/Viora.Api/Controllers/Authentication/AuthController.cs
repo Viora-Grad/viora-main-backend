@@ -14,6 +14,7 @@ using Viora.Application.Staffs.LoginStaff;
 using Viora.Application.Staffs.RegisterStaff;
 using Viora.Application.Users.GetLoggedInUser;
 using Viora.Application.Users.LocalLoginUser;
+using Viora.Application.Users.LogoutUser;
 using Viora.Application.Users.OAuthLoginUser;
 using Viora.Application.Users.OAuthRegisterUser;
 using Viora.Application.Users.OAuthValidateToken;
@@ -218,6 +219,15 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> StaffRefreshToken(StaffRefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         var command = new ConsumeStaffRefreshTokenCommand(request.RefreshToken);
+        var result = await _sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout([FromBody] string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var command = new LogoutUserCommand(refreshToken);
         var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
