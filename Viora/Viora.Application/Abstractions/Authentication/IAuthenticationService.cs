@@ -16,6 +16,8 @@ public interface IAuthenticationService
     Task<Result<AuthResult>> RefreshStaffTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task<Result<AuthResult>> AuthenticateStaffAsync(Staff staff, CancellationToken cancellationToken = default);
 
+    Task<Result> LogoutAsync(string refreshToken, CancellationToken cancellationToken = default);
+
 }
 
 public sealed record AuthResult(Guid UserId,

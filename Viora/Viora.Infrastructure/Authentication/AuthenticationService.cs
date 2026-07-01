@@ -61,9 +61,6 @@ internal class AuthenticationService(IUserRepository userRepository,
         var refreshTokenExpiry = refreshTokenService.GetExpiryDate();
         var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, refreshTokenExpiry, dateTimeProvider.UtcNow);
 
-        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
-        activeToken?.Revoke();
-
 
 
         var authResult = new AuthResult(
@@ -216,9 +213,6 @@ internal class AuthenticationService(IUserRepository userRepository,
         var refreshTokenExpiry = refreshTokenService.GetExpiryDate();
         var refreshToken = RefreshToken.Create(user.Id, hashedRefreshToken, refreshTokenExpiry, dateTimeProvider.UtcNow);
 
-        var activeToken = await refreshTokenRepository.GetActiveTokenByUserIdAsync(user.Id, cancellationToken);
-        activeToken?.Revoke();
-
 
         var authResult = new AuthResult(
             UserId: user.Id,
@@ -313,5 +307,17 @@ internal class AuthenticationService(IUserRepository userRepository,
             return Result.Success(authResult);
         }
         return Result.Failure<AuthResult>(AuthenticationErrors.InvalidToken);
+    }
+
+    public async Task<Result> LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var refreshTokenHash = refreshTokenService.HashToken(refreshToken);
+
+        var existingToken = await refreshTokenRepository.GetByTokenAsync(refreshTokenHash, cancellationToken) ??
+            throw new NotFoundException("Refresh token not found");
+
+        existingToken.Revoke();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }
