@@ -1,4 +1,4 @@
-﻿namespace Viora.Application.Organizations.GetOrganizationDetails;
+﻿namespace Viora.Application.Organizations.Shared;
 
 public record OrganizationDetailsResponse(
     Guid Id,
