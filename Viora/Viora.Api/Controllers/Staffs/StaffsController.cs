@@ -7,6 +7,8 @@ using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Staffs.AssignRoles;
 using Viora.Application.Staffs.CreateStaffInvitation;
 using Viora.Application.Staffs.GetStaffInvitation;
+using Viora.Application.Staffs.UpdateStaffInfo;
+
 
 namespace Viora.Api.Controllers.Staffs;
 
@@ -72,19 +74,22 @@ public class StaffsController(ISender sender) : ControllerBase
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-    /*
-     * TODO: Implement UpdateStaff endpoint
+
     [HttpPut("{staffId:guid}")]
-    [Authorize(Policy = "staffs:update")]
-    public async Task<IActionResult> UpdateStaff(Guid staffId, UpdateStaffRequest request, CancellationToken cancellationToken)
+    [Authorize(Roles = "Owner")]
+    //[Authorize(Policy = "staffs:update")]
+    public async Task<IActionResult> UpdateStaffInfo(Guid staffId, UpdateStaffInfoRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdateStaffCommand(staffId,
+        var command = new UpdateStaffInfoCommand(staffId,
             request.FirstName,
             request.LastName,
-            request.Email,
+            request.Username,
+            request.Password,
+            request.DateOfBirth,
+            request.Gender,
             request.PhoneNumber);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
-    }*/
+    }
 
 }

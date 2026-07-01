@@ -74,8 +74,8 @@ public class SubscriptionPlanChangeDomainEventHandler(
 
         var newFeatureUsages = newPlan.PlanLimitedFeatures.Select(plf =>
         FeatureUsage.Create(
-            plf.LimitedFeatureId,
             organizationId,
+            plf.LimitedFeatureId,
             startTime,
             endTime,
             plf.LimitValue))

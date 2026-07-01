@@ -70,8 +70,8 @@ internal class SubscriptionCreatedDomainEventHandler(
 
         var newFeatureUsages = plan.PlanLimitedFeatures.Select(plf =>
         FeatureUsage.Create(
-            plf.LimitedFeatureId,
             organizationId,
+            plf.LimitedFeatureId,
             startDate,
             endDate,
             plf.LimitValue))

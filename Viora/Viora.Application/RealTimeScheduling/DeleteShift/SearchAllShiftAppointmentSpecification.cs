@@ -10,6 +10,7 @@ public class SearchAllShiftAppointmentSpecification : BaseSpecification<Appointm
     {
         if (parameters.StaffId.HasValue)
             AddCriteria(x => x.StaffId == parameters.StaffId);
+        if (parameters.StartTime.HasValue && parameters.EndTime.HasValue)
         {
             TimeSpan startTime = parameters.StartTime.Value.ToTimeSpan();
             TimeSpan endTime = parameters.EndTime.Value.ToTimeSpan();
@@ -18,7 +19,11 @@ public class SearchAllShiftAppointmentSpecification : BaseSpecification<Appointm
                 x.ReservationDate.TimeOfDay >= startTime &&
                 x.ReservationDate.TimeOfDay <= endTime);
         }
-        AddCriteria(x => x.Status != CustomerStatus.Canceled && x.Status != CustomerStatus.Completed && x.Status != CustomerStatus.InProgress);
+        AddCriteria(
+            x => x.Status != CustomerStatus.Canceled &&
+            x.Status != CustomerStatus.Completed &&
+            x.Status != CustomerStatus.InProgress &&
+            x.Status != CustomerStatus.NoShow);
     }
 
 }
