@@ -1,4 +1,5 @@
 using Microsoft.SemanticKernel.ChatCompletion;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 
@@ -8,7 +9,7 @@ public class UnclearHandler : IIntentHandler
 {
     public ChatIntent Handles => ChatIntent.Unclear;
 
-    public Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history)
+    public Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
     {
         var response = new ChatResponse
         {
