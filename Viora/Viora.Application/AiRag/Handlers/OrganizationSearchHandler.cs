@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 
@@ -66,7 +67,7 @@ User: "find a cheap dentist near me"
         _kernel = kernel;
     }
 
-    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history)
+    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
     {
         var extractionHistory = new ChatHistory();
         extractionHistory.AddSystemMessage(ExtractionPrompt);

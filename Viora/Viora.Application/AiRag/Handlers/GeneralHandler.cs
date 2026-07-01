@@ -1,6 +1,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Viora.Application.AiRag.Abstractions;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 using Viora.Domain.AiRag.Prompts;
@@ -31,7 +32,7 @@ public class GeneralHandler : IIntentHandler
         },
     };
 
-    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history)
+    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
     {
         // Build a snapshot of the conversation so far, plus the system prompt,
         // without mutating the session's ChatHistory (the orchestrator handles AppendUser/AppendAssistant).

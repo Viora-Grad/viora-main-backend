@@ -11,6 +11,7 @@ using Viora.Application.AiRag.Intent;
 using Viora.Application.AiRag.Orchestrator;
 using Viora.Application.AiRag.Session;
 using Viora.Domain.ChatSessions;
+using Viora.Domain.Users.Customers;
 using Viora.Infrastructure.Repositories;
 using Viora.Infrastructure.VectorStore;
 
@@ -43,6 +44,7 @@ public static class AiRagServiceExtensions
         services.AddSingleton<ISpecialtyVectorStore, SpecialtyVectorStore>();
 
         services.AddScoped<IKnowledgeChunkMapper, KnowledgeChunkMapper>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
 
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 

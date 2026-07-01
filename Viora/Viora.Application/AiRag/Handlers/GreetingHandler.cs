@@ -1,4 +1,5 @@
 using Microsoft.SemanticKernel.ChatCompletion;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 
@@ -8,10 +9,15 @@ public class GreetingHandler : IIntentHandler
 {
     public ChatIntent Handles => ChatIntent.Greeting;
 
-    public Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history) =>
-        Task.FromResult(new ChatResponse
+    public Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
+    {
+        var greeting = userContext?.FirstName is { Length: > 0 } name
+            ? $"Hello {name}! I'm Vivi 👋"
+            : "Hello! I'm Vivi 👋";
+
+        return Task.FromResult(new ChatResponse
             {
-                Message = "Hello! I'm Vivi 👋\n\n" +
+                Message = $"{greeting}\n\n" +
                           "I can help you with:\n" +
                           "• Finding the right specialist based on your symptoms\n" +
                           "• Searching for healthcare organizations by name, country, or service type\n" +
@@ -19,4 +25,5 @@ public class GreetingHandler : IIntentHandler
                           "What can I help you with today?",
             }
         );
+    }
 }

@@ -1,6 +1,7 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Viora.Application.AiRag.Abstractions;
+using Viora.Domain.AiRag;
 using Viora.Domain.AiRag.Chat;
 using Viora.Domain.AiRag.Intent;
 using Viora.Domain.AiRag.Prompts;
@@ -22,7 +23,7 @@ public sealed class SpecialtyHandler : IIntentHandler
         _kernel = kernel;
     }
 
-    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history)
+    public async Task<ChatResponse> HandleAsync(string message, DetectedIntent detected, ChatHistory history, UserContext? userContext = null)
     {
         var specialties = await _store.SearchAsync(message, topK: 5);
 
@@ -36,7 +37,7 @@ public sealed class SpecialtyHandler : IIntentHandler
         }
 
         var ragHistory = new ChatHistory();
-        ragHistory.AddSystemMessage(SpecialtyRagPrompt.Build(specialties));
+        ragHistory.AddSystemMessage(SpecialtyRagPrompt.Build(specialties, userContext));
         ragHistory.AddUserMessage(message);
 
         var result = await _chat.GetChatMessageContentAsync(ragHistory, kernel: _kernel);
