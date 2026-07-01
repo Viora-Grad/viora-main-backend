@@ -8,4 +8,6 @@ public class MedicalInquiry
 
     /// Pre-built text used for embedding: "Name: {Name}. {Description}"
     public string EmbeddingText => $"Specialty: {Specialty}. {Question}";
+
+    public override string ToString() => EmbeddingText;
 }
