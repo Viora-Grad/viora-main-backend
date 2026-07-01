@@ -70,7 +70,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpGet]
     [Route("api/schedule/staff")]
-    public async Task<IActionResult> GetStaffShift([FromBody] StaffShiftByDayRequest request)
+    public async Task<IActionResult> GetStaffShift([FromQuery] StaffShiftByDayRequest request)
     {
         var query = new GetStaffShiftByDayQuery(request.day, request.StaffId, request.ShiftId);
         var result = await _sender.Send(query);

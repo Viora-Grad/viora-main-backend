@@ -10,12 +10,11 @@ public class FormSubmission : Entity
     public JsonDocument Submission { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-
     public FormSubmission() { } // For EF core 
 
-    private FormSubmission(Guid id, Guid appoiontmentId, Guid formId, JsonDocument submission, DateTime createdAt) : base(id)
+    private FormSubmission(Guid id, Guid appointmentId, Guid formId, JsonDocument submission, DateTime createdAt) : base(id)
     {
-        AppointmentId = id;
+        AppointmentId = appointmentId;
         FormId = formId;
         Submission = submission;
         CreatedAt = createdAt;
