@@ -38,14 +38,14 @@ public class AiOrchestratorService
     {
         var sessionId = request.SessionId ?? Guid.NewGuid().ToString();
 
-        // Step 0 — Load existing session from DB if not already in memory
+        // Step 1 — Load existing session from DB if not already in memory
         if (request.SessionId is not null)
             await _loadSession.ExecuteAsync(Guid.Parse(sessionId), userId, ct);
 
-        // Step 0.5 — Fetch user context (name + medical record) for personalization
+        // Step 2 — Fetch user context (name + medical record) for personalization
         var userContext = await _userProfile.GetUserContextAsync(userId, ct);
 
-        // Step 0.75 — Inject user context into session history for handlers that copy from history
+        // Step 3 — Inject user context into session history for handlers that copy from history
         var history = _sessions.GetOrCreate(sessionId);
         if (history.Count == 0 && userContext is not null)
         {
@@ -53,21 +53,21 @@ public class AiOrchestratorService
             history.AddSystemMessage(ctxMsg);
         }
 
-        // Step 1 — Classify the message (stateless, no history needed)
+        // Step 4 — Classify the message (stateless, no history needed)
         var detected = await _intentDetection.DetectAsync(request.Message);
 
-        // Step 2 — Route to the correct handler
+        // Step 5 — Route to the correct handler
         var handler = _handlers.FirstOrDefault(h => h.Handles == detected.Intent)
                       ?? _handlers.First(h => h.Handles == ChatIntent.General);
 
-        // Step 3 — Handler receives the full session ChatHistory for context
+        // Step 6 — Handler receives the full session ChatHistory for context
         var response = await handler.HandleAsync(request.Message, detected, history, userContext);
 
-        // Step 4 — Append user + assistant to session history (after handler)
+        // Step 7 — Append user + assistant to session history (after handler)
         _sessions.AppendUser(sessionId, request.Message);
         _sessions.AppendAssistant(sessionId, response.Message);
 
-        // Step 5 — Flush session to database
+        // Step 8 — Flush session to database
         await _flush.FlushAsync(Guid.Parse(sessionId), userId, ct);
 
         response.Intent = detected.Intent;
