@@ -8,6 +8,7 @@ using Viora.Application.Staffs.AssignRoles;
 using Viora.Application.Staffs.CreateStaffInvitation;
 using Viora.Application.Staffs.GetBranchServiceStaffs;
 using Viora.Application.Staffs.GetStaffInvitation;
+using Viora.Application.Staffs.SearchStaff;
 using Viora.Application.Staffs.UpdateStaffInfo;
 
 
@@ -108,6 +109,25 @@ public class StaffsController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetBranchServiceStaffs(Guid branchId, Guid serviceId, CancellationToken cancellationToken)
     {
         var query = new GetBranchServiceStaffsQuery(branchId, serviceId);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> SearchStaff([FromQuery] GetStaffsRequest request, CancellationToken cancellationToken)
+    {
+        var query = new SearchStaffQuery(
+            StaffId: request.StaffId,
+            OrganizationId: request.OrganizationId,
+            FirstName: request.FirstName,
+            LastName: request.LastName,
+            RoleIds: request.RoleIds,
+            BranchIds: request.BranchIds,
+            ServiceIds: request.ServiceIds,
+            Statuses: request.Statuses,
+            Page: request.Page,
+            PageSize: request.PageSize
+            );
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }
