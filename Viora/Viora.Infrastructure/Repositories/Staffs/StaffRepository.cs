@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viora.Domain.Staffs;
+using Viora.Domain.Staffs.Internal;
 
 namespace Viora.Infrastructure.Repositories.Staffs;
 
@@ -9,6 +10,13 @@ internal class StaffRepository : Repository<Staff>, IStaffRepository
     {
     }
 
+    public async Task<IEnumerable<Staff>> GetBranchServiceStaffsAsync(Guid branchId, Guid serviceId, CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<Staff>()
+            .Where(s => s.Branches.Any(b => b.Id == branchId) && s.Services.Any(sv => sv.Id == serviceId) && s.StaffStatus == StaffStatus.Active)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<IEnumerable<Staff>> GetByBranchIdAsync(Guid branchId, CancellationToken cancellationToken)
     {

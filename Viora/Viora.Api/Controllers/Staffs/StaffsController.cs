@@ -6,6 +6,7 @@ using Viora.Application.Authentication.CreateStaffRole;
 using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Staffs.AssignRoles;
 using Viora.Application.Staffs.CreateStaffInvitation;
+using Viora.Application.Staffs.GetBranchServiceStaffs;
 using Viora.Application.Staffs.GetStaffInvitation;
 using Viora.Application.Staffs.UpdateStaffInfo;
 
@@ -35,7 +36,7 @@ public class StaffsController(ISender sender) : ControllerBase
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }
-    [HttpGet("organization/{organizationId:guid}/roles")]
+    [HttpGet("organizations/{organizationId:guid}/roles")]
     [Authorize(Policy = "roles:read")]
     public async Task<IActionResult> GetRoles(Guid organizationId, CancellationToken cancellationToken = default)
     {
@@ -91,5 +92,23 @@ public class StaffsController(ISender sender) : ControllerBase
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-
+    /*
+     * TODO
+    [HttpGet("{staffId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> GetStaff(Guid staffId, CancellationToken cancellationToken)
+    {
+        var query = new GetStaffQuery(staffId);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    */
+    [HttpGet("branches/{branchId:guid}/services/{serviceId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> GetBranchServiceStaffs(Guid branchId, Guid serviceId, CancellationToken cancellationToken)
+    {
+        var query = new GetBranchServiceStaffsQuery(branchId, serviceId);
+        var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
 }
