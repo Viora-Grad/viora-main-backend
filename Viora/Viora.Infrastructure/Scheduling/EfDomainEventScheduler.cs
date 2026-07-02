@@ -8,7 +8,7 @@ namespace Viora.Infrastructure.Scheduling;
 
 internal class EfDomainEventScheduler(ApplicationDbContext appDbContext, IDateTimeProvider dateTime) : IDomainEventScheduler
 {
-    public Task ScheduleAsync<TEvent>(
+    public async Task<Guid> ScheduleAsync<TEvent>(
     TEvent @event, DateTimeOffset scheduledFor, CancellationToken cancellationToken = default)
     where TEvent : IDomainEvent
     {
@@ -18,7 +18,7 @@ internal class EfDomainEventScheduler(ApplicationDbContext appDbContext, IDateTi
             scheduledFor: scheduledFor);
 
         appDbContext.Set<ScheduledDomainEvent>().Add(record.Value);
-        return Task.CompletedTask;
+        return record.Value.Id;
     }
 
     public async Task CancelAsync(Guid id, CancellationToken cancellationToken = default)

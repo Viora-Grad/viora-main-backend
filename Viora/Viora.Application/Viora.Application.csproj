@@ -30,6 +30,14 @@
 
   <ItemGroup>
     <Folder Include="Feedbacks\AddFeedback\" />
+    <Folder Include="Wallets\CompletePromise\" />
+    <Folder Include="Wallets\GetWalletDetails\" />
+    <Folder Include="Wallets\Checkout\" />
+    <Folder Include="Wallets\ProvisionRecharge\" />
+    <Folder Include="Wallets\PromisePayment\" />
+    <Folder Include="Wallets\RefundPromise\" />
+    <Folder Include="Wallets\RechargeOrder\" />
+    <Folder Include="Wallets\OpenWallet\" />
   </ItemGroup>
 
 </Project>
