@@ -66,7 +66,7 @@ public class LegalPapersController(ISender sender) : ControllerBase
 
         bool isAdmin = roles.Any(role => role.Contains("Admin"));
 
-        var query = new GetLegalPaperFileQuery(
+        ; var query = new GetLegalPaperFileQuery(
             legalPaperId,
             (Guid)UserId!,
             isAdmin);
