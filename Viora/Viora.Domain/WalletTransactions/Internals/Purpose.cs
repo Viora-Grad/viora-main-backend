@@ -5,5 +5,6 @@ public enum Purpose
     Checkout,
     Recharge,
     Payout,
-    Refund
+    Refund,
+    Payment
 }

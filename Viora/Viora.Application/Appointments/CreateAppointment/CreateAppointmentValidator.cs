@@ -12,7 +12,6 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentCom
         _dateTimeProvider = dateTimeProvider;
         RuleFor(x => x.ServiceId).NotEmpty().WithMessage("Service ID is required.");
         RuleFor(x => x.StaffId).NotEmpty().WithMessage("Staff ID is required.");
-        RuleFor(x => x.BranchId).NotEmpty().WithMessage("Branch ID is required.");
 
         RuleFor(x => x.CreatedBy)
             .NotEmpty().
@@ -41,6 +40,5 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentCom
             .WithMessage("Payment method cannot be Cash when PaymentId is provided.");
 
         RuleFor(x => x.ReservationDate).GreaterThan(_dateTimeProvider.UtcNow).WithMessage("Reservation date must be in the future.");
-        RuleFor(x => x.EstimatedDuration).GreaterThan(TimeSpan.Zero).WithMessage("Estimated duration must be greater than zero.");
     }
 }

@@ -28,13 +28,20 @@ public sealed class WalletPromise : Entity
 
     private WalletPromise() { }
 
+    /// <summary>
+    /// Creates a pending promise (escrow). The <paramref name="id"/> is supplied by the caller so it can
+    /// be used up-front as the idempotency reference for the source/settlement/refund transactions and as
+    /// the scheduled-expiry event payload. <paramref name="sourceTransactionId"/> is the hold debit already
+    /// taken from the source wallet.
+    /// </summary>
     public static Result<WalletPromise> Create(
+        Guid id,
         Guid fromWalletId,
         Guid toWalletId,
         Money amount,
         DateTime expiresAtUtc,
         DateTime currentDateTime,
-        Guid scheduledEventId)
+        Guid sourceTransactionId)
     {
         if (fromWalletId == toWalletId)
             return Result.Failure<WalletPromise>(WalletPromiseErrors.CannotTransferToSelf);
@@ -45,17 +52,51 @@ public sealed class WalletPromise : Entity
         if (expiresAtUtc <= currentDateTime)
             return Result.Failure<WalletPromise>(WalletPromiseErrors.InvalidExpirationTime);
 
-        var intent = new WalletPromise
+        var promise = new WalletPromise
         {
-            Id = Guid.NewGuid(),
+            Id = id,
             FromWalletId = fromWalletId,
             ToWalletId = toWalletId,
             Money = amount,
-            ScheduledEventId = scheduledEventId,
             ExpiresAtUtc = expiresAtUtc,
-            Status = PromiseStatus.Pending
+            Status = PromiseStatus.Pending,
+            SourceTransactionId = sourceTransactionId,
         };
 
-        return Result.Success(intent);
+        return Result.Success(promise);
+    }
+
+    /// <summary>Records the scheduled expiry event id so it can be cancelled when the promise settles.</summary>
+    public void AttachScheduledEvent(Guid scheduledEventId) => ScheduledEventId = scheduledEventId;
+
+    /// <summary>Pending -&gt; Completed. Idempotent: fails if already resolved.</summary>
+    public Result Complete(Guid destinationTransactionId)
+    {
+        if (Status != PromiseStatus.Pending)
+            return Result.Failure(WalletPromiseErrors.AlreadyResolved);
+
+        Status = PromiseStatus.Completed;
+        DestinationTransactionId = destinationTransactionId;
+        return Result.Success();
+    }
+
+    /// <summary>Pending -&gt; Refunded. Idempotent: fails if already resolved.</summary>
+    public Result Refund()
+    {
+        if (Status != PromiseStatus.Pending)
+            return Result.Failure(WalletPromiseErrors.AlreadyResolved);
+
+        Status = PromiseStatus.Refunded;
+        return Result.Success();
+    }
+
+    /// <summary>Pending -&gt; Failed. Idempotent: fails if already resolved.</summary>
+    public Result Fail()
+    {
+        if (Status != PromiseStatus.Pending)
+            return Result.Failure(WalletPromiseErrors.AlreadyResolved);
+
+        Status = PromiseStatus.Failed;
+        return Result.Success();
     }
 }

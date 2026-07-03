@@ -22,6 +22,11 @@ public sealed class KashierWebhookController(ISender sender, ILogger<KashierWebh
     public Task<IActionResult> Addon(CancellationToken cancellationToken)
         => HandleAsync(WebhookKind.Addon, cancellationToken);
 
+    [HttpPost("recharge")]
+    [AllowAnonymous]
+    public Task<IActionResult> Recharge(CancellationToken cancellationToken)
+        => HandleAsync(WebhookKind.Recharge, cancellationToken);
+
     private async Task<IActionResult> HandleAsync(WebhookKind kind, CancellationToken cancellationToken)
     {
         using var reader = new StreamReader(Request.Body);

@@ -34,6 +34,7 @@ public class WalletTransaction : Entity
 
         var transaction = new WalletTransaction()
         {
+            Id = Guid.NewGuid(),
             WalletId = walletId,
             Type = type,
             Description = description,
