@@ -44,6 +44,8 @@ public sealed class Permission
     public static readonly Permission PrescriptionTemplateRead = new(91, "perscription:read");
     public static readonly Permission PrescriptionWrite = new(92, "perscription:write");
     public static readonly Permission PrescriptionRead = new(93, "perscription:read");
+    public static readonly Permission RemindersRead = new(100, "reminders:read");
+    public static readonly Permission RemindersWrite = new(101, "reminders:write");
 
     public static List<Permission> All =>
     [
@@ -70,7 +72,9 @@ public sealed class Permission
         PrescriptionRead,
         PrescriptionWrite,
         PrescriptionTemplateWrite,
-        PrescriptionTemplateRead
+        PrescriptionTemplateRead,
+        RemindersRead,
+        RemindersWrite,
     ];
     #endregion Permission Values
 }

@@ -35,6 +35,7 @@ using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Prescriptions;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Reminders;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
 using Viora.Domain.Staffs;
@@ -61,6 +62,7 @@ using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.Prescriptions;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
+using Viora.Infrastructure.Repositories.Reminders;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
 using Viora.Infrastructure.Repositories.SystemRoles;
@@ -126,6 +128,8 @@ public static class DependencyInjection
 
         #region Staff
         services.AddScoped<IStaffRepository, StaffRepository>();
+        services.AddScoped<StaffRefreshTokenRepository>();
+        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
         #endregion
 
         #region Form 
@@ -134,6 +138,9 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionMediaRepository, FormSubmissionMediaRepository>();
         #endregion
 
+        #region Reminder
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+        #endregion
 
         #region Prescription 
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
@@ -144,8 +151,6 @@ public static class DependencyInjection
 
         services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
-        services.AddScoped<StaffRefreshTokenRepository>();
-        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
