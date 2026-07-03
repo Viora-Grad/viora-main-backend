@@ -60,6 +60,12 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         }
     }
 
+    public async Task<ITransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        var transaction = await Database.BeginTransactionAsync(cancellationToken);
+        return new EfTransaction(transaction);
+    }
+
     public async Task PuplishDomainEventAsync(CancellationToken cancellationToken)
     {
         var domainEntities = ChangeTracker.Entries<Entity>()

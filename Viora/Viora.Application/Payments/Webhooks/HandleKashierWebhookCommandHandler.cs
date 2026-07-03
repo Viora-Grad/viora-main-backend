@@ -1,8 +1,10 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Billings;
+using Viora.Application.Wallets.ProvisionRecharge;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Orders;
@@ -24,6 +26,7 @@ internal sealed class HandleKashierWebhookCommandHandler(
     IDomainEventScheduler scheduler,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork,
+    ISender sender,
     ILogger<HandleKashierWebhookCommandHandler> logger) : ICommandHandler<HandleKashierWebhookCommand>
 {
     private const string SuccessStatus = "SUCCESS";
@@ -47,7 +50,12 @@ internal sealed class HandleKashierWebhookCommandHandler(
             return verify; // Unauthorized -> 401
         }
 
-        // 2. Resolve the order via the merchant reference we set as the order id.
+        // 2. Recharge has no order/invoice — the merchant reference carries the user id. On success,
+        //    credit the wallet (idempotent via the gateway transaction id); everything returns 200.
+        if (request.Kind == WebhookKind.Recharge)
+            return await HandleRechargeAsync(data, cancellationToken);
+
+        // 3. Resolve the order via the merchant reference we set as the order id.
         if (!Guid.TryParse(data.MerchantOrderId, out var orderId))
         {
             logger.LogWarning("Kashier {Kind} webhook: invalid merchant order id '{Id}'.", request.Kind, data.MerchantOrderId);
@@ -130,6 +138,25 @@ internal sealed class HandleKashierWebhookCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Kashier {Kind} webhook: order {OrderId} marked paid; provisioning scheduled.", request.Kind, orderId);
         return Result.Success();
+    }
+
+    private async Task<Result> HandleRechargeAsync(PaymentData data, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(data.Status, SuccessStatus, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogInformation("Kashier recharge webhook: non-success status {Status} for ref {Reference}; ignoring.", data.Status, data.TransactionId);
+            return Result.Success();
+        }
+
+        // The merchant reference carries the user id (set at session creation).
+        if (!Guid.TryParse(data.MerchantOrderId, out var userId))
+        {
+            logger.LogWarning("Kashier recharge webhook: invalid user reference '{Reference}'.", data.MerchantOrderId);
+            return Result.Success();
+        }
+
+        // Idempotent credit (dedup on the gateway transaction id). Handler swallows/loggs anomalies -> 200.
+        return await sender.Send(new ProvisionRechargeCommand(userId, data.Amount, data.Currency, data.TransactionId), cancellationToken);
     }
 
     private async Task<Result> ScheduleProvisioningAsync(Order order, CancellationToken cancellationToken)

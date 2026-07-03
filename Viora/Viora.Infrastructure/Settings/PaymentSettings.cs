@@ -10,4 +10,5 @@ public class PaymentSettings : IPaymentSettings
     public string Secret { get; set; } = default!;
     public string PublicBaseUrl { get; set; } = default!;
     public string ClientBaseUrl { get; set; } = default!;
+    public string TransferUrl { get; set; } = default!;
 }

@@ -40,6 +40,9 @@ using Viora.Domain.Shared;
 using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
+using Viora.Domain.WalletPromises;
+using Viora.Domain.Wallets;
+using Viora.Domain.WalletTransactions;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
@@ -63,6 +66,7 @@ using Viora.Infrastructure.Repositories.Prescriptions;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
+using Viora.Infrastructure.Repositories.Wallets;
 using Viora.Infrastructure.Repositories.SystemRoles;
 using Viora.Infrastructure.Repositories.Users;
 using Viora.Infrastructure.Scheduling;
@@ -158,6 +162,12 @@ public static class DependencyInjection
         services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         #endregion InventoryRepos
+
+        #region WalletRepos
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletPromiseRepository, WalletPromiseRepository>();
+        services.AddScoped<IWalletTransactionsRepository, WalletTransactionRepository>();
+        #endregion WalletRepos
         #endregion ReposRegisters
 
         #region ServicesRegisters

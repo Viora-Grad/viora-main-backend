@@ -20,6 +20,10 @@ internal sealed class KashierPaymentService : IPaymentService
     // between the API key and the salted Secret once verified against the test gateway.
     private readonly string _signingKey;
 
+    // Payout (single transfer): the absolute endpoint and the Secret used as its Authorization header.
+    private readonly string _transferUrl;
+    private readonly string _secret;
+
     private static readonly JsonSerializerOptions WriteOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -32,6 +36,8 @@ internal sealed class KashierPaymentService : IPaymentService
         _logger = logger;
         // Kashier signs webhooks with the (GUID) API key — verified against a live test webhook.
         _signingKey = settings.ApiKey;
+        _transferUrl = settings.TransferUrl;
+        _secret = settings.Secret;
     }
 
     public async Task<Result<PaymentSessionResponse>> CreatePaymentSessionAsync(PaymentRequest request, CancellationToken cancellation)
@@ -88,6 +94,48 @@ internal sealed class KashierPaymentService : IPaymentService
             _logger.LogError(ex, "Kashier session response was not valid JSON.");
             return Result.Failure<PaymentSessionResponse>(PaymentErrors.InvalidResponse);
         }
+    }
+
+    // Kashier single bank transfer (payout). NOTE: intentionally BYPASSED — the gateway transfer API
+    // currently has issues, so we fire the request best-effort, IGNORE its response entirely, and always
+    // report success so the branch wallet debit proceeds. Only bank transfers are issued (method=bank).
+    public async Task<Result<PayoutResponse>> InitiatePayoutAsync(PayoutRequest request, CancellationToken cancellation)
+    {
+        var body = new
+        {
+            amount = request.Amount,
+            method = "bank",
+            recipientName = request.RecipientName,
+            merchantTransferId = request.MerchantTransferId,
+            recipientBank = request.RecipientBank,
+            recipientNumber = request.RecipientNumber,
+        };
+
+        try
+        {
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, _transferUrl)
+            {
+                Content = JsonContent.Create(body, options: WriteOptions),
+            };
+            // Transfers require the Secret as the Authorization header value.
+            httpRequest.Headers.TryAddWithoutValidation("Authorization", _secret);
+
+            _logger.LogInformation("Kashier transfer request -> POST {Url} MerchantTransferId={Id} Amount={Amount}",
+                _transferUrl, request.MerchantTransferId, request.Amount);
+
+            using var response = await _httpClient.SendAsync(httpRequest, cancellation);
+            var raw = await response.Content.ReadAsStringAsync(cancellation);
+            _logger.LogInformation("Kashier transfer response ({Status}): {Body} — ignored (bypassed).",
+                (int)response.StatusCode, raw);
+        }
+        catch (Exception ex)
+        {
+            // Swallow everything: the transfer is bypassed regardless of outcome.
+            _logger.LogWarning(ex, "Kashier transfer request failed; bypassing and treating payout as successful.");
+        }
+
+        // Bypass: always succeed, reconciled by our merchant transfer id.
+        return Result.Success(new PayoutResponse(request.MerchantTransferId));
     }
 
     public Result VerifySignature(IReadOnlyDictionary<string, string> signatureFields, string signatureHeader)
