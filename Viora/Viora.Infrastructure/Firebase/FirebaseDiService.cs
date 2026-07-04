@@ -11,23 +11,17 @@ public static class FirebaseDiService
     public static IServiceCollection AddFirebase(this IServiceCollection services, IConfiguration configuration)
     {
         var firebaseSettings = new FirebaseSettings();
-        configuration.GetSection("Firebase").Bind(firebaseSettings);
+        var section = configuration.GetSection("Firebase");
+        section.Bind(firebaseSettings);
 
-        var trim = firebaseSettings.Path.Trim();
-
-
-        if (string.IsNullOrEmpty(firebaseSettings.Path))
-            throw new ArgumentException("Firebase service account credential path is not configured.");
-
-        if (!File.Exists(trim))
-            throw new FileNotFoundException($"Firebase service account credential file not found at path: {firebaseSettings.Path}");
+        var serviceAccountJson = GetFirebaseServiceAccountJson(firebaseSettings);
 
 
         services.AddSingleton<FirebaseApp>(_ =>
             FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
                 Credential = CredentialFactory
-                        .FromFile<ServiceAccountCredential>(trim)
+                        .FromJson<ServiceAccountCredential>(serviceAccountJson)
                         .ToGoogleCredential()
             })
         );
@@ -44,4 +38,22 @@ public static class FirebaseDiService
         return services;
     }
     // Add other Firebase services as needed, e.g., Firestore, Realtime Database, Authentication, etc.
+
+    private static string GetFirebaseServiceAccountJson(FirebaseSettings firebaseSettings)
+    {
+        var serviceAccount = new
+        {
+            type = firebaseSettings.Type,
+            project_id = firebaseSettings.Project_Id,
+            private_key_id = firebaseSettings.Private_Key_Id,
+            private_key = firebaseSettings.Private_Key.Replace("\\n", "\n"),
+            client_email = firebaseSettings.Client_Email,
+            client_id = firebaseSettings.Client_Id,
+            auth_uri = firebaseSettings.Auth_Uri,
+            token_uri = firebaseSettings.Token_Uri,
+            auth_provider_x509_cert_url = firebaseSettings.Auth_Provider_X509_Cert_Url,
+            client_x509_cert_url = firebaseSettings.Client_X509_Cert_Url
+        };
+        return System.Text.Json.JsonSerializer.Serialize(serviceAccount);
+    }
 }
