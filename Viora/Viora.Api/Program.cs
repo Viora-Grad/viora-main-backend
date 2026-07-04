@@ -1,8 +1,5 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 using Scalar.AspNetCore;
 using Serilog;
 using Viora.Api.Middleware;

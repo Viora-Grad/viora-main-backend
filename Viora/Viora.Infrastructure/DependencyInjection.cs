@@ -47,6 +47,7 @@ using Viora.Domain.Users.Owners;
 using Viora.Domain.WalletPromises;
 using Viora.Domain.Wallets;
 using Viora.Domain.WalletTransactions;
+using Viora.Infrastructure.Archives;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
@@ -74,7 +75,6 @@ using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Staffs;
-using Viora.Infrastructure.Archives;
 
 namespace Viora.Infrastructure;
 
@@ -164,6 +164,12 @@ public static class DependencyInjection
         services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         #endregion InventoryRepos
+
+        #region WalletRepos
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletPromiseRepository, WalletPromiseRepository>();
+        services.AddScoped<IWalletTransactionsRepository, WalletTransactionRepository>();
+        #endregion WalletRepos
 
         #region ArchivesRepos
         var mongoConnectionString = configuration.GetSection("MongoDB:ConnectionString").Value ?? "mongodb://localhost:27017";
