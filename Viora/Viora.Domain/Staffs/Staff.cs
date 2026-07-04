@@ -59,6 +59,16 @@ public sealed class Staff : Entity
                 _branches.Add(branch);
         }
     }
+    public void AssignServices(IEnumerable<Service> services)
+    {
+        if (services is null || !services.Any())
+            throw new ArgumentException("Services cannot be null or empty.");
+        foreach (var service in services)
+        {
+            if (!_services.Contains(service))
+                _services.Add(service);
+        }
+    }
     public void SetStaffProperties(
         FirstName firstName,
         LastName lastName,
@@ -101,14 +111,14 @@ public sealed class Staff : Entity
                PhoneNumber is not null &&
                _branches.Count != 0;
     }
-    public Result Suspend()
+    public Result Suspend() // this should raise an event to manage the subscription qouta of the organization, but for now we will just return a result
     {
         if (StaffStatus == StaffStatus.Suspended)
             return Result.Failure(StaffErrors.StaffAlreadySuspended);
         StaffStatus = StaffStatus.Suspended;
         return Result.Success();
     }
-    public Result Delete(DateTime deletedAt)
+    public Result Delete(DateTime deletedAt) // should raise an event for organization quota management, but for now we will just return a result
     {
         DeletedAt = deletedAt;
         return Result.Success();

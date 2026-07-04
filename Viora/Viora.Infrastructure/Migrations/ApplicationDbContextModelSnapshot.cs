@@ -143,8 +143,8 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid?>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("EstimatedDuration")
-                        .HasColumnType("float");
+                    b.Property<int>("EstimatedDurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsCheckedIn")
                         .HasColumnType("bit");
@@ -2085,6 +2085,210 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Owners", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.WalletPromises.WalletPromise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DestinationTransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FromWalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ScheduledEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceTransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ToWalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Money", "Viora.Domain.WalletPromises.WalletPromise.Money#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Amount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.WalletPromises.WalletPromise.Money#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("Currency");
+                                });
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromWalletId");
+
+                    b.HasIndex("SourceTransactionId")
+                        .IsUnique();
+
+                    b.ToTable("WalletPromises", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.WalletTransactions.WalletTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ReferenceId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ReferenceId");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Money", "Viora.Domain.WalletTransactions.WalletTransaction.Money#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Amount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.WalletTransactions.WalletTransaction.Money#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("Currency");
+                                });
+                        });
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "RunningBalance", "Viora.Domain.WalletTransactions.WalletTransaction.RunningBalance#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("RunningBalanceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.WalletTransactions.WalletTransaction.RunningBalance#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("RunningBalanceCurrency");
+                                });
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WalletId");
+
+                    b.HasIndex("Type", "Purpose", "ReferenceId")
+                        .IsUnique()
+                        .HasFilter("[ReferenceId] <> ''");
+
+                    b.ToTable("WalletTransactions", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Wallets.Wallet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("OpenedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Balance", "Viora.Domain.Wallets.Wallet.Balance#Money", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("BalanceAmount");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Wallets.Wallet.Balance#Money.Currency#Currency", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Code")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("nvarchar(3)")
+                                        .HasColumnName("BalanceCurrency");
+                                });
+                        });
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Currency", "Viora.Domain.Wallets.Wallet.Currency#Currency", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Code")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("nvarchar(3)")
+                                .HasColumnName("CurrencyCode");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId")
+                        .IsUnique()
+                        .HasFilter("[BranchId] IS NOT NULL");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Wallets", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Infrastructure.Authentication.LocalCredential", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -3169,6 +3373,15 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("UserProfile");
                 });
 
+            modelBuilder.Entity("Viora.Domain.WalletTransactions.WalletTransaction", b =>
+                {
+                    b.HasOne("Viora.Domain.Wallets.Wallet", null)
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Viora.Infrastructure.Authentication.LocalCredential", b =>
                 {
                     b.HasOne("Viora.Domain.Users.Identity.User", null)
@@ -3215,6 +3428,11 @@ namespace Viora.Infrastructure.Migrations
             modelBuilder.Entity("Viora.Domain.Users.Identity.User", b =>
                 {
                     b.Navigation("Identities");
+                });
+
+            modelBuilder.Entity("Viora.Domain.Wallets.Wallet", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

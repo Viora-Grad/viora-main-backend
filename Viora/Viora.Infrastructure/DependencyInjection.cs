@@ -16,6 +16,7 @@ using Viora.Application.Billings;
 using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Archives;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Branches;
@@ -44,6 +45,10 @@ using Viora.Domain.Subscriptions.Addons;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
+using Viora.Domain.WalletPromises;
+using Viora.Domain.Wallets;
+using Viora.Domain.WalletTransactions;
+using Viora.Infrastructure.Archives;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
@@ -67,6 +72,7 @@ using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
 using Viora.Infrastructure.Repositories.SystemRoles;
 using Viora.Infrastructure.Repositories.Users;
+using Viora.Infrastructure.Repositories.Wallets;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
@@ -163,6 +169,23 @@ public static class DependencyInjection
         services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         #endregion InventoryRepos
+
+        #region WalletRepos
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IWalletPromiseRepository, WalletPromiseRepository>();
+        services.AddScoped<IWalletTransactionsRepository, WalletTransactionRepository>();
+        #endregion WalletRepos
+
+        #region ArchivesRepos
+        var mongoConnectionString = configuration.GetSection("MongoDB:ConnectionString").Value ?? "mongodb://localhost:27017";
+        var mongoDatabaseName = configuration.GetSection("MongoDB:DatabaseName").Value ?? "Viora_Archive";
+        services.AddSingleton(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+        services.AddScoped<IArchiveRepository, ArchiveRepository>();
+        services.AddScoped<IFolderRepository, FolderRepository>();
+        services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<ITemplateRepository, TemplateRepository>();
+        #endregion ArchivesRepos
+
         #endregion ReposRegisters
 
         #region ServicesRegisters

@@ -10,6 +10,7 @@ public class SearchStaffResponse
     public string Gender { get; set; }
     public DateOnly DateOfBirth { get; set; }
 
+    public string status { get; set; }
 
 
 }

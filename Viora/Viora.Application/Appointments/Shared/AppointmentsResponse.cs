@@ -11,7 +11,7 @@ public sealed record AppointmentsResponse
     public DateTime ReservationDate { get; init; }
     public string PaymentMethod { get; init; } = null!;
     public string Status { get; init; } = null!;
-    public TimeSpan EstimatedDuration { get; init; }
+    public int EstimatedDurationMinutes { get; init; }
     public string? CustomerName { get; init; }
     public string? ServiceName { get; init; }
     public string? StaffName { get; init; }

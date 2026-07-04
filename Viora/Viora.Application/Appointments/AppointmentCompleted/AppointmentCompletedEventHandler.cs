@@ -1,14 +1,14 @@
-﻿using MediatR;
+using MediatR;
 using Viora.Domain.Appointments.Events;
 
 namespace Viora.Application.Appointments.AppointmentCompleted;
 
+// Wallet settlement now happens on check-in (see AppointmentCheckedInWalletSettlementHandler), so
+// completion has no wallet responsibility. Kept as a no-op hook for future completion-time side effects.
 public class AppointmentCompletedEventHandler : INotificationHandler<AppointmentCompletedEvent>
 {
-    public async Task Handle(AppointmentCompletedEvent notification, CancellationToken cancellationToken)
+    public Task Handle(AppointmentCompletedEvent notification, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-        // transfare the money from the wallet from customer wallet to client wallet 
-
+        return Task.CompletedTask;
     }
 }

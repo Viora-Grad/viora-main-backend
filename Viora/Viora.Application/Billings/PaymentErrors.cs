@@ -27,4 +27,7 @@ public static class PaymentErrors
 
     public static readonly Error InvalidSignature =
         new("Payment.InvalidSignature", "The webhook signature could not be verified.", ErrorCategory.Unauthorized);
+
+    public static readonly Error PayoutFailed =
+        new("Payment.PayoutFailed", "The payout could not be completed at the gateway.", ErrorCategory.BadGateway);
 }

@@ -1,12 +1,15 @@
-﻿using Viora.Application.Abstractions.Authentication;
+﻿using MediatR;
+using Viora.Application.Abstractions.Authentication;
 using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Application.Appointments.Shared;
+using Viora.Application.Wallets.PromisePayment;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 using Viora.Domain.Appointments.Internal;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Services;
 using Viora.Domain.Users.Customers;
 
 namespace Viora.Application.Appointments.CreateAppointment;
@@ -19,6 +22,8 @@ internal class CreateAppointmentCommandHandler(
     IAppointmentsRepository appointmentsRepository,
     IScheduleRepository scheduleRepository,
     IShiftRepository shiftRepository,
+    IServiceRepository serviceRepository,
+    ISender sender,
     IUserContext context,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CreateAppointmentCommand, Guid>
 {
@@ -28,7 +33,14 @@ internal class CreateAppointmentCommandHandler(
 
         var customer = await customerRepository.GetByIdAsync(userId, cancellationToken) ?? throw new NotFoundException("Customer could not be found.");
 
-        var schedule = await scheduleRepository.getByBranchIdAndDayAsync(request.BranchId, request.ReservationDate.DayOfWeek, cancellationToken) ??
+        // The branch and duration are properties of the service, not the client request.
+        var service = await serviceRepository.GetByIdAsync(request.ServiceId, cancellationToken)
+            ?? throw new NotFoundException("Service could not be found.");
+
+        var branchId = service.BranchId;
+        var estimatedDuration = service.Duration;
+
+        var schedule = await scheduleRepository.getByBranchIdAndDayAsync(branchId, request.ReservationDate.DayOfWeek, cancellationToken) ??
             throw new NotFoundException("No schedule found for the requested branch and day.");
 
         var shift = await shiftRepository.GetActiveShiftAsync(schedule.Id,
@@ -39,10 +51,10 @@ internal class CreateAppointmentCommandHandler(
         var shiftstart = new DateTime(request.ReservationDate.Year, request.ReservationDate.Month, request.ReservationDate.Day, shift.StartTime.Hour, shift.StartTime.Minute, 0);
         var shiftEnd = new DateTime(request.ReservationDate.Year, request.ReservationDate.Month, request.ReservationDate.Day, shift.EndTime.Hour, shift.EndTime.Minute, 0);
 
-        var isWithinShift = request.ReservationDate >= shiftstart && request.ReservationDate.Add(request.EstimatedDuration) <= shiftEnd;
+        var isWithinShift = request.ReservationDate >= shiftstart && request.ReservationDate.Add(estimatedDuration) <= shiftEnd;
         if (!isWithinShift)
         {
-            return Result.Failure<Guid>(AppointmentErrors.InvalidAppointmentTime);
+            return Result.Failure<Guid>(AppointmentErrors.AppointmentNotWithinShift);
         }
 
 
@@ -50,7 +62,7 @@ internal class CreateAppointmentCommandHandler(
             request.ServiceId,
             request.StaffId,
             request.ReservationDate,
-            request.ReservationDate.Add(request.EstimatedDuration),
+            request.ReservationDate.Add(estimatedDuration),
             cancellationToken); // check for overlapping appointments
 
         if (isOverlapping)
@@ -59,10 +71,10 @@ internal class CreateAppointmentCommandHandler(
         }
         CustomerStatus? status = !string.IsNullOrEmpty(request.Status) ? Enum.Parse<CustomerStatus>(request.Status, true) : null;
         var parameters = new GetAppointmentsParameters(
-            BranchId: request.BranchId,
+            BranchId: branchId,
             ServiceId: request.ServiceId,
             FromDate: shiftstart,
-            ToDate: request.ReservationDate.Add(request.EstimatedDuration)
+            ToDate: request.ReservationDate.Add(estimatedDuration)
 
             );
         var specs = new GetAppointmentsSpecification(parameters);
@@ -70,19 +82,37 @@ internal class CreateAppointmentCommandHandler(
         var queueNumber = await appointmentsRepository.CountAsync(specs, cancellationToken);
 
         var payMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod, true);
+
+        // Wallet payments are settled through an escrow promise: hold the service cost now, and store the
+        // resulting hold-transaction id as the appointment's PaymentId. On check-in the promise settles to
+        // the branch; if the customer never shows, it expires and refunds. If this appointment insert then
+        // fails, the promise simply expires and auto-refunds (self-healing).
+        var paymentId = request.PaymentId;
+        if (payMethod == PaymentMethod.Wallet)
+        {
+            var promiseResult = await sender.Send(
+                new PromisePaymentCommand(userId, branchId, service.Cost, request.ReservationDate),
+                cancellationToken);
+
+            if (promiseResult.IsFailure)
+                return Result.Failure<Guid>(promiseResult.Error);
+
+            paymentId = promiseResult.Value;
+        }
+
         var appointment = Appointment.Book(
         userId,
         request.ServiceId,
         request.StaffId,
-        request.BranchId,
-        request.PaymentId,
+        branchId,
+        paymentId,
         request.ReservationDate,
         (int)queueNumber,
         payMethod,
         status,
         Enum.Parse<Creator>(request.CreatedBy, true),
         Enum.Parse<Platform>(request.RequestPlatform, true),
-        request.EstimatedDuration,
+        (int)estimatedDuration.TotalMinutes,
         dateTimeProvider.UtcNow);
 
         appointmentsRepository.Add(appointment);

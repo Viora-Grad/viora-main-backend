@@ -67,11 +67,8 @@ internal class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         builder.Property(a => a.RequestPlatform)
             .IsRequired();
 
-        builder.Property(a => a.EstimatedDuration)
-            .IsRequired()
-            .HasConversion(
-                v => v.TotalMinutes,
-                v => TimeSpan.FromMinutes(v));
+        builder.Property(a => a.EstimatedDurationMinutes)
+            .IsRequired();
 
         builder.Property(a => a.CreatedAt)
             .IsRequired();
