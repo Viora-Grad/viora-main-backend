@@ -210,7 +210,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("permissions")]
-    [Authorize(Policy = "permissions:read")]
+    [Authorize]
     public IActionResult GetPermissions(CancellationToken cancellationToken = default)
     {
         return Ok(Permission.All);
