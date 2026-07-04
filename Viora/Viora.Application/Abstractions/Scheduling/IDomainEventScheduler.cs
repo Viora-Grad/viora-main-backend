@@ -4,6 +4,6 @@ namespace Viora.Application.Abstractions.Scheduling;
 
 public interface IDomainEventScheduler
 {
-    Task ScheduleAsync<TEvent>(TEvent @event, DateTimeOffset scheduledFor, CancellationToken cancellationToken = default) where TEvent : IDomainEvent;
+    Task<Guid> ScheduleAsync<TEvent>(TEvent @event, DateTimeOffset scheduledFor, CancellationToken cancellationToken = default) where TEvent : IDomainEvent;
     Task CancelAsync(Guid scheduledEventId, CancellationToken cancellationToken = default);
 }

@@ -8,4 +8,7 @@ public interface IPaymentSettings
     public string Secret { get; set; }
     public string PublicBaseUrl { get; set; }
     public string ClientBaseUrl { get; set; }
+
+    // Absolute URL of the Kashier single-transfer (payout) endpoint. Different host from BaseUrl.
+    public string TransferUrl { get; set; }
 }

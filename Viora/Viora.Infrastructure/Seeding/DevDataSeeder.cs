@@ -504,9 +504,10 @@ internal sealed class DevDataSeeder(
     }
 
     /// <summary>
-    /// Dev-only operational data for the pinned branch: services, staff, a weekly schedule, and shifts.
-    /// Moved here from the production reference seeder (it must never go live). Gated on services
-    /// already existing so re-runs are a no-op.
+    /// Dev-only operational data for the pinned branch: services, staff (each assigned to the branch and
+    /// presenting a couple of services), a weekly schedule, and a shift per staff per weekday. Moved here
+    /// from the production reference seeder (it must never go live). Gated on services already existing so
+    /// re-runs are a no-op.
     /// </summary>
     private async Task SeedBranchOperationsAsync(CancellationToken cancellationToken)
     {
@@ -517,19 +518,33 @@ internal sealed class DevDataSeeder(
         }
 
         // Services + staff for the dev branch (branch already committed by the active-owner persona).
-        db.Set<Service>().AddRange(BuildServices());
+        var services = BuildServices().ToList();
+        db.Set<Service>().AddRange(services);
 
-        foreach (var staffId in StaffIds)
-            db.Set<Staff>().Add(
-                Staff.SeedActiveStaff(
-                staffId,
+        // The branch these staff belong to; needed to seed the Staff<->Branch (StaffBranch) join.
+        var branch = await db.Set<Branch>().FindAsync([BranchId], cancellationToken)
+            ?? throw new InvalidOperationException("DevData: dev branch not found; the active-owner persona must run first.");
+
+        for (var i = 0; i < StaffIds.Length; i++)
+        {
+            var staff = Staff.SeedActiveStaff(
+                StaffIds[i],
                 OrganizationId,
                 "John",
                 "Doe",
                 clock.UtcNow,
                 new DateOnly(1990, 1, 1),
                 Domain.Staffs.Internal.Gender.Male,
-                new PhoneNumber("+1234567890")));
+                new PhoneNumber("+1234567890"));
+
+            // Staff <-> Branch: every dev staff member works at the pinned branch.
+            staff.AssignBranches([branch]);
+
+            // Staff <-> Service: each member "presents" two of the branch's services (rotating pair).
+            staff.AssignServices([services[i % services.Count], services[(i + 1) % services.Count]]);
+
+            db.Set<Staff>().Add(staff);
+        }
 
         // Weekly schedule (Mon–Fri), pinned to known ids so the shifts below resolve their FK.
         var days = new[]
@@ -546,14 +561,13 @@ internal sealed class DevDataSeeder(
         // Persist schedules first — Shift.ScheduleId is an enforced FK to Schedule.
         await SaveSuppressingDomainEventsAsync(cancellationToken);
 
-        db.Set<Shift>().AddRange(
-        [
-            Shift.Create(ScheduleIds[0], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[4]),
-            Shift.Create(ScheduleIds[1], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[4]),
-            Shift.Create(ScheduleIds[2], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[2]),
-            Shift.Create(ScheduleIds[3], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[3]),
-            Shift.Create(ScheduleIds[4], new TimeOnly(12, 0), new TimeOnly(23, 59), StaffIds[0]),
-        ]);
+        // A shift for every staff member on every weekday, so each staff has a full weekly schedule
+        // (the schedule returned when querying a staff member's shifts).
+        var shifts =
+            from scheduleId in ScheduleIds
+            from staffId in StaffIds
+            select Shift.Create(scheduleId, new TimeOnly(9, 0), new TimeOnly(17, 0), staffId);
+        db.Set<Shift>().AddRange(shifts);
 
         await SaveSuppressingDomainEventsAsync(cancellationToken);
         logger.LogInformation("DevData: seeded branch operations (services, staff, schedules, shifts).");

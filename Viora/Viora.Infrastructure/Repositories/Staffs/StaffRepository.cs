@@ -10,6 +10,20 @@ internal class StaffRepository : Repository<Staff>, IStaffRepository
     {
     }
 
+    // Eager-loads the full object graph for the "me" profile. Split query avoids the cartesian blow-up
+    // across the three independent collections; owned branch collections (phones, hours, services-provided)
+    // load automatically with the branch.
+    public async Task<Staff?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<Staff>()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(s => s.Roles).ThenInclude(r => r.Permissions)
+            .Include(s => s.Branches)
+            .Include(s => s.Services)
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
     public async Task<IEnumerable<Staff>> GetBranchServiceStaffsAsync(Guid branchId, Guid serviceId, CancellationToken cancellationToken)
     {
         return await DbContext.Set<Staff>()

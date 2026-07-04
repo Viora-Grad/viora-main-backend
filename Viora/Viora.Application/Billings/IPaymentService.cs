@@ -9,4 +9,8 @@ public interface IPaymentService
 
     // Verifies a webhook's x-kashier-signature header against the signed data fields (HMAC-SHA256, CPU-only).
     Result VerifySignature(IReadOnlyDictionary<string, string> signatureFields, string signatureHeader);
+
+    // Sends funds out to a branch's destination account/wallet (branch checkout). Synchronous: a success
+    // result means the gateway accepted the payout.
+    Task<Result<PayoutResponse>> InitiatePayoutAsync(PayoutRequest request, CancellationToken cancellation);
 }

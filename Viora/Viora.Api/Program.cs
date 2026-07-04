@@ -17,6 +17,7 @@ using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
 using Viora.Domain.Services;
+using Viora.Domain.Wallets;
 using Viora.Infrastructure;
 using Viora.Infrastructure.AiRag;
 using Viora.Infrastructure.RealTime.Hubs;
@@ -85,6 +86,8 @@ try
         builder.Configuration, "Branch");
     builder.Services.AddInterfacedOptions<IPaymentSettings, PaymentSettings>(
         builder.Configuration, "Payment");
+    builder.Services.AddInterfacedOptions<IWalletSettings, WalletSettings>(
+        builder.Configuration, "Wallet");
     #endregion Settings
 
     var app = builder.Build();

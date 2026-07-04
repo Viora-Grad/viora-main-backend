@@ -31,14 +31,12 @@ public class AppointmentsController(
         var command = new CreateAppointmentCommand(
             StaffId: request.StaffId,
             ServiceId: request.ServiceId,
-            BranchId: request.BranchId,
-            PaymentId: request.PaymentId,
+            PaymentId: null,
             ReservationDate: request.ReservationDate,
             PaymentMethod: request.PaymentMethod,
             Status: request.Status,
             CreatedBy: request.CreatedBy,
-            RequestPlatform: request.RequestPlatform,
-            EstimatedDuration: request.EstimatedDuration
+            RequestPlatform: request.RequestPlatform
         );
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();

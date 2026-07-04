@@ -6,6 +6,7 @@ public enum WebhookKind
 {
     Subscription,
     Addon,
+    Recharge,
 }
 
 // Raw webhook delivery from Kashier. Kind comes from which route received it

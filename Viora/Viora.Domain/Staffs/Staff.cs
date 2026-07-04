@@ -59,6 +59,16 @@ public sealed class Staff : Entity
                 _branches.Add(branch);
         }
     }
+    public void AssignServices(IEnumerable<Service> services)
+    {
+        if (services is null || !services.Any())
+            throw new ArgumentException("Services cannot be null or empty.");
+        foreach (var service in services)
+        {
+            if (!_services.Contains(service))
+                _services.Add(service);
+        }
+    }
     public void SetStaffProperties(
         FirstName firstName,
         LastName lastName,
