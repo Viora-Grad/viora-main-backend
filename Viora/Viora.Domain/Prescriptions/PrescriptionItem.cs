@@ -16,7 +16,7 @@ public class PrescriptionItem : Entity
     private PrescriptionItem(Guid id, Guid prescriptionId, string name, string? note, string dose, int Frequence, int duration) : base(id)
     {
 
-        PrescriptionId = id;
+        PrescriptionId = prescriptionId;
         Name = new MedicationName(name);
         Note = new PrescriptionNote(note);
         Dosage = new MedicalDosage(dose, Frequence, duration);

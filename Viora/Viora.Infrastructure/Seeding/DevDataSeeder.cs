@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -6,6 +7,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.Abstractions.Security;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Forms;
 using Viora.Domain.Appointments.Internal;
 using Viora.Domain.Branches;
 using Viora.Domain.Inventory;
@@ -20,6 +22,7 @@ using Viora.Domain.Organizations.OrganizationDetails;
 using Viora.Domain.Organizations.Shared;
 using Viora.Domain.Organizations.Shared.Enums;
 using Viora.Domain.Plans;
+using Viora.Domain.Prescriptions;
 using Viora.Domain.RealTimeScheduling;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
@@ -97,6 +100,18 @@ internal sealed class DevDataSeeder(
     // Pinned customer persona id (shared between User and Customer aggregates) so seeded
     // appointments can reference it deterministically. Login: customer@viora.dev / Dev123!Pass
     private static readonly Guid CustomerUserId = Guid.Parse("d4e5f6a7-0002-0000-0000-000000000001");
+
+    // Pinned form id so seeded forms can be referenced deterministically across runs.
+    private static readonly Guid FormId = Guid.Parse("F0A00001-0000-0000-0000-000000000001");
+
+    // Pinned prescription and prescription-item ids so they can be referenced deterministically.
+    private static readonly Guid PrescriptionId = Guid.Parse("A035C001-0000-0000-0000-000000000001");
+    private static readonly Guid[] PrescriptionItemIds =
+    [
+        Guid.Parse("1A3D0001-0000-0000-0000-000000000001"),
+        Guid.Parse("1A3D0002-0000-0000-0000-000000000002"),
+        Guid.Parse("1A3D0003-0000-0000-0000-000000000003"),
+    ];
 
     // Pinned ids for the Alexandria dental persona (dental.owner@viora.dev).
     private static readonly Guid AlexDentalOrgId = new("aed00001-0000-0000-0000-000000000001");
@@ -225,10 +240,13 @@ internal sealed class DevDataSeeder(
         // Kept under this persona's gate so it can never run without its branch present.
         await SeedBranchOperationsAsync(cancellationToken);
 
+        await SeedFormsAsync(cancellationToken);
+
         // Inventory (items + movement history) and appointments for the dev branch. Both depend on the
         // branch/services/staff committed above, so they run last under this persona's gate.
         await SeedInventoryAsync(ownerId, organization.Id, cancellationToken);
         await SeedAppointmentsAsync(cancellationToken);
+        await SeedPrescriptionsAsync(cancellationToken);
 
         logger.LogInformation("DevData: seeded active owner persona ({Email}).", email);
     }
@@ -573,6 +591,55 @@ internal sealed class DevDataSeeder(
         logger.LogInformation("DevData: seeded branch operations (services, staff, schedules, shifts).");
     }
 
+    private async Task SeedFormsAsync(CancellationToken cancellationToken)
+    {
+        if (await db.Set<Form>().AnyAsync(cancellationToken))
+        {
+            logger.LogInformation("DevData: forms already seeded, skipping.");
+            return;
+        }
+
+        var service = await db.Set<Service>()
+            .FirstOrDefaultAsync(s => s.BranchId == BranchId && s.Description.Value == "A basic haircut service.", cancellationToken)
+            ?? throw new InvalidOperationException("DevData: haircut service not found; branch operations must be seeded first.");
+
+        var staffId = StaffIds[0];
+
+        var fields = JsonDocument.Parse("""
+        {
+            "fields": [
+                {
+                    "type": "textarea",
+                    "name": "additional_questions",
+                    "label": "Any additional medical conditions or concerns?",
+                    "required": false
+                },
+                {
+                    "type": "file",
+                    "name": "previous_prescription",
+                    "label": "Previous Prescription",
+                    "accept": ".pdf,.jpg,.png",
+                    "required": false
+                },
+                {
+                    "type": "file",
+                    "name": "medical_scans",
+                    "label": "Medical Scans",
+                    "accept": ".pdf,.jpg,.png,.dcm",
+                    "required": false
+                }
+            ]
+        }
+        """);
+
+        var form = Unwrap(Form.Create(service.Id, staffId, "Haircut Intake Form", fields), "form");
+        SetEntityId(form, FormId);
+
+        db.Set<Form>().Add(form);
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded haircut intake form.");
+    }
+
     private IEnumerable<Service> BuildServices() =>
     [
         Unwrap(Service.Create(BranchId, "Haircut", "A basic haircut service.", 30, ServiceType.Cardiology, new Money(20.00m, Currency.Egp), serviceSettings), "service Haircut"),
@@ -708,6 +775,64 @@ internal sealed class DevDataSeeder(
 
         await SaveSuppressingDomainEventsAsync(cancellationToken);
         logger.LogInformation("DevData: seeded appointments for the dev branch.");
+    }
+
+    /// <summary>
+    /// Dev-only prescription for the first completed appointment. Adds a prescription with
+    /// three sample items (medication, dose, frequency, duration). Gated on any prescription
+    /// already existing so re-runs are a no-op.
+    /// </summary>
+    private async Task SeedPrescriptionsAsync(CancellationToken cancellationToken)
+    {
+        if (await db.Set<Prescription>().AnyAsync(cancellationToken))
+        {
+            logger.LogInformation("DevData: prescriptions already seeded, skipping.");
+            return;
+        }
+
+        var completedAppointment = await db.Set<Appointment>()
+            .Where(a => a.BranchId == BranchId && a.Status == CustomerStatus.Completed)
+            .OrderBy(a => a.ReservationDate)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (completedAppointment is null)
+        {
+            logger.LogWarning("DevData: no completed appointment found; skipping prescription seeding.");
+            return;
+        }
+
+        var now = clock.UtcNow;
+
+        var prescription = Unwrap(
+            Prescription.Create(completedAppointment.Id, now), "prescription");
+        SetEntityId(prescription, PrescriptionId);
+
+        var items = new (string Name, string? Note, string Dose, int Frequency, int Duration)[]
+        {
+            ("Amoxicillin", "Take after meals", "500mg", 3, 7),
+            ("Ibuprofen", "For pain relief", "200mg", 2, 5),
+            ("Vitamin C", "Daily supplement", "1000mg", 1, 14),
+        };
+
+        var prescriptionItems = new List<PrescriptionItem>();
+        for (var i = 0; i < items.Length; i++)
+        {
+            var (name, note, dose, frequency, duration) = items[i];
+            var item = Unwrap(
+                PrescriptionItem.Create(prescription.Id, name, note, dose, frequency, duration),
+                $"prescription item {name}");
+            SetEntityId(item, PrescriptionItemIds[i]);
+            prescriptionItems.Add(item);
+        }
+
+        prescription.AddItems(prescriptionItems);
+
+        db.Set<Prescription>().Add(prescription);
+        db.Set<PrescriptionItem>().AddRange(prescriptionItems);
+
+        await SaveSuppressingDomainEventsAsync(cancellationToken);
+        logger.LogInformation("DevData: seeded prescription with {Count} items for appointment {AppointmentId}.",
+            prescriptionItems.Count, completedAppointment.Id);
     }
 
     /// <summary>Creates a User with local credentials + Customer role, then the Customer aggregate (shared id).</summary>
