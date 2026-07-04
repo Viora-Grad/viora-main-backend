@@ -34,7 +34,8 @@ internal class SearchStaffQueryHandler(
             LastName = staff.LastName!,
             PhoneNumber = staff.PhoneNumber,
             Gender = staff.Gender.ToString()!,
-            DateOfBirth = (DateOnly)staff.DateOfBirth!
+            DateOfBirth = (DateOnly)staff.DateOfBirth!,
+            status = staff.StaffStatus.ToString()
         }
         ).ToList();
 

@@ -54,7 +54,7 @@ internal class CreateAppointmentCommandHandler(
         var isWithinShift = request.ReservationDate >= shiftstart && request.ReservationDate.Add(estimatedDuration) <= shiftEnd;
         if (!isWithinShift)
         {
-            return Result.Failure<Guid>(AppointmentErrors.InvalidAppointmentTime);
+            return Result.Failure<Guid>(AppointmentErrors.AppointmentNotWithinShift);
         }
 
 
