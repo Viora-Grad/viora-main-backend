@@ -16,6 +16,7 @@ using Viora.Application.Billings;
 using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Archives;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Branches;
@@ -69,6 +70,7 @@ using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
 using Viora.Infrastructure.Staffs;
+using Viora.Infrastructure.Archives;
 
 namespace Viora.Infrastructure;
 
@@ -158,6 +160,17 @@ public static class DependencyInjection
         services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
         #endregion InventoryRepos
+
+        #region ArchivesRepos
+        var mongoConnectionString = configuration.GetSection("MongoDB:ConnectionString").Value ?? "mongodb://localhost:27017";
+        var mongoDatabaseName = configuration.GetSection("MongoDB:DatabaseName").Value ?? "Viora_Archive";
+        services.AddSingleton(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+        services.AddScoped<IArchiveRepository, ArchiveRepository>();
+        services.AddScoped<IFolderRepository, FolderRepository>();
+        services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<ITemplateRepository, TemplateRepository>();
+        #endregion ArchivesRepos
+
         #endregion ReposRegisters
 
         #region ServicesRegisters
