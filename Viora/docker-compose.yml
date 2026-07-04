@@ -26,11 +26,15 @@ services:
       # Override the Seq sink's serverUrl (3rd entry, index 2, in Serilog:WriteTo) to reach the seq container.
       - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
       - Payment__Secret=${PAYMENT__SECRET}
+      - MongoDB__ConnectionString=mongodb://mongo:27017
+      - MongoDB__DatabaseName=Viora_Archive
     depends_on:
       sql:
         condition: service_healthy
       qdrant:
         condition: service_started
+      mongo:
+        condition: service_healthy
       seq:
         condition: service_started
     restart: unless-stopped
@@ -69,6 +73,23 @@ services:
     networks:
       - viora-net
 
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - viora-net
+
   seq:
     image: datalust/seq:latest
     container_name: seq
@@ -87,6 +108,7 @@ volumes:
   sql-data:
   qdrant-data:
   seq-data:
+  mongo-data:
 
 networks:
   viora-net:
