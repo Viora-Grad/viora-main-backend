@@ -37,13 +37,16 @@ internal sealed class CreateRechargeSessionCommandHandler(
         var now = dateTimeProvider.UtcNow;
         logger.LogInformation("Wallet recharge session requested. User={UserId} Amount={Amount}", userId, request.Amount);
 
-        // Recharge has no persisted order; we carry the user id as the merchant reference so the webhook
-        // (which always echoes MerchantOrderId) can resolve the wallet to credit.
+        // Kashier requires a unique order id per session, so a bare user id (reused across recharges) is
+        // rejected. We build the order as [user id ("N", 32 hex chars)] + [fresh guid ("N")]: unique per
+        // attempt, purely alphanumeric, and the webhook recovers the wallet from the fixed 32-char prefix.
+        var order = userId.ToString("N") + Guid.NewGuid().ToString("N");
+
         var paymentRequest = new PaymentRequest
         {
             Amount = request.Amount.ToString("0.00", CultureInfo.InvariantCulture),
             Currency = wallet.Currency.Code,
-            Order = userId.ToString(),
+            Order = order,
             MerchantId = paymentSettings.MerchentId,
             ServerWebhook = $"{paymentSettings.PublicBaseUrl.TrimEnd('/')}/api/webhooks/kashier/recharge",
             MerchantRedirect = paymentSettings.ClientBaseUrl,

@@ -148,10 +148,11 @@ internal sealed class HandleKashierWebhookCommandHandler(
             return Result.Success();
         }
 
-        // The merchant reference carries the user id (set at session creation).
-        if (!Guid.TryParse(data.MerchantOrderId, out var userId))
+        // The order is [user id ("N", 32 hex)] + [unique suffix]; the wallet owner is the 32-char prefix.
+        var merchantOrder = data.MerchantOrderId;
+        if (merchantOrder is null || merchantOrder.Length < 32 || !Guid.TryParseExact(merchantOrder[..32], "N", out var userId))
         {
-            logger.LogWarning("Kashier recharge webhook: invalid user reference '{Reference}'.", data.MerchantOrderId);
+            logger.LogWarning("Kashier recharge webhook: could not extract user id from order '{Order}'.", data.MerchantOrderId);
             return Result.Success();
         }
 
