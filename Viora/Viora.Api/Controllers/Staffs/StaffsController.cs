@@ -5,8 +5,11 @@ using Viora.Api.Extensions;
 using Viora.Application.Authentication.CreateStaffRole;
 using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Staffs.AssignRoles;
+using Viora.Application.Staffs.ChangeStatus;
 using Viora.Application.Staffs.CreateStaffInvitation;
+using Viora.Application.Staffs.DeleteStaff;
 using Viora.Application.Staffs.GetBranchServiceStaffs;
+using Viora.Application.Staffs.GetStaffById;
 using Viora.Application.Staffs.GetStaffInvitation;
 using Viora.Application.Staffs.GetStaffMe;
 using Viora.Application.Staffs.SearchStaff;
@@ -94,17 +97,30 @@ public class StaffsController(ISender sender) : ControllerBase
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-    /*
-     * TODO
     [HttpGet("{staffId:guid}")]
     [Authorize]
     public async Task<IActionResult> GetStaff(Guid staffId, CancellationToken cancellationToken)
     {
-        var query = new GetStaffQuery(staffId);
+        var query = new GetStaffByIdQuery(staffId);
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }
-    */
+    [HttpPatch("{StaffId:guid}/status")]
+    [Authorize(Policy = "staffs:write")]
+    public async Task<IActionResult> UpdateStaffStatus(Guid StaffId, ChangeStatusRequest request, CancellationToken cancellationToken)
+    {
+        var command = new ChangeStatusCommand(StaffId, request.Status);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpDelete("{StaffId:guid}")]
+    [Authorize(Policy = "staff:write")]
+    public async Task<IActionResult> DeleteStaff(Guid StaffId, CancellationToken cancellationToken)
+    {
+        var command = new DeleteStaffCommand(StaffId);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
 
     // Full profile of the currently authenticated staff member (id resolved from the token):
     // roles + their permissions, assigned branches, and services.

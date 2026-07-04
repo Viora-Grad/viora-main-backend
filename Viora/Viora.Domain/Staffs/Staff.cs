@@ -111,14 +111,14 @@ public sealed class Staff : Entity
                PhoneNumber is not null &&
                _branches.Count != 0;
     }
-    public Result Suspend()
+    public Result Suspend() // this should raise an event to manage the subscription qouta of the organization, but for now we will just return a result
     {
         if (StaffStatus == StaffStatus.Suspended)
             return Result.Failure(StaffErrors.StaffAlreadySuspended);
         StaffStatus = StaffStatus.Suspended;
         return Result.Success();
     }
-    public Result Delete(DateTime deletedAt)
+    public Result Delete(DateTime deletedAt) // should raise an event for organization quota management, but for now we will just return a result
     {
         DeletedAt = deletedAt;
         return Result.Success();

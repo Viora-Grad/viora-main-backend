@@ -72,9 +72,10 @@ public sealed class Permission
         PrescriptionRead,
         PrescriptionWrite,
         PrescriptionTemplateWrite,
-        PrescriptionTemplateRead,
         OrganizationPerscriptionTemplateRead,
         FormSubmissionRead
+        PrescriptionTemplateRead,
+        StaffWrite
     ];
     #endregion Permission Values
 }
