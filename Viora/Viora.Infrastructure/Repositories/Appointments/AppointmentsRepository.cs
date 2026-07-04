@@ -29,7 +29,7 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .Where(appointment => appointment.ServiceId == serviceId &&
             appointment.StaffId == staffId &&
             appointment.ReservationDate >= startDate &&
-            appointment.ReservationDate.AddMinutes(appointment.EstimatedDuration.Minutes) <= endDate)
+            appointment.ReservationDate.AddMinutes(appointment.EstimatedDurationMinutes) <= endDate)
             .ToListAsync(cancellationToken);
     }
 
@@ -64,7 +64,7 @@ internal class AppointmentsRepository : Repository<Appointment>, IAppointmentsRe
             .Where(appointment => appointment.ServiceId == serviceId &&
             appointment.StaffId == staffId &&
             appointment.ReservationDate < endDate &&
-            appointment.ReservationDate.AddMinutes(appointment.EstimatedDuration.Minutes) > startDate)
+            appointment.ReservationDate.AddMinutes(appointment.EstimatedDurationMinutes) > startDate)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

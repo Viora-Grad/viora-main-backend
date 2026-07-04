@@ -112,7 +112,7 @@ internal class CreateAppointmentCommandHandler(
         status,
         Enum.Parse<Creator>(request.CreatedBy, true),
         Enum.Parse<Platform>(request.RequestPlatform, true),
-        estimatedDuration,
+        (int)estimatedDuration.TotalMinutes,
         dateTimeProvider.UtcNow);
 
         appointmentsRepository.Add(appointment);
