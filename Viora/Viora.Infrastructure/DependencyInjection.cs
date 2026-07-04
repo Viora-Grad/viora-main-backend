@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Application.Billings;
+using Viora.Application.Notifications.NotificationService;
 using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
@@ -27,6 +28,7 @@ using Viora.Domain.Inventory;
 using Viora.Domain.InventoryMovements;
 using Viora.Domain.Medias;
 using Viora.Domain.MedicalRecords;
+using Viora.Domain.Notifications;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.OnBoardings;
@@ -52,6 +54,7 @@ using Viora.Infrastructure.Archives;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Payments;
@@ -63,6 +66,7 @@ using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Inventories;
 using Viora.Infrastructure.Repositories.MedicalRecords;
+using Viora.Infrastructure.Repositories.Notifications;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.Prescriptions;
@@ -143,6 +147,9 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         services.AddScoped<IFormSubmissionMediaRepository, FormSubmissionMediaRepository>();
         #endregion
+        #region Notification
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        #endregion
 
         #region Reminder
         services.AddScoped<IReminderRepository, ReminderRepository>();
@@ -207,6 +214,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
+        services.AddScoped<INotificationService, NotificationService.NotificationService>();
         #endregion ServicesRegisters
 
         #region Payments
@@ -224,6 +232,11 @@ public static class DependencyInjection
         #region HostedWorkers
         services.AddHostedService<ScheduledEventDispatcherService>();
         #endregion HostedWorkers
+
+        #region Firebase
+        services.AddFirebase(configuration);
+        services.AddFirebaseMessaging();
+        #endregion
 
         var connectionString = configuration.GetConnectionString("Default") ?? throw new ArgumentNullException(configuration.GetConnectionString("Default"));
 

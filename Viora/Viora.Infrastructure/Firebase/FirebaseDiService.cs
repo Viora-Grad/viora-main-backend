@@ -13,14 +13,21 @@ public static class FirebaseDiService
         var firebaseSettings = new FirebaseSettings();
         configuration.GetSection("Firebase").Bind(firebaseSettings);
 
+        var trim = firebaseSettings.Path.Trim();
+
+
         if (string.IsNullOrEmpty(firebaseSettings.Path))
             throw new ArgumentException("Firebase service account credential path is not configured.");
+
+        if (!File.Exists(trim))
+            throw new FileNotFoundException($"Firebase service account credential file not found at path: {firebaseSettings.Path}");
+
 
         services.AddSingleton<FirebaseApp>(_ =>
             FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
                 Credential = CredentialFactory
-                        .FromFile<ServiceAccountCredential>(firebaseSettings.Path)
+                        .FromFile<ServiceAccountCredential>(trim)
                         .ToGoogleCredential()
             })
         );
