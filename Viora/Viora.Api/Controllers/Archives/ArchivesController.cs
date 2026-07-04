@@ -19,8 +19,8 @@ using Viora.Application.Archives.GetRecord;
 using Viora.Application.Archives.GetRecordsByFolder;
 using Viora.Application.Archives.GetTemplate;
 using Viora.Application.Archives.GetTemplateCurrentVersion;
-using Viora.Application.Archives.GetTemplateVersionFields;
 using Viora.Application.Archives.GetTemplatesByFolder;
+using Viora.Application.Archives.GetTemplateVersionFields;
 using Viora.Application.Archives.PublishTemplateVersion;
 using Viora.Application.Archives.SearchRecords;
 using Viora.Application.Archives.UpdateArchive;
@@ -35,7 +35,7 @@ namespace Viora.Api.Controllers.Archives;
 public class ArchivesController(ISender sender) : ControllerBase
 {
     [HttpPost]
-    [AllowAnonymous]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> CreateArchive([FromBody] CreateArchiveRequest request, CancellationToken ct)
     {
         var command = new CreateArchiveCommand(
@@ -51,8 +51,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
-    [AllowAnonymous]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetArchive([FromRoute] Guid id, CancellationToken ct)
     {
         var query = new GetArchiveQuery(id);
@@ -61,7 +60,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("organization/{organizationId:guid}")]
-    [AllowAnonymous]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetArchives([FromRoute] Guid organizationId, CancellationToken ct)
     {
         var query = new GetArchivesQuery(organizationId);
@@ -70,6 +69,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> UpdateArchive([FromRoute] Guid id, [FromBody] UpdateArchiveRequest request, CancellationToken ct)
     {
         var command = new UpdateArchiveCommand(
@@ -85,6 +85,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> DeleteArchive([FromRoute] Guid id, CancellationToken ct)
     {
         var command = new DeleteArchiveCommand(id);
@@ -93,6 +94,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{archiveId:guid}/folders")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> CreateFolder([FromRoute] Guid archiveId, [FromBody] CreateFolderRequest request, CancellationToken ct)
     {
         var command = new CreateFolderCommand(
@@ -107,6 +109,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/folders/{id:guid}")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetFolder([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var query = new GetFolderQuery(id);
@@ -115,6 +118,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/tree")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetFolderTree([FromRoute] Guid archiveId, CancellationToken ct)
     {
         var query = new GetFolderTreeQuery(archiveId);
@@ -123,6 +127,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{archiveId:guid}/folders/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> UpdateFolder([FromRoute] Guid archiveId, [FromRoute] Guid id, [FromBody] UpdateFolderRequest request, CancellationToken ct)
     {
         var command = new UpdateFolderCommand(id, request.Name, request.Description ?? string.Empty, request.Order);
@@ -131,6 +136,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{archiveId:guid}/folders/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> DeleteFolder([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var command = new DeleteFolderCommand(id);
@@ -139,6 +145,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{archiveId:guid}/records")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> CreateRecord([FromRoute] Guid archiveId, [FromBody] CreateRecordRequest request, CancellationToken ct)
     {
         var command = new CreateRecordCommand(
@@ -154,6 +161,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/records/{id:guid}")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetRecord([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var query = new GetRecordQuery(id);
@@ -162,6 +170,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/folders/{folderId:guid}/records")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetRecordsByFolder([FromRoute] Guid archiveId, [FromRoute] Guid folderId, CancellationToken ct)
     {
         var query = new GetRecordsByFolderQuery(folderId);
@@ -170,6 +179,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/records/search")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> SearchRecords(
         [FromRoute] Guid archiveId,
         [FromQuery] string? searchTerm,
@@ -184,6 +194,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{archiveId:guid}/records/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> UpdateRecord([FromRoute] Guid archiveId, [FromRoute] Guid id, [FromBody] UpdateRecordRequest request, CancellationToken ct)
     {
         var command = new UpdateRecordCommand(id, request.Values);
@@ -192,6 +203,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{archiveId:guid}/records/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> DeleteRecord([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var command = new DeleteRecordCommand(id);
@@ -200,6 +212,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{archiveId:guid}/templates")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> CreateTemplate([FromRoute] Guid archiveId, [FromBody] CreateTemplateRequest request, CancellationToken ct)
     {
         var command = new CreateTemplateCommand(archiveId, request.FolderId, request.Name, request.Description ?? string.Empty);
@@ -208,6 +221,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/templates/{id:guid}")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetTemplate([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var query = new GetTemplateQuery(id);
@@ -216,6 +230,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/templates/{id:guid}/current-version")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetTemplateCurrentVersion([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var query = new GetTemplateCurrentVersionQuery(id);
@@ -224,6 +239,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/templates/{id:guid}/versions/{version:int}")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetTemplateVersionFields([FromRoute] Guid archiveId, [FromRoute] Guid id, [FromRoute] int version, CancellationToken ct)
     {
         var query = new GetTemplateVersionFieldsQuery(id, version);
@@ -232,6 +248,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpGet("{archiveId:guid}/folders/{folderId:guid}/templates")]
+    [Authorize(Policy = "archive:read")]
     public async Task<IActionResult> GetTemplatesByFolder([FromRoute] Guid archiveId, [FromRoute] Guid folderId, CancellationToken ct)
     {
         var query = new GetTemplatesByFolderQuery(folderId);
@@ -240,6 +257,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{archiveId:guid}/templates/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> UpdateTemplate([FromRoute] Guid archiveId, [FromRoute] Guid id, [FromBody] UpdateTemplateRequest request, CancellationToken ct)
     {
         var command = new UpdateTemplateCommand(id, request.Name, request.Description ?? string.Empty);
@@ -248,6 +266,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{archiveId:guid}/templates/{id:guid}")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> DeleteTemplate([FromRoute] Guid archiveId, [FromRoute] Guid id, CancellationToken ct)
     {
         var command = new DeleteTemplateCommand(id);
@@ -256,6 +275,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{archiveId:guid}/templates/{templateId:guid}/versions")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> CreateTemplateVersion([FromRoute] Guid archiveId, [FromRoute] Guid templateId, [FromBody] CreateTemplateVersionRequest request, CancellationToken ct)
     {
         var command = new CreateTemplateVersionCommand(templateId, request.Fields);
@@ -264,6 +284,7 @@ public class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPatch("{archiveId:guid}/templates/{templateId:guid}/versions/{versionId:guid}/publish")]
+    [Authorize(Policy = "archive:write")]
     public async Task<IActionResult> PublishTemplateVersion([FromRoute] Guid archiveId, [FromRoute] Guid templateId, [FromRoute] Guid versionId, CancellationToken ct)
     {
         var command = new PublishTemplateVersionCommand(templateId, versionId);

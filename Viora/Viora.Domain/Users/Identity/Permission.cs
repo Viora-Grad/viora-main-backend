@@ -34,19 +34,24 @@ public sealed class Permission
     public static readonly Permission InvitationsRead = new(61, "invitations:read", "Read staff members invitations");
     public static readonly Permission InvitationsDelete = new(62, "invitations:delete", "Delete staff members invitations");
 
-    public static readonly Permission ScheduleWrite = new(70, "schedule:write");
-    public static readonly Permission ScheduleRead = new(71, "schedule:read");
-    public static readonly Permission ShiftWrite = new(72, "shift:write");
-    public static readonly Permission ShiftRead = new(73, "shift:read");
-    public static readonly Permission FormWrite = new(80, "form:write");
-    public static readonly Permission FormRead = new(81, "form:read");
-    public static readonly Permission PrescriptionTemplateWrite = new(90, "prescription:write");
-    public static readonly Permission PrescriptionTemplateRead = new(91, "perscription:read");
-    public static readonly Permission PrescriptionWrite = new(92, "perscription:write");
-    public static readonly Permission PrescriptionRead = new(93, "perscription:read");
-    public static readonly Permission RemindersRead = new(100, "reminders:read");
-    public static readonly Permission RemindersWrite = new(101, "reminders:write");
+    public static readonly Permission ScheduleWrite = new(70, "schedule:write", "Create the schedule of the branches");
+    public static readonly Permission ScheduleRead = new(71, "schedule:read", "Read schedule information");
+    public static readonly Permission ShiftWrite = new(72, "shift:write", "Create the shift of the Staff");
+    public static readonly Permission ShiftRead = new(73, "shift:read", "Read shift information");
+    public static readonly Permission FormWrite = new(80, "form:write", "Create the form of the service");
+    public static readonly Permission FormRead = new(81, "form:read", "Read the form information");
+    public static readonly Permission FormSubmissionRead = new(82, "formSubmission:read", "Read form submission information");
+    public static readonly Permission PrescriptionTemplateWrite = new(90, "prescriptionTemplate:write", "Create prescription templates");
+    public static readonly Permission PrescriptionTemplateRead = new(91, "prescriptionTamplate:read", "Read prescription templates information");
+    public static readonly Permission PrescriptionWrite = new(92, "prescription:write", "Create prescriptions");
+    public static readonly Permission PrescriptionRead = new(93, "prescription:read", "Read prescriptions");
+    public static readonly Permission OrganizationPerscriptionTemplateRead = new(94, "organizationPrescriptionTemplate:read", "read all organization Perscription Template");
+    public static readonly Permission ArchiveWrite = new(100, "archive:write", "Create and modify archived items");
+    public static readonly Permission ArchiveRead = new(101, "archive:read", "Read archived items");
+    public static readonly Permission RemindersRead = new(110, "reminders:read");
+    public static readonly Permission RemindersWrite = new(111, "reminders:write");
     public static readonly Permission StaffWrite = new(120, "staff:write", "update and delete staff members");
+
 
     public static List<Permission> All =>
     [
@@ -73,7 +78,11 @@ public sealed class Permission
         PrescriptionRead,
         PrescriptionWrite,
         PrescriptionTemplateWrite,
+        OrganizationPerscriptionTemplateRead,
+        FormSubmissionRead,
         PrescriptionTemplateRead,
+        ArchiveRead,
+        ArchiveWrite,
         RemindersRead,
         RemindersWrite,
         StaffWrite
