@@ -30,6 +30,7 @@ public class FormController : ControllerBase
 
     [HttpGet]
     [Route("api/service/{serviceId}/form")]
+    [Authorize(Policy = "form:read")]
     public async Task<IActionResult> GetServiceForm(Guid serviceId, CancellationToken cancellationToken)
     {
         var query = new GetServiceFormQuery(serviceId);
@@ -39,7 +40,7 @@ public class FormController : ControllerBase
 
     [HttpGet]
     [Route("api/service/form/{formId}")]
-
+    [Authorize(Policy = "form:read")]
     public async Task<IActionResult> GetForm(Guid formId, CancellationToken cancellationToken)
     {
         var query = new GetFormByIdQuery(formId);
@@ -49,6 +50,7 @@ public class FormController : ControllerBase
 
     [HttpPost]
     [Route("api/service/form/create")]
+    [Authorize(Policy = "form:write")]
     public async Task<IActionResult> CreateForm(CreateFormRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateFormCommand(request.ServiceId, request.StaffId, request.name, request.fields);
@@ -58,6 +60,7 @@ public class FormController : ControllerBase
 
     [HttpPut]
     [Route("api/service/form/update/{formId}")]
+    [Authorize(Policy = "form:write")]
     public async Task<IActionResult> UpdateForm(Guid formId, JsonDocument fields, CancellationToken cancellationToken)
     {
         var command = new UpdateFormCommand(formId, fields);
@@ -67,6 +70,7 @@ public class FormController : ControllerBase
 
     [HttpDelete]
     [Route("api/service/form/delete/{formId}")]
+    [Authorize(Policy = "form:write")]
     public async Task<IActionResult> DeleteForm(Guid formId, CancellationToken cancellationToken)
     {
         var command = new DeleteFormCommand(formId);
@@ -77,8 +81,7 @@ public class FormController : ControllerBase
 
     [HttpPost]
     [Route("api/appontment/{appointmentId}/form-submission")]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> submitForm(
         [FromBody] FormSubmissionRequest request,
          Guid appointmentId,
@@ -100,7 +103,7 @@ public class FormController : ControllerBase
 
 
     [HttpGet]
-    [Authorize]
+    [Authorize(policy: "formSubmission:read")]
     [Route("api/form/{formId}/submission/{appointmentId}")]
     public async Task<IActionResult> GetAppountmentSubmission(Guid formId, Guid appointmentId, CancellationToken cancellationToke)
     {
@@ -110,9 +113,8 @@ public class FormController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize(policy: "formSubmission:read")]
     [Route("api/form/submission/{FormSubmissionId}")]
-    //[AllowAnonymous]
 
     public async Task<IActionResult> GetSubmission(Guid FormSubmissionId, CancellationToken cancellationToke)
     {
@@ -124,7 +126,7 @@ public class FormController : ControllerBase
 
     [HttpPost]
     [Route("api/form/submission/file/{FormSubmissionId}")]
-    //[AllowAnonymous]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> UploadFormSubmissionFile(
         [FromForm] IFormFile File,
         Guid FormSubmissionId,
@@ -151,7 +153,7 @@ public class FormController : ControllerBase
 
     [HttpGet]
     [Route("api/form/submission/file/{FormSubmission}/{FileId}")]
-    //[AllowAnonymous]
+    [Authorize(policy: "formSubmission:read")]
     public async Task<IActionResult> GetFormSubmissionFileById(Guid FormSubmission, Guid FileId, CancellationToken cancellationToken)
     {
         var query = new GetFormSubmissionFileQuery(FormSubmission, FileId);

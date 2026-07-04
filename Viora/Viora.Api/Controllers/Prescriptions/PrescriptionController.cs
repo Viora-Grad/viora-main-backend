@@ -25,8 +25,7 @@ public class PrescriptionController : ControllerBase
 
     [HttpPost]
     [Route("api/prescription/create")]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Policy = "prescription:write")]
     public async Task<IActionResult> CreatePrescription(PrescriptionRequest request, CancellationToken cancellationToken)
     {
         var command = new CreatePrescriptionCommand(request.AppointmentId, request.Items);
@@ -37,9 +36,8 @@ public class PrescriptionController : ControllerBase
 
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "prescriptionTemplate:write")]
     [Route("api/prescription-template/create")]
-    //[AllowAnonymous]
     public async Task<IActionResult> CreatePrescriptionTemplate(
         [FromForm] PrescriptionTemplateRequest request,
         [FromServices] IStorageSettings storageSettings,
@@ -73,9 +71,8 @@ public class PrescriptionController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "organizationPrescriptionTemplate:read")]
     [Route("api/{organizationId}/prescription-template/")]
-    //[AllowAnonymous]
     public async Task<IActionResult> GetOrganizationPrescription(Guid organizationId, CancellationToken cancellationToken)
     {
         var query = new GetOrganizaionPrescriptionTamplateQuery(organizationId);
@@ -84,8 +81,7 @@ public class PrescriptionController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Policy = "prescriptionTemplate:read")]
     [Route("api/prescription-template/{id}")]
     public async Task<IActionResult> GetprescriptionTemplate(Guid Id, CancellationToken cancellationToken)
     {
@@ -96,8 +92,7 @@ public class PrescriptionController : ControllerBase
 
 
     [HttpGet]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Policy = "prescription:read")]
     [Route("api/prescription/appointment/{appointmentId}")]
 
     public async Task<IActionResult> GetAppointmentPrescription(Guid appointmentId, CancellationToken cancellationToken)
@@ -109,8 +104,7 @@ public class PrescriptionController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Policy = "prescription:read")]
     [Route("api/prescription/{id}")]
 
     public async Task<IActionResult> GetPrescriptionById(Guid id, CancellationToken cancellationToken)
@@ -123,8 +117,7 @@ public class PrescriptionController : ControllerBase
 
 
     [HttpGet]
-    [Authorize]
-    //[AllowAnonymous]
+    [Authorize(Policy = "prescription:read")]
     [Route("api/prescription-template/{templateId}/File")]
 
     public async Task<IActionResult> GetTemplateFile(Guid templateId, CancellationToken cancellationToken)

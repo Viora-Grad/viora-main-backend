@@ -25,7 +25,7 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Route("api/order/subscription")]
-
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> CreateSubscriptionOrder(
         CreateSubscriptionOrderRequest request,
         CancellationToken cancellationToken)
@@ -37,6 +37,7 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Route("api/order/subscription/{subscriptionId}/renew")]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> RenewSubscriptionOrder(
         Guid subscriptionId,
         CancellationToken cancellationToken)
@@ -49,6 +50,7 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Route("api/order/subscription/change-plan")]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> ChangeSubscriptionPlan(
         ChangeSubscriptionPlanRequest request,
         CancellationToken cancellationToken)
@@ -60,6 +62,7 @@ public class OrderController : ControllerBase
 
     [HttpPost]
     [Route("api/order/addon")]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> CreateAddonOrder(
         CreateAddAddonOrderRequest createAddAddonRequest,
         CancellationToken cancellationToken)
@@ -71,7 +74,7 @@ public class OrderController : ControllerBase
 
     [HttpGet]
     [Route("api/organization/{organizationId:guid}/order/addons")]
-    [Authorize]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> GetAddons(
         Guid organizationId,
         CancellationToken cancellationToken)
@@ -83,7 +86,7 @@ public class OrderController : ControllerBase
 
     [HttpGet]
     [Route("api/organization/{organizationId:guid}/order/subscriptions")]
-    [Authorize]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> GetSubscriptions(
         Guid organizationId,
         CancellationToken cancellationToken)

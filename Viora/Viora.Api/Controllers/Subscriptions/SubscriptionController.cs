@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Subscriptions.GetOrganizationSubscriptions;
@@ -17,6 +18,7 @@ public class SubscriptionController : ControllerBase
 
     [HttpGet]
     [Route("api/subscription/{organizationId}")]
+    [Authorize(Roles = "Owner,Admin")]
 
     public async Task<IActionResult> GetOrganizationSubscriptions(
         Guid organizationId, CancellationToken cancellationToken)
@@ -29,6 +31,7 @@ public class SubscriptionController : ControllerBase
 
     [HttpDelete]
     [Route("api/addon/remove")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> RemoveAddon(
         RemoveAddonRequest request,
         CancellationToken cancellationToken)

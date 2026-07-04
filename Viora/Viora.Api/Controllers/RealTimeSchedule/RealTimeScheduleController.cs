@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.RealTimeScheduling.CancelSchedule;
@@ -24,6 +25,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpPost]
     [Route("api/schedule/create")]
+    [Authorize(Policy = "schedule:write")]
     public async Task<IActionResult> CreateSchedule(CreateScheduleRequest request)
     {
         var command = new CreateScheduleCommand(request.BranchId, request.DayOfWeek);
@@ -33,6 +35,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpPost]
     [Route("api/schedule/shift/create")]
+    [Authorize(Policy = "shift:write")]
     public async Task<IActionResult> CreateShift(CreateShiftRequest request)
     {
         var command = new CreateShiftCommand(request.BranchId, request.StartTime, request.EndTime, request.DayOfWeek, request.StaffId);
@@ -42,6 +45,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpPost]
     [Route("api/schedule/cancel")]
+    [Authorize(Policy = "schedule:write")]
     public async Task<IActionResult> CancelSchedule(CancelScheduleRequest request)
     {
         var command = new CancelScheduleCommand(request.ShiftId, request.BranchId, request.cancellationDate, request.Reason);
@@ -51,6 +55,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpGet]
     [Route("api/schedule/{branchId}")]
+    [Authorize(Policy = "schedule:read")]
     public async Task<IActionResult> GetBranchSchedule(Guid branchId)
     {
         var query = new GetBranchScheduleQuery(branchId);
@@ -61,6 +66,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpGet]
     [Route("api/branch/{branchId}/schedule/staff/{staffId}")]
+    [Authorize(Policy = "shift:read")]
     public async Task<IActionResult> GetStaffShifts(Guid staffId, Guid branchId)
     {
         var query = new GetStaffShiftQuery(staffId, branchId);
@@ -70,6 +76,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpGet]
     [Route("api/schedule/staff")]
+    [Authorize(Policy = "shift:read")]
     public async Task<IActionResult> GetStaffShift([FromQuery] StaffShiftByDayRequest request)
     {
         var query = new GetStaffShiftByDayQuery(request.day, request.StaffId, request.ShiftId);
@@ -80,6 +87,7 @@ public class RealTimeScheduleController : ControllerBase
 
     [HttpDelete]
     [Route("api/schedule/shift/delete/{id}")]
+    [Authorize(Policy = "shift:write")]
     public async Task<IActionResult> DeleteShift(Guid id)
     {
         var command = new DeleteShiftCommand(id);
