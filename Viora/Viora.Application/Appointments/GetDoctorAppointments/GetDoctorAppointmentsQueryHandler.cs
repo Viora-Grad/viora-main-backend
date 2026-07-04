@@ -41,7 +41,7 @@ internal class GetDoctorAppointmentsQueryHandler(
             PaymentMethod = a.PayMethod.ToString(),
             ReservationDate = a.ReservationDate,
             Status = a.Status.ToString(),
-            EstimatedDuration = a.EstimatedDuration,
+            EstimatedDurationMinutes = a.EstimatedDurationMinutes,
             CustomerId = a.CustomerId,
             CustomerName = a.Customer?.PersonalInfo.FirstName + " " + a.Customer?.PersonalInfo.LastName ?? string.Empty,
             ServiceName = a.Service?.Name ?? string.Empty,

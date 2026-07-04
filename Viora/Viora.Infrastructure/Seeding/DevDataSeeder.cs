@@ -99,13 +99,13 @@ internal sealed class DevDataSeeder(
     private static readonly Guid CustomerUserId = Guid.Parse("d4e5f6a7-0002-0000-0000-000000000001");
 
     // Pinned ids for the Alexandria dental persona (dental.owner@viora.dev).
-    private static readonly Guid AlexDentalOrgId     = new("aed00001-0000-0000-0000-000000000001");
-    private static readonly Guid AlexDentalBranch1Id  = new("aed00002-0000-0000-0000-000000000001");
-    private static readonly Guid AlexDentalBranch2Id  = new("aed00003-0000-0000-0000-000000000001");
+    private static readonly Guid AlexDentalOrgId = new("aed00001-0000-0000-0000-000000000001");
+    private static readonly Guid AlexDentalBranch1Id = new("aed00002-0000-0000-0000-000000000001");
+    private static readonly Guid AlexDentalBranch2Id = new("aed00003-0000-0000-0000-000000000001");
 
     // Pinned ids for the Giza physiotherapy persona (physio.owner@viora.dev).
-    private static readonly Guid GizaPhysioOrgId    = new("f1c00001-0000-0000-0000-000000000002");
-    private static readonly Guid GizaPhysioBranchId  = new("f1c00002-0000-0000-0000-000000000002");
+    private static readonly Guid GizaPhysioOrgId = new("f1c00001-0000-0000-0000-000000000002");
+    private static readonly Guid GizaPhysioBranchId = new("f1c00002-0000-0000-0000-000000000002");
 
     private const string DefaultPassword = "Dev123!Pass";
 
@@ -700,7 +700,7 @@ internal sealed class DevDataSeeder(
                 status: status,
                 createdBy: Creator.Customer,
                 requestPlatform: platform,
-                estimatedDuration: TimeSpan.FromMinutes(minutes),
+                estimatedDurationMinutes: minutes,
                 createdAt: now.AddDays(dayOffset - 1));
 
             db.Set<Appointment>().Add(appointment);

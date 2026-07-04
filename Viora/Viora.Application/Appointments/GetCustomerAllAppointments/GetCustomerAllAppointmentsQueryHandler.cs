@@ -45,7 +45,7 @@ internal class GetCustomerAllAppointmentsQueryHandler(
             PaymentMethod = a.PayMethod.ToString(),
             ReservationDate = a.ReservationDate,
             Status = a.Status.ToString(),
-            EstimatedDuration = a.EstimatedDuration,
+            EstimatedDurationMinutes = a.EstimatedDurationMinutes,
             ServiceName = a.Service?.Name ?? string.Empty,
             StaffName = $"", // staff not implemented yet
             Cost = $"{a.Service?.Cost.ToString()}"
