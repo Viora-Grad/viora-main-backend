@@ -16,7 +16,7 @@ public sealed class Permission
 
     public string Name { get; init; }
 
-    public string? Description { get; init; }
+    public string? Description { get; set; }
 
     #region Permission Values
     public static readonly Permission UsersRead = new(1, "users:read", "Read user information");
