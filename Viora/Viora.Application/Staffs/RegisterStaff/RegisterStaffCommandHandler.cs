@@ -33,7 +33,7 @@ internal class RegisterStaffCommandHandler(
         if (!token.IsValid(timeProvider.UtcNow))
             return Result.Failure<Guid>(StaffErrors.InvalidInvitationToken);
 
-        var staff = token.Staff;
+        var staff = await staffRepository.GetByIdAsync(token.StaffId, cancellationToken);
 
         if (staff is null)
             return Result.Failure<Guid>(StaffErrors.StaffNotFound);
@@ -58,7 +58,9 @@ internal class RegisterStaffCommandHandler(
         var consume = await usageService.ConsumeLimit(staff.OrganizationId, LimitedFeature.StaffMembers.Id, -1, cancellationToken);
         */
         staff.SetStaffProperties(firstName, lastName, username, hashedPassword, dateOfBirth, gender, phoneNumber);
-        staff.Activate();
+        var result = staff.Activate();
+        if (result.IsFailure)
+            return Result.Failure<Guid>(result.Error);
 
         token.MarkAsUsed(timeProvider.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);

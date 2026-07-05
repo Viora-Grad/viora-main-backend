@@ -30,11 +30,11 @@ internal class SearchStaffQueryHandler(
         var response = Staffs.Select(staff => new SearchStaffResponse
         {
             Id = staff.Id,
-            FirstName = staff.FirstName!,
-            LastName = staff.LastName!,
+            FirstName = staff.FirstName?.Value,
+            LastName = staff.LastName?.Value,
             PhoneNumber = staff.PhoneNumber,
-            Gender = staff.Gender.ToString()!,
-            DateOfBirth = (DateOnly)staff.DateOfBirth!,
+            Gender = staff.Gender.ToString(),
+            DateOfBirth = staff.DateOfBirth,
             status = staff.StaffStatus.ToString()
         }
         ).ToList();
