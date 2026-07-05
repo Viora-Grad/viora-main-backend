@@ -23,9 +23,7 @@ public sealed class RolePermission
         new RolePermission { RoleId = Role.Customer.Id, PermissionId = Permission.ShiftRead.Id },
         new RolePermission { RoleId = Role.Customer.Id, PermissionId = Permission.FormSubmissionRead.Id },
         new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.PrescriptionRead.Id },
-
-
-
+        new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.FormRead.Id },
         ];
 
     #endregion
