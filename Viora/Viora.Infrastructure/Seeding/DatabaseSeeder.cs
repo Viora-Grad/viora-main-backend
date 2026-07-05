@@ -99,23 +99,33 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
         #endregion Roles
 
         #region Permissions
-        var existingPermissionIds = await db.Set<Permission>()
-            .Select(p => p.Id)
-            .ToListAsync(cancellationToken);
+        var permissions = await db.Set<Permission>().ToListAsync(cancellationToken);
+        var existingPermissionIds = permissions.Select(p => p.Id).ToList();
 
         var missingPermissions = AuthorizationData.Permissions
             .Where(p => !existingPermissionIds.Contains(p.Id))
-            .Select(p => Permission.Create(p.Id, p.Name))
+            .Select(p => Permission.Create(p.Id, p.Name, p.Description))
             .ToList();
+
+        var permissionsWithoutDescription = permissions.Where(p => string.IsNullOrEmpty(p.Description)).ToList();
+
+        permissionsWithoutDescription.ForEach(p =>
+        {
+            var updatedPermission = AuthorizationData.Permissions.FirstOrDefault(ap => ap.Id == p.Id);
+            if (updatedPermission != null && !string.IsNullOrEmpty(updatedPermission.Description))
+            {
+                p.Description = updatedPermission.Description;
+            }
+        });
 
         if (missingPermissions.Count == 0)
             logger.LogInformation("Permission seed: all {Count} permissions already present.", AuthorizationData.Permissions.Count);
         else
         {
             await db.Set<Permission>().AddRangeAsync(missingPermissions, cancellationToken);
-            await db.SaveChangesAsync(cancellationToken);
             logger.LogInformation("Permission seed: inserted {Count} new permissions.", missingPermissions.Count);
         }
+        await db.SaveChangesAsync(cancellationToken);
         #endregion Permissions
 
         #region RolePermissions
