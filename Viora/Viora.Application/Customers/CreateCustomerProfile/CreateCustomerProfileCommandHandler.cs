@@ -38,8 +38,8 @@ internal class CreateCustomerProfileCommandHandler(
             );
         customerRepository.Add(customer);
 
-        userRepository.AttachRole(Role.Customer);
-        user.BecomeCustomer(Role.Customer);
+        var role = await userRepository.FindRoleAsync(Role.Customer.Id, cancellationToken) ?? throw new NotFoundException("Customer role not found.");
+        user.BecomeCustomer(role);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new CreateCustomerProfileResponse(
