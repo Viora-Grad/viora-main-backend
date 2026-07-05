@@ -4,11 +4,14 @@ public class SlotResponse
 {
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
+    public Guid AppointmentId { get; set; }
 
-    public SlotResponse(DateTime startTime, DateTime endTime)
+    public SlotResponse(Guid appointmentId, DateTime startTime, DateTime endTime)
     {
+
         StartTime = startTime;
         EndTime = endTime;
+        AppointmentId = appointmentId;
     }
 
 }
