@@ -48,6 +48,10 @@ public sealed class Permission
     public static readonly Permission OrganizationPerscriptionTemplateRead = new(94, "organizationPrescriptionTemplate:read", "read all organization Perscription Template");
     public static readonly Permission ArchiveWrite = new(100, "archive:write", "Create and modify archived items");
     public static readonly Permission ArchiveRead = new(101, "archive:read", "Read archived items");
+    public static readonly Permission RemindersRead = new(110, "reminders:read");
+    public static readonly Permission RemindersWrite = new(111, "reminders:write");
+    public static readonly Permission StaffWrite = new(120, "staff:write", "update and delete staff members");
+
 
     public static List<Permission> All =>
     [
@@ -79,6 +83,9 @@ public sealed class Permission
         PrescriptionTemplateRead,
         ArchiveRead,
         ArchiveWrite,
+        RemindersRead,
+        RemindersWrite,
+        StaffWrite
     ];
     #endregion Permission Values
 }

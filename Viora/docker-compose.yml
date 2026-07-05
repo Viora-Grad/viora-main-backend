@@ -28,6 +28,18 @@ services:
       - Payment__Secret=${PAYMENT__SECRET}
       - MongoDB__ConnectionString=mongodb://mongo:27017
       - MongoDB__DatabaseName=Viora_Archive
+      # Firebase service account (values sourced from Viora/.env)
+      - FIREBASE__TYPE=${FIREBASE__TYPE}
+      - FIREBASE__PROJECT_ID=${FIREBASE__PROJECT_ID}
+      - FIREBASE__PRIVATE_KEY_ID=${FIREBASE__PRIVATE_KEY_ID}
+      - FIREBASE__PRIVATE_KEY=${FIREBASE__PRIVATE_KEY}
+      - FIREBASE__CLIENT_EMAIL=${FIREBASE__CLIENT_EMAIL}
+      - FIREBASE__CLIENT_ID=${FIREBASE__CLIENT_ID}
+      - FIREBASE__AUTH_URI=${FIREBASE__AUTH_URI}
+      - FIREBASE__TOKEN_URI=${FIREBASE__TOKEN_URI}
+      - FIREBASE__AUTH_PROVIDER_X509_CERT_URL=${FIREBASE__AUTH_PROVIDER_X509_CERT_URL}
+      - FIREBASE__CLIENT_X509_CERT_URL=${FIREBASE__CLIENT_X509_CERT_URL}
+      - FIREBASE__UNIVERSE_DOMAIN=${FIREBASE__UNIVERSE_DOMAIN}
     depends_on:
       sql:
         condition: service_healthy
