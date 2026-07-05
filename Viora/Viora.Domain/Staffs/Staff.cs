@@ -49,6 +49,16 @@ public sealed class Staff : Entity
                 _roles.Add(role);
         }
     }
+    public void UpdateRoles(IEnumerable<Role> roles)
+    {
+        if (roles is null || !roles.Any())
+            throw new ArgumentException("Roles cannot be null or empty.");
+        _roles.Clear();
+        foreach (var role in roles)
+        {
+            _roles.Add(role);
+        }
+    }
     public void AssignBranches(IEnumerable<Branch> branches)
     {
         if (branches is null || !branches.Any())
@@ -67,6 +77,16 @@ public sealed class Staff : Entity
         {
             if (!_services.Contains(service))
                 _services.Add(service);
+        }
+    }
+    public void UpdateServices(IEnumerable<Service> services)
+    {
+        if (services is null || !services.Any())
+            throw new ArgumentException("Services cannot be null or empty.");
+        _services.Clear();
+        foreach (var service in services)
+        {
+            _services.Add(service);
         }
     }
     public void SetStaffProperties(
