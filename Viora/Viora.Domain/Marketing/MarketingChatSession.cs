@@ -19,6 +19,10 @@ public sealed class MarketingChatSession : Entity
     // Facebook photo post; otherwise it creates a text/link post.
     public string? LatestImageUrl { get; private set; }
 
+    // Manus URL of the latest post-copy attachment (if any). Manus delivers the full copy as an attached
+    // document; this is proxied and decoded on demand so the user can preview the drafted content.
+    public string? LatestContentUrl { get; private set; }
+
     // Manus runs content generation as an async task. While one is in flight these hold its id/url; the poll
     // step reads the result via Manus and, once ready, moves the text into LatestManusIdea and clears these.
     public string? PendingManusTaskId { get; private set; }
@@ -66,11 +70,13 @@ public sealed class MarketingChatSession : Entity
         return message;
     }
 
-    // Stores the generated copy and (optionally) the generated image URL from a completed Manus task.
-    public void SetManusIdea(string idea, string? imageUrl, DateTime currentDateTime)
+    // Stores the generated copy and (optionally) the generated image URL and post-copy attachment URL from
+    // a completed Manus task.
+    public void SetManusIdea(string idea, string? imageUrl, string? contentUrl, DateTime currentDateTime)
     {
         LatestManusIdea = idea;
         LatestImageUrl = imageUrl;
+        LatestContentUrl = contentUrl;
         UpdatedAtUtc = currentDateTime;
     }
 

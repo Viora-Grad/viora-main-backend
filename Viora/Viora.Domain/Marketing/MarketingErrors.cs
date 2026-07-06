@@ -45,4 +45,7 @@ public static class MarketingErrors
 
     public static readonly Error ImageNotFound =
         new("Marketing.ImageNotFound", "No generated image is available for this chat", ErrorCategory.NotFound);
+
+    public static readonly Error ContentNotFound =
+        new("Marketing.ContentNotFound", "No drafted content is available for this chat", ErrorCategory.NotFound);
 }

@@ -38,7 +38,7 @@ public sealed class SendMarketingMessageCommandHandlerTests
     {
         var session = MarketingChatSession.Create(_orgId, _userId, _now);
         if (withDraftIdea)
-            session.SetManusIdea("a summer sale promo idea", null, _now);
+            session.SetManusIdea("a summer sale promo idea", null, null, _now);
 
         _userContext.Setup(u => u.OrganizationId).Returns(_orgId);
         _clock.Setup(c => c.UtcNow).Returns(_now);

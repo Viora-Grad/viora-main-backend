@@ -124,7 +124,8 @@ internal sealed class ManusClient : IManusClient
             using var messagesDoc = JsonDocument.Parse(messagesRaw);
             var content = ExtractLatestAssistantContent(messagesDoc.RootElement);
             var imageUrl = ExtractLatestAssistantImageUrl(messagesDoc.RootElement);
-            return Result.Success(new ManusTaskResult(Completed: true, Content: content, ImageUrl: imageUrl));
+            var contentUrl = ExtractLatestAssistantContentUrl(messagesDoc.RootElement);
+            return Result.Success(new ManusTaskResult(Completed: true, Content: content, ImageUrl: imageUrl, ContentUrl: contentUrl));
         }
         catch (Exception ex) when (ex is TaskCanceledException or HttpRequestException or JsonException)
         {
@@ -154,6 +155,31 @@ internal sealed class ManusClient : IManusClient
         {
             _logger.LogError(ex, "Manus image download errored for {Url}.", url);
             return Result.Failure<ManusImage>(MarketingErrors.ManusFailed);
+        }
+    }
+
+    // Downloads a Manus text attachment (the post copy) and decodes it as a string. The client's
+    // x-manus-api-key header rides along even for the absolute files URL, so private attachments are
+    // fetchable here (the raw URL is not publicly readable).
+    public async Task<Result<ManusText>> DownloadTextAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Manus text download failed ({Status}) for {Url}.", (int)response.StatusCode, url);
+                return Result.Failure<ManusText>(MarketingErrors.ManusFailed);
+            }
+
+            var text = await response.Content.ReadAsStringAsync(cancellationToken);
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "text/plain";
+            return Result.Success(new ManusText(text, contentType));
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or HttpRequestException)
+        {
+            _logger.LogError(ex, "Manus text download errored for {Url}.", url);
+            return Result.Failure<ManusText>(MarketingErrors.ManusFailed);
         }
     }
 
@@ -205,6 +231,38 @@ internal sealed class ManusClient : IManusClient
 
                 var url = GetString(attachment, "url");
                 if (isImage && !string.IsNullOrWhiteSpace(url))
+                    return url;
+            }
+        }
+
+        return null;
+    }
+
+    // Latest assistant non-image attachment url — the post copy, which Manus attaches as a document
+    // (e.g. text/markdown) rather than inlining in content. Newest-first order => first match is most recent.
+    private static string? ExtractLatestAssistantContentUrl(JsonElement root)
+    {
+        if (!root.TryGetProperty("messages", out var messages) || messages.ValueKind != JsonValueKind.Array)
+            return null;
+
+        foreach (var message in messages.EnumerateArray())
+        {
+            if (!message.TryGetProperty("type", out var type) || type.GetString() != "assistant_message")
+                continue;
+            if (!message.TryGetProperty("assistant_message", out var assistant)
+                || !assistant.TryGetProperty("attachments", out var attachments)
+                || attachments.ValueKind != JsonValueKind.Array)
+                continue;
+
+            foreach (var attachment in attachments.EnumerateArray())
+            {
+                var attachmentType = GetString(attachment, "type");
+                var contentType = GetString(attachment, "content_type");
+                var isImage = string.Equals(attachmentType, "image", StringComparison.OrdinalIgnoreCase)
+                    || (contentType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ?? false);
+
+                var url = GetString(attachment, "url");
+                if (!isImage && !string.IsNullOrWhiteSpace(url))
                     return url;
             }
         }

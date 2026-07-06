@@ -5,7 +5,9 @@ using Viora.Api.Extensions;
 using Viora.Application.Marketing.ConnectMetaPage;
 using Viora.Application.Marketing.DeleteMetaCredential;
 using Viora.Application.Marketing.GetChat;
+using Viora.Application.Marketing.GetDraftContent;
 using Viora.Application.Marketing.GetDraftImage;
+using Viora.Application.Marketing.GetMetaCredentialStatus;
 using Viora.Application.Marketing.GetQuota;
 using Viora.Application.Marketing.ListChats;
 using Viora.Application.Marketing.PollContent;
@@ -35,6 +37,14 @@ public class MarketingController(ISender sender) : ControllerBase
     public async Task<IActionResult> ConnectMetaPage(ConnectMetaPageRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ConnectMetaPageCommand(request.AuthCode, request.PageId), cancellationToken);
+        return result.ToActionResult();
+    }
+
+    // Report whether the caller's organization has a Facebook Page credential saved.
+    [HttpGet("meta-credentials/status")]
+    public async Task<IActionResult> GetMetaCredentialStatus(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetMetaCredentialStatusQuery(), cancellationToken);
         return result.ToActionResult();
     }
 
@@ -79,6 +89,14 @@ public class MarketingController(ISender sender) : ControllerBase
         return result.IsSuccess
             ? File(result.Value.Content, result.Value.ContentType, result.Value.FileName)
             : result.ToActionResult();
+    }
+
+    // Preview the drafted post copy (proxied from the Manus attachment) before publishing.
+    [HttpGet("chats/{chatId:guid}/content")]
+    public async Task<IActionResult> GetDraftContent(Guid chatId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetDraftContentQuery(chatId), cancellationToken);
+        return result.ToActionResult();
     }
 
     // Get a chat session with message history and current status.
