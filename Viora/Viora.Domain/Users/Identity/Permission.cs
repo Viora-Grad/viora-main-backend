@@ -53,6 +53,13 @@ public sealed class Permission
     public static readonly Permission RemindersRead = new(110, "reminders:read");
     public static readonly Permission RemindersWrite = new(111, "reminders:write");
     public static readonly Permission StaffWrite = new(120, "staff:write", "update and delete staff members");
+    public static readonly Permission InventoryRead = new(130, "inventory:read", "read the inventory items");
+    public static readonly Permission InventoryWrite = new(131, "inventory:write", "create, update and delete inventory items");
+    public static readonly Permission BranchWrite = new(140, "branch:write", "create, update and delete branches");
+    public static readonly Permission DashboardRead = new(150, "dashboard:read", "read the dashboard information");
+    public static readonly Permission ServiceWrite = new(160, "service:write", "create, update and delete services");
+    public static readonly Permission MarketingWrite = new(170, "marketing:write", "create, update and delete marketing campaigns");
+    public static readonly Permission MarketingRead = new(171, "marketing:read", "read marketing campaigns");
 
 
     public static List<Permission> All =>
@@ -89,7 +96,14 @@ public sealed class Permission
         ArchiveWrite,
         RemindersRead,
         RemindersWrite,
-        StaffWrite
+        StaffWrite,
+        InventoryRead,
+        InventoryWrite,
+        BranchWrite,
+        DashboardRead,
+        ServiceWrite,
+        MarketingWrite,
+        MarketingRead
     ];
     #endregion Permission Values
 }

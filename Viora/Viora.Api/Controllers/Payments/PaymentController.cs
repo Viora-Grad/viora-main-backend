@@ -18,7 +18,7 @@ public class PaymentController : ControllerBase
 
     [HttpPost]
     [Route("api/payments/session/{orderId:guid}")]
-    [Authorize]
+    [Authorize(Roles = "Customer,Owner")]
     public async Task<IActionResult> CreateSession(Guid orderId, CancellationToken cancellationToken)
     {
         var result = await _sender.Send(new CreatePaymentSessionCommand(orderId), cancellationToken);
