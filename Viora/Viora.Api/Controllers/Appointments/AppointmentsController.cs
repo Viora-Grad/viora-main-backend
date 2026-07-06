@@ -12,6 +12,7 @@ using Viora.Application.Appointments.GetAppointment;
 using Viora.Application.Appointments.GetBranchAppointments;
 using Viora.Application.Appointments.GetCustomerAllAppointments;
 using Viora.Application.Appointments.GetDoctorAppointments;
+using Viora.Application.Appointments.NoShowAppointment;
 
 namespace Viora.Api.Controllers.Appointments;
 
@@ -24,8 +25,7 @@ public class AppointmentsController(
     ) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Roles = "Staff,Customer")]
-    [AllowAnonymous]
+    [Authorize(Policy = "appointments:create,appointments:write")]
     public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateAppointmentCommand(
@@ -42,7 +42,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/check-in")]
-    [Authorize(Roles = "Staff,Owner")] // might change the policy later to be more specific to the staff role
+    [Authorize(Policy = "appointments:write")] // might change the policy later to be more specific to the staff role
     public async Task<IActionResult> CheckInAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CheckInAppointmentCommand(AppointmentId: id);
@@ -50,7 +50,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/complete")]
-    [Authorize(Roles = "Staff,Owner")]
+    [Authorize(Policy = "appointments:write")]
     public async Task<IActionResult> CompleteAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CompleteAppointmentCommand(AppointmentId: id);
@@ -58,7 +58,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/cancel")]
-    [Authorize(Roles = "Staff,Customer,Owner")]
+    [Authorize(Policy = "appointments:cancel,appointments:write")]
     public async Task<IActionResult> CancelAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CancelAppointmentCommand(AppointmentId: id);
@@ -66,7 +66,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/delay")]
-    [Authorize(Roles = "Staff,Owner")]
+    [Authorize(Policy = "appointments:write")]
     public async Task<IActionResult> DelayAppointment([FromRoute] Guid id, [FromBody] int delayDurationInMinutes, CancellationToken cancellationToken)
     {
         var delay = TimeSpan.FromMinutes(delayDurationInMinutes);
@@ -75,7 +75,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = "Staff,Customer,Owner")]
+    [Authorize]
     public async Task<IActionResult> GetAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var query = new GetAppointmentQuery(AppointmentId: id);
@@ -83,7 +83,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpGet("/branches/{branchId:guid}")]
-    [Authorize(Roles = "Owner,Staff,Customer")]
+    [Authorize]
     public async Task<IActionResult> GetAppointmentsByBranch([FromRoute] Guid branchId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
     {
         var query = new GetBranchAppointmentsQuery(
@@ -106,7 +106,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpGet("/doctors/{doctorId:guid}")]
-    [Authorize(Roles = "Owner,Staff,Customer")]
+    [Authorize]
     public async Task<IActionResult> GetAppointmentsByDoctor([FromRoute] Guid doctorId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
     {
 
@@ -130,7 +130,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpGet("/customers/{customerId:guid}")]
-    [Authorize(Roles = "Staff,Customer")]
+    [Authorize]
     public async Task<IActionResult> GetAppointmentsByCustomer([FromRoute] Guid customerId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
     {
         if (userContext.UserId != customerId)
@@ -154,6 +154,14 @@ public class AppointmentsController(
             PageSize: queryParams.PageSize
             );
         var result = await sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPatch("{appointmentId:guid}/no-show")]
+    [Authorize(Policy = "appointments:write")]
+    public async Task<IActionResult> MarkAsNoShow([FromRoute] Guid appointmentId, CancellationToken cancellationToken)
+    {
+        var command = new NoShowAppointmentCommand(AppointmentId: appointmentId);
+        var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
 }
