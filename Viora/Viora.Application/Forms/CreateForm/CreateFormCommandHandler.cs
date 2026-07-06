@@ -16,10 +16,11 @@ public class CreateFormCommandHandler(
 {
     public async Task<Result<Guid>> Handle(CreateFormCommand request, CancellationToken cancellationToken)
     {
-
-        var staff = await staffRepository.GetByIdAsync(request.StaffId, cancellationToken)
-            ?? throw new NotFoundException($"the staff with id {request.StaffId} not found");
-
+        if (request.StaffId.HasValue)
+        {
+            var staff = await staffRepository.GetByIdAsync(request.StaffId.Value, cancellationToken)
+               ?? throw new NotFoundException($"the staff with id {request.StaffId} not found");
+        }
         var service = await serviceRepository.GetByIdAsync(request.ServiceId, cancellationToken)
             ?? throw new NotFoundException($"the service with id {request.ServiceId} not Found");
 
