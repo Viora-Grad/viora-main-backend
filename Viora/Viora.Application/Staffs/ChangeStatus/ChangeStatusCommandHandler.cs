@@ -7,7 +7,7 @@ using Viora.Domain.Staffs.Internal;
 
 namespace Viora.Application.Staffs.ChangeStatus;
 
-internal class ChangeStatusCommandHandler(
+public class ChangeStatusCommandHandler(
     IUserContext context,
     IStaffRepository staffRepository,
     IUnitOfWork unitOfWork

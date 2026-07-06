@@ -7,7 +7,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Authentication.ChangePassword;
 
-internal sealed class ChangePasswordCommandHandler(
+public sealed class ChangePasswordCommandHandler(
     IAuthenticationService authService,
     IUserContext userContext,
     IUserRepository userRepository,

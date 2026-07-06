@@ -5,7 +5,7 @@ namespace Viora.Domain.Staffs;
 public interface IStaffRepository
 {
     void Add(Staff staff);
-    Task<Staff?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Staff?> GetByIdAsync(Guid? id, CancellationToken cancellationToken);
 
     /// <summary>Loads a staff member with roles (and their permissions), branches, and services eager-loaded.</summary>
     Task<Staff?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken);

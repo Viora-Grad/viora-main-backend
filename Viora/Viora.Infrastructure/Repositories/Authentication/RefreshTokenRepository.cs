@@ -3,7 +3,7 @@ using Viora.Infrastructure.Authentication;
 
 namespace Viora.Infrastructure.Repositories.Authentication;
 
-internal class RefreshTokenRepository(ApplicationDbContext dbContext)
+public class RefreshTokenRepository(ApplicationDbContext dbContext)
 {
     public async Task<RefreshToken?> GetByTokenAsync(string tokenHash, CancellationToken cancellationToken = default)
     {

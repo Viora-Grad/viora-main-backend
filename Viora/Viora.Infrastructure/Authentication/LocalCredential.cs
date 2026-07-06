@@ -1,6 +1,6 @@
 ﻿namespace Viora.Infrastructure.Authentication;
 
-internal class LocalCredential(Guid userId, string hashedPassword, int hashVersion = 1)
+public class LocalCredential(Guid userId, string hashedPassword, int hashVersion = 1)
 {
     public Guid UserId { get; private set; } = userId;
     public string HashedPassword { get; private set; } = hashedPassword;

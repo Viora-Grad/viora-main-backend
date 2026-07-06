@@ -16,7 +16,7 @@ namespace Viora.Application.Appointments.CreateAppointment;
 // TODO: Add domain events for appointment creation and handle them in the application layer to send notifications, update staff schedules, etc.
 // TODO: Consider a solution for the race condition where two appointments are created at the same time for the same service and staff member.
 // This could involve implementing a locking mechanism or using database transactions to ensure data integrity.
-internal class CreateAppointmentCommandHandler(
+public class CreateAppointmentCommandHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork,
     IAppointmentsRepository appointmentsRepository,

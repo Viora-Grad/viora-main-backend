@@ -11,7 +11,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Staffs.CreateStaffInvitation;
 
-internal class CreateStaffInvitationCommandHandler(
+public class CreateStaffInvitationCommandHandler(
     IDateTimeProvider dateTimeProvider,
     IOrganizationRepository organizationRepository,
     IStaffRepository staffRepository,

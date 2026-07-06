@@ -32,7 +32,7 @@ public class FeedbacksController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> AddFeedback(AddFeedbackRequest request, CancellationToken cancellationToken)
     {
         var command = new AddFeedbackCommand(
@@ -47,7 +47,7 @@ public class FeedbacksController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{feedbackId:guid}")]
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> UpdateFeedback(Guid feedbackId, UpdateFeedbackRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateFeedbackCommand(

@@ -20,7 +20,7 @@ public class LegalPapersController(ISender sender) : ControllerBase
             : null;
 
     [HttpPost]
-    [Authorize]
+    [Authorize()]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> AddLegalPaper(
         [FromForm] AddLegalPaperRequest request,
@@ -55,7 +55,7 @@ public class LegalPapersController(ISender sender) : ControllerBase
     // endpoint: the handler authorizes against the paper's application owner (admins are
     // privileged) so the underlying media id is never an access primitive.
     [HttpGet("{legalPaperId:guid}/file")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Owner")]
 
     public async Task<IActionResult> GetFile(Guid legalPaperId, CancellationToken cancellationToken)
     {
@@ -81,7 +81,7 @@ public class LegalPapersController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{legalPaperId:guid}/status")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateStatus(
         Guid legalPaperId,
         UpdateLegalPaperStatusRequest request,

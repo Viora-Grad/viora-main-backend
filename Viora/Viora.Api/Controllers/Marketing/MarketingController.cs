@@ -25,6 +25,7 @@ public class MarketingController(ISender sender) : ControllerBase
 {
     // Save/update the caller's organization Facebook Page access token + Page id.
     [HttpPost("meta-credentials")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> SaveMetaCredential(SaveMetaCredentialRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SaveMetaCredentialCommand(request.PageId, request.AccessToken), cancellationToken);
@@ -34,6 +35,7 @@ public class MarketingController(ISender sender) : ControllerBase
     // Connect a Facebook Page via the OAuth flow: exchanges the short-lived user token (AuthCode) for a
     // long-lived one, resolves the Page's own token from /me/accounts by PageId, then stores it (encrypted).
     [HttpPost("meta-credentials/connect")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> ConnectMetaPage(ConnectMetaPageRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ConnectMetaPageCommand(request.AuthCode, request.PageId), cancellationToken);
@@ -50,6 +52,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Delete the caller's organization Facebook Page credential from the database.
     [HttpDelete("meta-credentials")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> DeleteMetaCredential(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteMetaCredentialCommand(), cancellationToken);
@@ -58,6 +61,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Start a new chat session (== a new post draft), optionally with a first prompt.
     [HttpPost("chats")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> StartChat(StartChatRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new StartChatCommand(request.FirstMessage), cancellationToken);
@@ -66,6 +70,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Send a message; runs intent detection + routing (Manus content or finalize).
     [HttpPost("chats/{chatId:guid}/messages")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> SendMessage(Guid chatId, SendMarketingMessageRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SendMarketingMessageCommand(chatId, request.Message), cancellationToken);
@@ -74,6 +79,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Poll the in-flight Manus generation for a chat; returns the copy once ready (async two-step).
     [HttpPost("chats/{chatId:guid}/poll-content")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> PollContent(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new PollContentCommand(chatId), cancellationToken);
@@ -83,6 +89,7 @@ public class MarketingController(ISender sender) : ControllerBase
     // Preview the generated draft image (proxied from Manus) before publishing. Returns the raw image bytes;
     // fetch it with the Authorization header (e.g. as a blob) rather than a bare <img src>.
     [HttpGet("chats/{chatId:guid}/image")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetDraftImage(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetDraftImageQuery(chatId), cancellationToken);
@@ -101,6 +108,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Get a chat session with message history and current status.
     [HttpGet("chats/{chatId:guid}")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetChat(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetChatQuery(chatId), cancellationToken);
@@ -109,6 +117,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // List the caller's organization chat sessions (title/status).
     [HttpGet("chats")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> ListChats(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ListChatsQuery(), cancellationToken);
@@ -117,6 +126,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Publish the archived post to Facebook.
     [HttpPost("chats/{chatId:guid}/publish")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> Publish(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new PublishPostCommand(chatId), cancellationToken);
@@ -125,6 +135,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Get remaining/used marketing-post quota for the caller's organization.
     [HttpGet("quota")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetQuota(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetMarketingQuotaQuery(), cancellationToken);

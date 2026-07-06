@@ -10,7 +10,7 @@ using Viora.Domain.Staffs.Internal;
 
 namespace Viora.Application.Staffs.RegisterStaff;
 
-internal class RegisterStaffCommandHandler(
+public class RegisterStaffCommandHandler(
     IStaffRepository staffRepository,
     IStaffTokenRepository tokenRepository,
     IStaffInvitationService invitationService,

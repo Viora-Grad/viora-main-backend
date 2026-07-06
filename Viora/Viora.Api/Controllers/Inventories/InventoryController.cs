@@ -24,7 +24,7 @@ public class InventoryController(ISender sender) : ControllerBase
             : null;
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "inventory:read")]
     [Route("branch/{branchId}/inventories")]
     public async Task<IActionResult> GetItems(
         Guid branchId,
@@ -39,7 +39,7 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [HttpGet("inventories/{itemId:guid}")]
-    [Authorize]
+    [Authorize(Policy = "inventory:read")]
     public async Task<IActionResult> GetItemById(Guid itemId, CancellationToken cancellationToken)
     {
         var query = new GetInventoryItemByIdQuery(itemId);
@@ -47,7 +47,7 @@ public class InventoryController(ISender sender) : ControllerBase
         return result.ToActionResult();
     }
 
-    [Authorize]
+    [Authorize(Policy = "inventory:read")]
     [HttpGet("inventories/{itemId:guid}/image")]
     public async Task<IActionResult> GetItemImage(Guid itemId, CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public class InventoryController(ISender sender) : ControllerBase
         return File(file.Content, file.ContentType, file.FileName);
     }
 
-    [Authorize]
+    [Authorize(Policy = "inventory:read")]
     [HttpGet("branch/{branchId}/inventories/movements")]
     public async Task<IActionResult> GetBranchMovements(
         Guid branchId,
@@ -75,7 +75,7 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "inventory:write")]
     [Route("inventories")]
     public async Task<IActionResult> AddItem(AddInventoryItemRequest request, CancellationToken cancellationToken)
     {
@@ -95,7 +95,7 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [HttpPut("inventories/{itemId:guid}")]
-    [Authorize]
+    [Authorize(Policy = "inventory:write")]
     public async Task<IActionResult> UpdateItem(Guid itemId, UpdateInventoryItemRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateInventoryItemCommand(
@@ -109,7 +109,7 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [HttpPost("inventories/{itemId:guid}/restock")]
-    [Authorize]
+    [Authorize(Policy = "inventory:write")]
     public async Task<IActionResult> Restock(Guid itemId, InventoryItemActionRequest request, CancellationToken cancellationToken)
     {
         var command = new InventoryItemActionCommand(
@@ -123,7 +123,7 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [HttpPost("inventories/{itemId:guid}/consume")]
-    [Authorize]
+    [Authorize(Policy = "inventory:write")]
     public async Task<IActionResult> Consume(Guid itemId, InventoryItemActionRequest request, CancellationToken cancellationToken)
     {
         var command = new InventoryItemActionCommand(

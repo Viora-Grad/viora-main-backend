@@ -434,7 +434,7 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid>("ServiceId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StaffId")
+                    b.Property<Guid?>("StaffId")
                         .HasColumnType("uniqueidentifier");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Viora.Domain.Forms.Form.Name#FormName", b1 =>
@@ -2891,9 +2891,7 @@ namespace Viora.Infrastructure.Migrations
 
                     b.HasOne("Viora.Domain.Staffs.Staff", null)
                         .WithMany()
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StaffId");
                 });
 
             modelBuilder.Entity("Viora.Domain.Forms.FormSubmission", b =>

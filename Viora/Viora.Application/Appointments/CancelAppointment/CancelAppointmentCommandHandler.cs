@@ -10,7 +10,7 @@ using Viora.Domain.Users.Customers;
 
 namespace Viora.Application.Appointments.CancelAppointment;
 
-internal class CancelAppointmentCommandHandler(
+public class CancelAppointmentCommandHandler(
     IUserContext userContext,
     ICustomerRepository customerRepository,
     IStaffRepository staffRepository,

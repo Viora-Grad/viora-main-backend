@@ -20,7 +20,7 @@ internal class FormConfiguration : IEntityTypeConfiguration<Form>
             .IsRequired();
 
         builder.Property(f => f.StaffId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.ComplexProperty(f => f.Name, nameBuilder =>
         {

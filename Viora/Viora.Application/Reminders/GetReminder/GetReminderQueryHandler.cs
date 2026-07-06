@@ -5,7 +5,7 @@ using Viora.Domain.Reminders;
 
 namespace Viora.Application.Reminders.GetReminder;
 
-internal class GetReminderQueryHandler(IReminderRepository reminderRepository) : IQueryHandler<GetReminderQuery, Reminder>
+public class GetReminderQueryHandler(IReminderRepository reminderRepository) : IQueryHandler<GetReminderQuery, Reminder>
 {
     public async Task<Result<Reminder>> Handle(GetReminderQuery request, CancellationToken cancellationToken)
     {

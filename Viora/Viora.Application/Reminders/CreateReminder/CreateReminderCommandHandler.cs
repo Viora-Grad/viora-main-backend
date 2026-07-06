@@ -10,7 +10,7 @@ using Viora.Domain.Reminders.Events;
 
 namespace Viora.Application.Reminders.CreateReminder;
 
-internal class CreateReminderCommandHandler(
+public class CreateReminderCommandHandler(
     IAppointmentsRepository appointmentsRepository,
     IReminderRepository reminderRepository,
     IDomainEventScheduler scheduler,

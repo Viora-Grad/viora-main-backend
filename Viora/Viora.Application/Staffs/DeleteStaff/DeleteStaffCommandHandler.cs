@@ -6,7 +6,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Staffs.DeleteStaff;
 
-internal class DeleteStaffCommandHandler(
+public class DeleteStaffCommandHandler(
     IUserContext context,
     IStaffRepository staffRepository,
     IUnitOfWork unitOfWork,

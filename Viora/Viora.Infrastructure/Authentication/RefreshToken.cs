@@ -1,6 +1,6 @@
 ﻿namespace Viora.Infrastructure.Authentication;
 
-internal class RefreshToken
+public class RefreshToken
 {
     public Guid Id { get; set; }
     public string TokenHash { get; private set; } = null!;

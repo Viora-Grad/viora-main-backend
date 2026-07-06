@@ -18,13 +18,13 @@ internal static class PlanData
         PlanPeriod.monthly),
 
     Plan.Create(
-        new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+        new Guid("8f14e45f-ea9d-4c3b-9f6a-2b7a3d8e7c9a"),
         "Professional",
         "Professional Plan",
         "Advanced features for growing businesses",
         (decimal)199.9,
         Currency.Egp,
-        PlanPeriod.semiAnnually),
+        PlanPeriod.monthly),
 
     Plan.Create(
         new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
@@ -33,7 +33,7 @@ internal static class PlanData
         "Full feature set for large organizations",
         (decimal)399.9,
         Currency.Egp,
-        PlanPeriod.annually),
+        PlanPeriod.monthly),
 
     ];
 }
