@@ -96,7 +96,14 @@ public sealed class Permission
         ArchiveWrite,
         RemindersRead,
         RemindersWrite,
-        StaffWrite
+        StaffWrite,
+        InventoryRead,
+        InventoryWrite,
+        BranchWrite,
+        DashboardRead,
+        ServiceWrite,
+        MarketingWrite,
+        MarketingRead
     ];
     #endregion Permission Values
 }
