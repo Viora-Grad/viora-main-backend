@@ -56,6 +56,7 @@ public class RealTimeScheduleController : ControllerBase
     [HttpGet]
     [Route("api/schedule/{branchId}")]
     [Authorize(Policy = "schedule:read")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetBranchSchedule(Guid branchId)
     {
         var query = new GetBranchScheduleQuery(branchId);

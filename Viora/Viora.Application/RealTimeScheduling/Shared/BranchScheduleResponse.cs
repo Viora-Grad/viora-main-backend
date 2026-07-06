@@ -24,6 +24,7 @@ public class BranchScheduleResponse
                          schedule.DayOfWeek.ToString(),
                          schedule.Intervals
                              .Select(shift => new ShiftResponse(
+                                 shift.Id,
                                  shift.StaffId,
                                  shift.StartTime,
                                  shift.EndTime
