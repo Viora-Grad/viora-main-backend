@@ -49,7 +49,7 @@ internal sealed class DevDataSeeder(
     private const string Sentinel = "33330000-0000-0000-0000-000000000001";
     private const string EgyptCountryId = "a1b2c3d4-0001-0000-0000-000000000003";
     private const string StarterPlanId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-    private const string ProPlanId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+    private const string ProPlanId = "8f14e45f-ea9d-4c3b-9f6a-2b7a3d8e7c9a";
     private const string EnterprisePlanId = "cccccccc-cccc-cccc-cccc-cccccccccccc";
 
     // A minimal valid 1x1 PNG and a tiny valid PDF used as placeholder blobs.
@@ -175,10 +175,12 @@ INSERT INTO [MediaFiles] ([Id], [Key], [MimeType], [Name], [OrganizationId], [Si
     }
 
     // ---------------------------------------------------------------------------------------------------------
-    // USERS + LOCAL CREDENTIALS + AUTH IDENTITIES + USER ROLES  (Role ids: Registered=1, Owner=2, Customer=4)
+    // USERS + LOCAL CREDENTIALS + AUTH IDENTITIES + USER ROLES  (Role ids: Registered=1, Owner=2, Admin=3, Customer=4)
+    // The admin (admin@viora.dev) is a standalone platform User with the Admin role -- no Owner/Customer aggregate.
     // ---------------------------------------------------------------------------------------------------------
     private static string BuildUsersSql(string passwordHash) => $@"
 INSERT INTO [Users] ([Id], [CreatedAt], [Email], [IsEmailVerified], [LastLoginAt], [Status], [PersonalInfo_DateOfBirth], [PersonalInfo_FirstName], [PersonalInfo_Gender], [PersonalInfo_LastName]) VALUES
+('ad000000-0000-0000-0000-000000000001', '2026-01-05T09:00:00', N'admin@viora.dev',        1, NULL, N'Active', '1980-01-01', N'System', N'Male',   N'Admin'),
 ('11110000-0000-0000-0000-000000000001', '2026-01-10T09:00:00', N'aya.hassan@viora.dev',    1, NULL, N'Active', '1985-03-12', N'Aya',   N'Female', N'Hassan'),
 ('11110000-0000-0000-0000-000000000002', '2026-01-10T09:00:00', N'sara.mostafa@viora.dev',  1, NULL, N'Active', '1988-07-22', N'Sara',  N'Female', N'Mostafa'),
 ('11110000-0000-0000-0000-000000000003', '2026-01-10T09:00:00', N'karim.saber@viora.dev',   1, NULL, N'Active', '1983-11-05', N'Karim', N'Male',   N'Saber'),
@@ -194,6 +196,7 @@ INSERT INTO [Users] ([Id], [CreatedAt], [Email], [IsEmailVerified], [LastLoginAt
 ('22220000-0000-0000-0000-000000000006', '2026-02-01T09:00:00', N'tarek.fouad@viora.dev',   1, NULL, N'Active', '1993-10-07', N'Tarek', N'Male',   N'Fouad');
 
 INSERT INTO [LocalCredential] ([UserId], [FailedLoginAttempts], [HashVersion], [HashedPassword], [LastChangedAt]) VALUES
+('ad000000-0000-0000-0000-000000000001', 0, 1, N'{passwordHash}', NULL),
 ('11110000-0000-0000-0000-000000000001', 0, 1, N'{passwordHash}', NULL),
 ('11110000-0000-0000-0000-000000000002', 0, 1, N'{passwordHash}', NULL),
 ('11110000-0000-0000-0000-000000000003', 0, 1, N'{passwordHash}', NULL),
@@ -209,6 +212,7 @@ INSERT INTO [LocalCredential] ([UserId], [FailedLoginAttempts], [HashVersion], [
 ('22220000-0000-0000-0000-000000000006', 0, 1, N'{passwordHash}', NULL);
 
 INSERT INTO [AuthIdentities] ([Id], [CreatedAt], [LastLoginAt], [Provider], [ProviderKey], [UserId]) VALUES
+('a1de0000-0000-0000-0000-000000000014', '2026-01-05T09:00:00', NULL, N'local', N'admin@viora.dev',        'ad000000-0000-0000-0000-000000000001'),
 ('a1de0000-0000-0000-0000-000000000001', '2026-01-10T09:00:00', NULL, N'local', N'aya.hassan@viora.dev',    '11110000-0000-0000-0000-000000000001'),
 ('a1de0000-0000-0000-0000-000000000002', '2026-01-10T09:00:00', NULL, N'local', N'sara.mostafa@viora.dev',  '11110000-0000-0000-0000-000000000002'),
 ('a1de0000-0000-0000-0000-000000000003', '2026-01-10T09:00:00', NULL, N'local', N'karim.saber@viora.dev',   '11110000-0000-0000-0000-000000000003'),
@@ -224,6 +228,7 @@ INSERT INTO [AuthIdentities] ([Id], [CreatedAt], [LastLoginAt], [Provider], [Pro
 ('a1de0000-0000-0000-0000-000000000013', '2026-02-01T09:00:00', NULL, N'local', N'tarek.fouad@viora.dev',   '22220000-0000-0000-0000-000000000006');
 
 INSERT INTO [UserRole] ([UserId], [RoleId]) VALUES
+('ad000000-0000-0000-0000-000000000001', 3),
 ('11110000-0000-0000-0000-000000000001', 2),
 ('11110000-0000-0000-0000-000000000002', 2),
 ('11110000-0000-0000-0000-000000000003', 2),
