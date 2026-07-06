@@ -14,7 +14,7 @@ namespace Viora.Application.Appointments.DelayAppointment;
 /// <param name="userContext"> corresponds to the authorized staff member who can access this endpoint and by respect this command</param>
 /// <param name="appointmentsRepository"></param>
 /// <param name="unitOfWork"></param>
-internal class DelayAppointmentCommandHandler(
+public class DelayAppointmentCommandHandler(
     IUserContext userContext,
     IAppointmentsRepository appointmentsRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<DelayAppointmentCommand>
@@ -27,7 +27,12 @@ internal class DelayAppointmentCommandHandler(
             return Result.Failure(AppointmentErrors.AppointmentNotFound);
         }
         var userId = userContext.UserId;
+        var orgId = userContext.OrganizationId;
 
+        if (orgId is null || appointment.Staff.OrganizationId != orgId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to delay this appointment.");
+        }
 
         // get affected appointments and delay them as well
         var endOfDay = appointment.ReservationDate.Date.AddDays(1).AddTicks(-1);

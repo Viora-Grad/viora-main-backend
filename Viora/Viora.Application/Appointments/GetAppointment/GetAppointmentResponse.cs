@@ -13,6 +13,7 @@ public class GetAppointmentResponse
     public bool IsCheckedIn { get; init; }
     public string Status { get; init; } = null!;
     public int EstimatedDurationMinutes { get; init; }
+    public int AppointmentQueueNumber { get; init; }
     public DateTime EndTime { get; init; }
     public DateTime CreatedAt { get; init; }
     public string? CustomerFirstName { get; init; }

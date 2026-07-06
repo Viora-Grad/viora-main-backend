@@ -6,7 +6,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Staffs.AssignRoles;
 
-internal class AssignRolesCommandHandler(
+public class AssignRolesCommandHandler(
     IRoleRepository roleRepository,
     IStaffRepository staffRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<AssignRolesCommand>

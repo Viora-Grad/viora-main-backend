@@ -24,6 +24,7 @@ internal sealed class GetFeedbacksQueryHandler(
             cancellationToken);
 
         var items = feedbacks.Select(f => new GetFeedbacksResponse(
+            f.Id,
             f.BranchId,
             f.UserId,
             names.TryGetValue(f.UserId, out var name) ? name : string.Empty,

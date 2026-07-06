@@ -1,12 +1,11 @@
 ﻿using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
-using Viora.Application.Appointments.GetAppointment;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 
-namespace Viora.Application.Appointments.GetCustomerAppointment;
+namespace Viora.Application.Appointments.GetAppointment;
 
-internal class GetAppointmentQueryHandler(
+public class GetAppointmentQueryHandler(
     IAppointmentsRepository appointmentsRepository) : IQueryHandler<GetAppointmentQuery, GetAppointmentResponse>
 {
     public async Task<Result<GetAppointmentResponse>> Handle(GetAppointmentQuery request, CancellationToken cancellationToken)
@@ -27,6 +26,7 @@ internal class GetAppointmentQueryHandler(
             IsCheckedIn = appointment.IsCheckedIn,
             Status = appointment.Status.ToString(),
             EstimatedDurationMinutes = appointment.EstimatedDurationMinutes,
+            AppointmentQueueNumber = appointment.AppointmentQueueNumber,
             EndTime = appointment.EndTime,
             CreatedAt = appointment.CreatedAt,
             CustomerFirstName = appointment.Customer?.PersonalInfo.FirstName,

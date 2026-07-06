@@ -4,7 +4,7 @@ using Viora.Domain.Abstractions;
 
 namespace Viora.Application.Authentication.ConsumeStaffRefreshToken;
 
-internal class ConsumeStaffRefreshTokenCommandHandler(
+public class ConsumeStaffRefreshTokenCommandHandler(
     IAuthenticationService authenticationService
     ) : ICommandHandler<ConsumeStaffRefreshTokenCommand, AuthResult>
 {

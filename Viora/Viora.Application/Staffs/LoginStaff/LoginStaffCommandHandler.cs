@@ -6,7 +6,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Staffs.LoginStaff;
 
-internal class LoginStaffCommandHandler(
+public class LoginStaffCommandHandler(
     IAuthenticationService authenticationService,
     IStaffRepository staffRepository,
     IHasher hasher

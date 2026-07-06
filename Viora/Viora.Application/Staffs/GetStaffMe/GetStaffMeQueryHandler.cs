@@ -8,7 +8,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Staffs.GetStaffMe;
 
-internal sealed class GetStaffMeQueryHandler(
+public sealed class GetStaffMeQueryHandler(
     IStaffRepository staffRepository,
     IUserContext userContext) : IQueryHandler<GetStaffMeQuery, StaffMeResponse>
 {

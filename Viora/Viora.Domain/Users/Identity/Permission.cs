@@ -30,6 +30,8 @@ public sealed class Permission
     public static readonly Permission FeaturesWrite = new(41, "features:write", "Create, update, and delete features");
     public static readonly Permission AppointmentsRead = new(50, "appointments:read", "Read appointment information");
     public static readonly Permission AppointmentsWrite = new(51, "appointments:write", "Create, update, and delete appointments");
+    public static readonly Permission AppointmentsCreate = new(52, "appointments:create", "Create appointments");
+    public static readonly Permission AppointmentsCancel = new(53, "appointments:cancel", "Cancel appointments");
     public static readonly Permission InvitationsCreate = new(60, "invitations:create", "Create staff members invitations");
     public static readonly Permission InvitationsRead = new(61, "invitations:read", "Read staff members invitations");
     public static readonly Permission InvitationsDelete = new(62, "invitations:delete", "Delete staff members invitations");
@@ -66,6 +68,8 @@ public sealed class Permission
         FeaturesWrite,
         AppointmentsRead,
         AppointmentsWrite,
+        AppointmentsCreate,
+        AppointmentsCancel,
         InvitationsCreate,
         InvitationsRead,
         InvitationsDelete,

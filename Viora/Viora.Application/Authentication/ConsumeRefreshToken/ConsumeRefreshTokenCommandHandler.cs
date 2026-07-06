@@ -4,7 +4,7 @@ using Viora.Domain.Abstractions;
 
 namespace Viora.Application.Authentication.ConsumeRefreshToken;
 
-internal class ConsumeRefreshTokenCommandHandler(IAuthenticationService authenticationService) : ICommandHandler<ConsumeRefreshTokenCommand, AuthResult>
+public class ConsumeRefreshTokenCommandHandler(IAuthenticationService authenticationService) : ICommandHandler<ConsumeRefreshTokenCommand, AuthResult>
 {
     public async Task<Result<AuthResult>> Handle(ConsumeRefreshTokenCommand request, CancellationToken cancellationToken)
     {

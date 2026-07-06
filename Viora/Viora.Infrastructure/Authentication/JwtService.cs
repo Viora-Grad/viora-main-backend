@@ -8,7 +8,7 @@ using Viora.Application.Abstractions.Clock;
 
 namespace Viora.Infrastructure.Authentication;
 
-internal class JwtService(IConfiguration configuration, IDateTimeProvider dateTimeProvider) : IJwtService
+public class JwtService(IConfiguration configuration, IDateTimeProvider dateTimeProvider) : IJwtService
 {
     private readonly string Issuer = configuration["JWT:ISSUER"] ?? throw new ArgumentNullException("JWT:ISSUER configuration is missing");
     private readonly string Audience = configuration["JWT:AUDIENCE"] ?? throw new ArgumentNullException("JWT:AUDIENCE configuration is missing");

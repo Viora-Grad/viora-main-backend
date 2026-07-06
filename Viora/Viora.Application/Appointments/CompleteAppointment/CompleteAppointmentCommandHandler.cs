@@ -1,13 +1,17 @@
-﻿using Viora.Application.Abstractions.Clock;
+﻿using Viora.Application.Abstractions.Authentication;
+using Viora.Application.Abstractions.Clock;
 using Viora.Application.Abstractions.Exceptions;
 using Viora.Application.Abstractions.Messaging;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
 using Viora.Domain.Appointments.Internal;
+using Viora.Domain.Staffs;
 
 namespace Viora.Application.Appointments.CompleteAppointment;
 
-internal class CompleteAppointmentCommandHandler(
+public class CompleteAppointmentCommandHandler(
+    IUserContext userContext,
+    IStaffRepository staffRepository,
     IAppointmentsRepository appointmentsRepository,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork
@@ -15,8 +19,16 @@ internal class CompleteAppointmentCommandHandler(
 {
     public async Task<Result> Handle(CompleteAppointmentCommand request, CancellationToken cancellationToken)
     {
+        var staffId = userContext.UserId;
+        var orgId = userContext.OrganizationId;
+
         var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
             throw new NotFoundException($"Appointment with ID {request.AppointmentId} not found");
+
+        if (appointment.Staff.OrganizationId != orgId)
+        {
+            throw new UnauthorizedAccessException($"You are not authorized to complete appointment with ID {appointment.Id}");
+        }
 
         var result = appointment.Complete(dateTimeProvider.UtcNow);
 

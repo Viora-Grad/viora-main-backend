@@ -3,7 +3,7 @@ using Viora.Domain.Appointments;
 
 namespace Viora.Application.Appointments.Shared;
 
-internal class GetAppointmentsSpecification : BaseSpecification<Appointment>
+public class GetAppointmentsSpecification : BaseSpecification<Appointment>
 {
     public GetAppointmentsSpecification(GetAppointmentsParameters p)
     {

@@ -16,7 +16,7 @@ namespace Viora.Application.Appointments.CreateAppointment;
 // TODO: Add domain events for appointment creation and handle them in the application layer to send notifications, update staff schedules, etc.
 // TODO: Consider a solution for the race condition where two appointments are created at the same time for the same service and staff member.
 // This could involve implementing a locking mechanism or using database transactions to ensure data integrity.
-internal class CreateAppointmentCommandHandler(
+public class CreateAppointmentCommandHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork,
     IAppointmentsRepository appointmentsRepository,
@@ -30,12 +30,20 @@ internal class CreateAppointmentCommandHandler(
     public async Task<Result<Guid>> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
     {
         var userId = context.UserId;
+        var orgId = context.OrganizationId;
 
-        var customer = await customerRepository.GetByIdAsync(userId, cancellationToken) ?? throw new NotFoundException("Customer could not be found.");
+        Customer? customer = null;
+        if (orgId is null)
+        {
+            customer = await customerRepository.GetByIdAsync(userId, cancellationToken)
+                ?? throw new NotFoundException("Customer could not be found.");
+        }
+
+
 
         // The branch and duration are properties of the service, not the client request.
         var service = await serviceRepository.GetByIdAsync(request.ServiceId, cancellationToken)
-            ?? throw new NotFoundException("Service could not be found.");
+                ?? throw new NotFoundException("Service could not be found.");
 
         var branchId = service.BranchId;
         var estimatedDuration = service.Duration;
@@ -99,21 +107,30 @@ internal class CreateAppointmentCommandHandler(
 
             paymentId = promiseResult.Value;
         }
+        Guid? customerId;
+        if (customer is not null)
+        {
+            customerId = customer.Id;
+        }
+        else
+        {
+            customerId = null;
+        }
 
         var appointment = Appointment.Book(
-        userId,
-        request.ServiceId,
-        request.StaffId,
-        branchId,
-        paymentId,
-        request.ReservationDate,
-        (int)queueNumber,
-        payMethod,
-        status,
-        Enum.Parse<Creator>(request.CreatedBy, true),
-        Enum.Parse<Platform>(request.RequestPlatform, true),
-        (int)estimatedDuration.TotalMinutes,
-        dateTimeProvider.UtcNow);
+            customerId,
+            request.ServiceId,
+            request.StaffId,
+            branchId,
+            paymentId,
+            request.ReservationDate,
+            (int)queueNumber,
+            payMethod,
+            status,
+            Enum.Parse<Creator>(request.CreatedBy, true),
+            Enum.Parse<Platform>(request.RequestPlatform, true),
+            (int)estimatedDuration.TotalMinutes,
+            dateTimeProvider.UtcNow);
 
         appointmentsRepository.Add(appointment);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -24,6 +24,10 @@ public sealed class RolePermission
         new RolePermission { RoleId = Role.Customer.Id, PermissionId = Permission.FormSubmissionRead.Id },
         new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.PrescriptionRead.Id },
         new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.FormRead.Id },
+        new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.AppointmentsRead.Id },
+        new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.AppointmentsCreate.Id },
+        new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.AppointmentsCancel.Id },
+        new RolePermission {RoleId = Role.Customer.Id, PermissionId= Permission.RemindersRead.Id },
         ];
 
     #endregion
