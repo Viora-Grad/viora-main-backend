@@ -12,7 +12,6 @@ internal class GetBranchAppointmentsQueryHandler(
 {
     public async Task<Result<PaginatedModel<AppointmentsResponse>>> Handle(GetBranchAppointmentsQuery request, CancellationToken cancellationToken)
     {
-
         var parameters = new GetAppointmentsParameters(
             CustomerId: request.CustomerId,
             BranchId: request.BranchId,
@@ -36,6 +35,7 @@ internal class GetBranchAppointmentsQueryHandler(
         var response = appointments.Select(a => new AppointmentsResponse
         {
             AppointmentId = a.Id,
+            CustomerId = a.CustomerId,
             ServiceId = a.ServiceId,
             StaffId = a.StaffId,
             BranchId = a.BranchId,
@@ -45,7 +45,7 @@ internal class GetBranchAppointmentsQueryHandler(
             Status = a.Status.ToString(),
             EstimatedDurationMinutes = a.EstimatedDurationMinutes,
             ServiceName = a.Service?.Name ?? string.Empty,
-            StaffName = $"", // staff not implemented yet
+            StaffName = $"{a.Staff.FirstName ?? string.Empty} {a.Staff.LastName ?? string.Empty}".Trim(),
             Cost = $"{a.Service?.Cost.ToString()}"
         }).ToList();
         return Result.Success(new PaginatedModel<AppointmentsResponse>(response, request.Page, request.PageSize, response.Count));

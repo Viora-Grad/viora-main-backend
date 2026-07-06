@@ -4,12 +4,14 @@ namespace Viora.Application.RealTimeScheduling.Shared;
 
 public class BranchScheduleResponse
 {
+    public Guid Id { get; set; }
     public string Day { get; set; }
 
     public List<ShiftResponse> Shifts { get; set; }
 
-    public BranchScheduleResponse(string day, List<ShiftResponse> shifts)
+    public BranchScheduleResponse(Guid id, string day, List<ShiftResponse> shifts)
     {
+        Id = id;
         Day = day;
         Shifts = shifts;
     }
@@ -18,6 +20,7 @@ public class BranchScheduleResponse
     {
         var schedulesResponse = schedules
                 .Select(schedule => new BranchScheduleResponse(
+                         schedule.Id,
                          schedule.DayOfWeek.ToString(),
                          schedule.Intervals
                              .Select(shift => new ShiftResponse(
