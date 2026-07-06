@@ -34,6 +34,12 @@ public static class MarketingErrors
     public static readonly Error MetaGraphFailed =
         new("Marketing.MetaGraphFailed", "The Facebook Graph API request failed", ErrorCategory.BadGateway);
 
+    public static readonly Error TokenExchangeFailed =
+        new("Marketing.TokenExchangeFailed", "Could not exchange the Facebook authorization token for a long-lived token", ErrorCategory.BadGateway);
+
+    public static readonly Error PageNotInAccounts =
+        new("Marketing.PageNotInAccounts", "The requested Facebook Page was not found among the pages this user manages", ErrorCategory.Validation);
+
     public static readonly Error NoDraftContent =
         new("Marketing.NoDraftContent", "There is no marketing content to finalize yet; generate content first", ErrorCategory.Validation);
 

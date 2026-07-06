@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
+using Viora.Application.Marketing.ConnectMetaPage;
 using Viora.Application.Marketing.DeleteMetaCredential;
 using Viora.Application.Marketing.GetChat;
 using Viora.Application.Marketing.GetDraftImage;
@@ -25,6 +26,15 @@ public class MarketingController(ISender sender) : ControllerBase
     public async Task<IActionResult> SaveMetaCredential(SaveMetaCredentialRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SaveMetaCredentialCommand(request.PageId, request.AccessToken), cancellationToken);
+        return result.ToActionResult();
+    }
+
+    // Connect a Facebook Page via the OAuth flow: exchanges the short-lived user token (AuthCode) for a
+    // long-lived one, resolves the Page's own token from /me/accounts by PageId, then stores it (encrypted).
+    [HttpPost("meta-credentials/connect")]
+    public async Task<IActionResult> ConnectMetaPage(ConnectMetaPageRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ConnectMetaPageCommand(request.AuthCode, request.PageId), cancellationToken);
         return result.ToActionResult();
     }
 
