@@ -57,12 +57,6 @@ public class FormController : ControllerBase
         var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-    public async Task<IActionResult> CreateForm(CreateFormRequest request, CancellationToken cancellationToken)
-    {
-        var command = new CreateFormCommand(request.ServiceId, request.StaffId, request.name, request.fields);
-        var result = await _sender.Send(command);
-        return result.ToActionResult();
-    }
 
     [HttpPut]
     [Route("api/service/form/update/{formId}")]
