@@ -54,7 +54,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpGet("me")]
-    [Authorize]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> GetOrganizationDetails(CancellationToken cancellationToken)
     {
         var query = new GetMyOrganizationDetailsQuery((Guid)UserId!);
@@ -64,7 +64,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
 
     [HttpPost("{organizationId:guid}/gallery/images")]
     [Consumes("multipart/form-data")]
-    [Authorize]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> AddImageToGallery(
     Guid organizationId,
     IFormFileCollection files,
@@ -82,7 +82,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
 
     [HttpPost("{organizationId:guid}/gallery/documents")]
     [Consumes("multipart/form-data")]
-    [Authorize]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> AddDocToGallery(
     Guid organizationId,
     IFormFileCollection files,
@@ -106,7 +106,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{organizationId:guid}/suspend")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> SuspendOrganization(Guid organizationId, SuspendOrganizationRequest request, CancellationToken cancellationToken)
     {
         var command = new SuspendOrganizationCommand(organizationId, UserId, request.Reason, request.Notes);
@@ -115,6 +115,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{organizationId:guid}/hide")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> HideOrganization(Guid organizationId, CancellationToken cancellationToken)
     {
         var command = new HideOrganizationCommand(organizationId);
@@ -123,7 +124,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{organizationId:guid}/profile")]
-    [Authorize]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> UpdateProfile(Guid organizationId, UpdateOrganizationProfileRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateOrganizationProfileCommand(
@@ -140,6 +141,7 @@ public class OrganizationsController(ISender sender) : ControllerBase
 
     [HttpPut("{organizationId:guid}/logo")]
     [Consumes("multipart/form-data")]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> UpdateLogo(Guid organizationId, IFormFile file, CancellationToken cancellationToken)
     {
         await using var stream = file.OpenReadStream();

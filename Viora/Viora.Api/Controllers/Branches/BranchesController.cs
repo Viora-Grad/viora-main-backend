@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Branches.AddBranch;
@@ -83,6 +84,7 @@ public class BranchesController(ISender sender) : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [Authorize(Roles = "Owner")]
     public async Task<IActionResult> AddBranch(AddBranchRequest request, CancellationToken cancellationToken)
     {
         var command = new AddBranchCommand(
@@ -106,6 +108,7 @@ public class BranchesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{branchId:guid}/phone-numbers")]
+    [Authorize(Policy = "branch:write")]
     public async Task<IActionResult> UpdatePhoneNumbers(Guid branchId, UpdatePhoneNumbersRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdatePhoneNumbersCommand(branchId, request.PhoneNumbers);
@@ -114,6 +117,7 @@ public class BranchesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{branchId:guid}/status")]
+    [Authorize(Policy = "branch:write")]
     public async Task<IActionResult> UpdateBranchStatus(Guid branchId, UpdateBranchStatusRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateBranchStatusCommand(branchId, request.Status);
@@ -122,6 +126,7 @@ public class BranchesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("{branchId:guid}/schedule")]
+    [Authorize(Policy = "branch:write")]
     public async Task<IActionResult> UpdateSchedule(Guid branchId, UpdateScheduleRequest request, CancellationToken cancellationToken)
     {
         var schedule = new List<BusinessHour>();
@@ -140,6 +145,7 @@ public class BranchesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{branchId:guid}/gallery/{mediaId:guid}")]
+    [Authorize(Policy = "branch:write")]
     public async Task<IActionResult> LinkImageToBranch(Guid branchId, Guid mediaId, CancellationToken cancellationToken)
     {
         var command = new LinkImageToBranchCommand(branchId, mediaId);
@@ -148,6 +154,7 @@ public class BranchesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{branchId:guid}/gallery/{imageId:guid}")]
+    [Authorize(Policy = "branch:write")]
     public async Task<IActionResult> UnlinkImageFromBranch(Guid branchId, Guid imageId, CancellationToken cancellationToken)
     {
         var command = new UnlinkImageFromBranchCommand(branchId, imageId);

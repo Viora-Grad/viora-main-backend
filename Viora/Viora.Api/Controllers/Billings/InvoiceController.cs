@@ -18,7 +18,7 @@ public class InvoiceController : ControllerBase
 
     [HttpGet]
     [Route("api/organization/{organizationId:guid}/invoices")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Owner")]
     public async Task<IActionResult> GetOrganizationInvoices(Guid organizationId, CancellationToken cancellationToken)
     {
         var result = await _sender.Send(new GetOrganizationInvoicesQuery(organizationId), cancellationToken);

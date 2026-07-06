@@ -24,7 +24,7 @@ public class ServicesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("services")]
-    [Authorize]
+    [Authorize(Policy = "service:write")]
     public async Task<IActionResult> AddService(AddServiceRequest request, CancellationToken cancellationToken)
     {
         var command = new AddServiceCommand(
@@ -40,7 +40,7 @@ public class ServicesController(ISender sender) : ControllerBase
     }
 
     [HttpPut("services/{serviceId:guid}")]
-    [Authorize]
+    [Authorize(Policy = "service:write")]
     public async Task<IActionResult> UpdateService(Guid serviceId, UpdateServiceRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateServiceCommand(
@@ -56,7 +56,7 @@ public class ServicesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("services/{serviceId:guid}/discount")]
-    [Authorize]
+    [Authorize(Policy = "service:write")]
     public async Task<IActionResult> AddDiscount(Guid serviceId, AddDiscountRequest request, CancellationToken cancellationToken)
     {
         var command = new AddDiscountCommand(
