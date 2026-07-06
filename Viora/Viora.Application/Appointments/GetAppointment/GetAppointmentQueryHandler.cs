@@ -26,6 +26,7 @@ public class GetAppointmentQueryHandler(
             IsCheckedIn = appointment.IsCheckedIn,
             Status = appointment.Status.ToString(),
             EstimatedDurationMinutes = appointment.EstimatedDurationMinutes,
+            AppointmentQueueNumber = appointment.AppointmentQueueNumber,
             EndTime = appointment.EndTime,
             CreatedAt = appointment.CreatedAt,
             CustomerFirstName = appointment.Customer?.PersonalInfo.FirstName,
