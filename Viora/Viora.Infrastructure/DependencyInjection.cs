@@ -13,6 +13,8 @@ using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Application.Billings;
+using Viora.Application.Marketing.Abstractions;
+using Viora.Application.Marketing.Services;
 using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
@@ -24,6 +26,7 @@ using Viora.Domain.Feedbacks;
 using Viora.Domain.Forms;
 using Viora.Domain.Inventory;
 using Viora.Domain.InventoryMovements;
+using Viora.Domain.Marketing;
 using Viora.Domain.Medias;
 using Viora.Domain.MedicalRecords;
 using Viora.Domain.Orders;
@@ -50,6 +53,7 @@ using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Mail;
+using Viora.Infrastructure.Marketing;
 using Viora.Infrastructure.Media;
 using Viora.Infrastructure.Payments;
 using Viora.Infrastructure.RealTime;
@@ -58,6 +62,7 @@ using Viora.Infrastructure.Repositories.Appointments;
 using Viora.Infrastructure.Repositories.Authentication;
 using Viora.Infrastructure.Repositories.Billings;
 using Viora.Infrastructure.Repositories.Forms;
+using Viora.Infrastructure.Repositories.Marketing;
 using Viora.Infrastructure.Repositories.Inventories;
 using Viora.Infrastructure.Repositories.MedicalRecords;
 using Viora.Infrastructure.Repositories.Organizations;
@@ -168,6 +173,11 @@ public static class DependencyInjection
         services.AddScoped<IWalletPromiseRepository, WalletPromiseRepository>();
         services.AddScoped<IWalletTransactionsRepository, WalletTransactionRepository>();
         #endregion WalletRepos
+
+        #region MarketingRepos
+        services.AddScoped<IMarketingChatSessionRepository, MarketingChatSessionRepository>();
+        services.AddScoped<IMetaPageCredentialRepository, MetaPageCredentialRepository>();
+        #endregion MarketingRepos
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -202,6 +212,28 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.Connection.Add("keep-alive");
         });
         #endregion Payments
+
+        #region Marketing
+        // Groq-backed application services (not MediatR handlers, so registered explicitly). They depend on
+        // the Semantic Kernel IChatCompletionService registered by AddAiRagServices.
+        services.AddScoped<IMarketingIntentDetector, MarketingIntentDetector>();
+        services.AddScoped<IMarketingPostJsonBuilder, MarketingPostJsonBuilder>();
+
+        // Manus content API. Base URL + the x-manus-api-key header from IManusSettings.
+        services.AddHttpClient<IManusClient, ManusClient>((sp, client) =>
+        {
+            var manusSettings = sp.GetRequiredService<IManusSettings>();
+            client.BaseAddress = new Uri(manusSettings.BaseUrl.TrimEnd('/') + "/");
+            client.DefaultRequestHeaders.Add("x-manus-api-key", manusSettings.ApiKey);
+        });
+
+        // Facebook Graph API. Per-tenant Page tokens are sent per request (form data), not as a header.
+        services.AddHttpClient<IMetaGraphService, MetaGraphService>((sp, client) =>
+        {
+            var metaSettings = sp.GetRequiredService<IMetaSettings>();
+            client.BaseAddress = new Uri(metaSettings.BaseUrl.TrimEnd('/') + "/");
+        });
+        #endregion Marketing
 
         #region HostedWorkers
         services.AddHostedService<ScheduledEventDispatcherService>();

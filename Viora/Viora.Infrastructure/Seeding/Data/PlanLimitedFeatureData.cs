@@ -28,7 +28,20 @@ internal class PlanLimitedFeatureData
             new Guid("40000000-0000-0000-0000-000000000004"),
             PlanData.All[1].Id,
             LimitedFeaturesData.All[1].Id,
-            25)
+            25),
+
+        // Marketing AI posts (LimitedFeaturesData.All[4]). Per-plan allotments; tune as needed.
+        PlanLimitedFeature.Create(
+            new Guid("40000000-0000-0000-0000-000000000005"),
+            PlanData.All[0].Id,
+            LimitedFeaturesData.All[4].Id,
+            5),
+
+        PlanLimitedFeature.Create(
+            new Guid("40000000-0000-0000-0000-000000000006"),
+            PlanData.All[1].Id,
+            LimitedFeaturesData.All[4].Id,
+            30)
     ];
 
 }

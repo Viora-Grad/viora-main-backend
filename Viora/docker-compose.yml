@@ -23,9 +23,12 @@ services:
       - AiRag__Qdrant__Port=6334
       - AiRag__Onnx__ModelPath=Models/all-MiniLM-L6-V2/model.onnx
       - AiRag__Onnx__VocabPath=Models/all-MiniLM-L6-V2/vocab.txt
+      - CipherPrivateKey=${CIPHER_PRIVATE_KEY} 
       # Override the Seq sink's serverUrl (3rd entry, index 2, in Serilog:WriteTo) to reach the seq container.
       - Serilog__WriteTo__2__Args__serverUrl=http://seq:80
       - Payment__Secret=${PAYMENT__SECRET}
+      - Manus__BaseUrl=${MANUS__BASE_URL} 
+      - Manus__ApiKey=${MANUS__API_KEY} 
     depends_on:
       sql:
         condition: service_healthy

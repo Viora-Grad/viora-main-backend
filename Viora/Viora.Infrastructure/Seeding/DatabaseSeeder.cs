@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Shared;
+using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
+using Viora.Domain.Subscriptions.Internal;
 using Viora.Domain.Users.Identity;
 using Viora.Infrastructure.Seeding.Data;
 
@@ -214,6 +216,69 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
         }
 
         #endregion PlanLimitedFeature
+
+        #region MarketingQuotaBackfill
+        // FeatureUsage rows are normally created at subscription time. Orgs that subscribed before the
+        // marketing-posts feature existed have no row and would hit FeatureUsageNotFound -> 405 on finalize.
+        // Idempotently provision one for each active subscription whose plan grants the feature.
+        var marketingFeatureId = LimitedFeature.MarketingAiPosts.Id;
+
+        var marketingGrants = await db.Set<PlanLimitedFeature>()
+            .Where(plf => plf.LimitedFeatureId == marketingFeatureId)
+            .ToDictionaryAsync(plf => plf.PlanId, plf => plf.LimitValue, cancellationToken);
+
+        if (marketingGrants.Count == 0)
+        {
+            logger.LogInformation("Marketing quota backfill: no plan grants the marketing-posts feature; nothing to backfill.");
+        }
+        else
+        {
+            var orgsWithMarketingUsage = (await db.Set<FeatureUsage>()
+                .Where(fu => fu.LimitedFeatureId == marketingFeatureId)
+                .Select(fu => fu.OrganizationId)
+                .ToListAsync(cancellationToken))
+                .ToHashSet();
+
+            var activeSubscriptions = await db.Set<Subscription>()
+                .Where(s => s.Status == SubscriptionStatus.Active)
+                .ToListAsync(cancellationToken);
+
+            var newUsages = new List<FeatureUsage>();
+            foreach (var subscription in activeSubscriptions)
+            {
+                if (orgsWithMarketingUsage.Contains(subscription.OrganizationId))
+                    continue;
+                if (!marketingGrants.TryGetValue(subscription.PlanId, out var limit))
+                    continue;
+
+                var usage = FeatureUsage.Create(
+                    subscription.OrganizationId,
+                    marketingFeatureId,
+                    subscription.SubscriptionsStartTime,
+                    subscription.SubscriptionsEndTime,
+                    limit);
+
+                if (usage.IsFailure)
+                {
+                    logger.LogWarning("Marketing quota backfill: could not create usage for org {Org}: {Error}.",
+                        subscription.OrganizationId, usage.Error.Name);
+                    continue;
+                }
+
+                newUsages.Add(usage.Value);
+                orgsWithMarketingUsage.Add(subscription.OrganizationId); // guard against duplicate active subs
+            }
+
+            if (newUsages.Count == 0)
+                logger.LogInformation("Marketing quota backfill: all eligible organizations already provisioned.");
+            else
+            {
+                await db.Set<FeatureUsage>().AddRangeAsync(newUsages, cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+                logger.LogInformation("Marketing quota backfill: provisioned {Count} organizations.", newUsages.Count);
+            }
+        }
+        #endregion MarketingQuotaBackfill
 
         #region Addons
         var existingAddon = await db.Set<LimitedFeatureAddon>()

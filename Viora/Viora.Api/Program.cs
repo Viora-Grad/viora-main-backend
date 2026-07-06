@@ -10,6 +10,7 @@ using Viora.Application.Abstractions.Media;
 using Viora.Application.AiRag.Ingestion;
 using Viora.Domain.Billings;
 using Viora.Domain.Branches;
+using Viora.Domain.Marketing;
 using Viora.Domain.Organizations.OnBoardings;
 using Viora.Domain.Organizations.Suspensions;
 using Viora.Domain.Scheduling;
@@ -59,7 +60,6 @@ try
         options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     });
     builder.Services.AddAiRagServices(builder.Configuration);
-    builder.Services.AddControllers();
     builder.Services.AddOpenApi();
     builder.Services.AddSignalR();
 
@@ -85,6 +85,10 @@ try
         builder.Configuration, "Payment");
     builder.Services.AddInterfacedOptions<IWalletSettings, WalletSettings>(
         builder.Configuration, "Wallet");
+    builder.Services.AddInterfacedOptions<IManusSettings, ManusSettings>(
+        builder.Configuration, "Manus");
+    builder.Services.AddInterfacedOptions<IMetaSettings, MetaSettings>(
+        builder.Configuration, "Meta");
     #endregion Settings
 
     var app = builder.Build();

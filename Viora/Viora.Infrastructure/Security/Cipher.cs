@@ -12,7 +12,7 @@ public class Cipher : ICipher
 
     public Cipher()
     {
-        string keyString = Environment.GetEnvironmentVariable("CipherPrivateKey")!;
+        string keyString = Environment.GetEnvironmentVariable("CipherPrivateKey") ?? throw new ArgumentException("Cipher key was not found in the env");
         byte[] keyBytes = Encoding.UTF8.GetBytes(keyString);
         Array.Copy(keyBytes, Key, Math.Min(keyBytes.Length, Key.Length));
     }
