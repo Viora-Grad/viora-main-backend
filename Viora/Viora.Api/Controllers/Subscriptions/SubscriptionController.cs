@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Subscriptions.GetOrganizationSubscriptions;
+using Viora.Application.Subscriptions.GetOrganizationUsage;
 using Viora.Application.Subscriptions.RemoveAddon;
 
 namespace Viora.Api.Controllers.Subscriptions;
@@ -25,6 +26,17 @@ public class SubscriptionController : ControllerBase
     {
         var query = new GetOrganizationSubscriptionsQuery(organizationId);
         var result = await _sender.Send(query, cancellationToken);
+        return result.ToActionResult();
+    }
+
+
+    // Quota + usage for the caller's organization (org id from the token) across all plan-limited features.
+    [HttpGet]
+    [Route("api/subscription/usage")]
+    [Authorize]
+    public async Task<IActionResult> GetOrganizationUsage(CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new GetOrganizationUsageQuery(), cancellationToken);
         return result.ToActionResult();
     }
 
