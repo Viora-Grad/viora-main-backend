@@ -18,12 +18,15 @@ internal class NoShowAppointmentCommandHandler(
 {
     public async Task<Result> Handle(NoShowAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var staffId = userContext.UserId;
-        var staff = await staffRepository.GetByIdAsync(staffId, cancellationToken) ??
-            throw new NotFoundException("Staff with ID " + staffId + " not found.");
+        var orgId = userContext.OrganizationId;
 
         var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
             throw new NotFoundException("Appointment with ID " + request.AppointmentId + " not found.");
+
+        if (appointment.Staff.OrganizationId != orgId)
+        {
+            throw new UnauthorizedAccessException("You do not have permission to mark this appointment as no-show.");
+        }
 
         var noShowResult = appointment.NoShow(dateTimeProvider.UtcNow);
 

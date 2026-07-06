@@ -19,13 +19,15 @@ internal class CheckInAppointmentCommandHandler(
 {
     public async Task<Result> Handle(CheckInAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var staffId = userContext.UserId;
-        var staff = await staffRepository.GetByIdAsync(staffId, cancellationToken) ??
-            throw new NotFoundException("Staff with ID " + staffId + " not found.");
+        var orgId = userContext.OrganizationId;
 
         var appointment = await appointmentsRepository.GetByIdAsync(request.AppointmentId, cancellationToken) ??
             throw new NotFoundException("Appointment with ID " + request.AppointmentId + " not found.");
 
+        if (appointment.Staff.OrganizationId != orgId)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to check in this appointment.");
+        }
         var checkInResult = appointment.CheckIn(dateTimeProvider.UtcNow, Creator.Staff);
 
         if (checkInResult.IsFailure)

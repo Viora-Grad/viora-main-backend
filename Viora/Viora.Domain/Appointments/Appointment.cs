@@ -185,8 +185,13 @@ public sealed class Appointment : Entity
     public Result Cancel(DateTime cancelTime, Guid branchId, Creator creator)
     {
         // Only allow canceling the appointment if it is not completed
-        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress || cancelTime.AddHours(2) > ReservationDate)
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
+
+        if (cancelTime.AddHours(2) > ReservationDate && creator == Creator.Customer) // Only allow customers to cancel the appointment if it is at least 2 hours before the reservation date
+            return Result.Failure(AppointmentErrors.CancellationProhibited);
+
+
         Status = CustomerStatus.Canceled;
         LastUpdatedAt = cancelTime;
         RaiseDomainEvent(new AppointmentCanceledEvent(Id, branchId, ReservationDate, creator));

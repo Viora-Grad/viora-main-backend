@@ -25,7 +25,7 @@ public class AppointmentsController(
     ) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Policy = "appointments:create,appointments:write")]
+    [Authorize(Policy = "appointments:create")]
     public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateAppointmentCommand(
@@ -45,6 +45,7 @@ public class AppointmentsController(
     [Authorize(Policy = "appointments:write")] // might change the policy later to be more specific to the staff role
     public async Task<IActionResult> CheckInAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+
         var command = new CheckInAppointmentCommand(AppointmentId: id);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
@@ -58,7 +59,7 @@ public class AppointmentsController(
         return result.ToActionResult();
     }
     [HttpPatch("{id:guid}/cancel")]
-    [Authorize(Policy = "appointments:cancel,appointments:write")]
+    [Authorize(Policy = "appointments:cancel")]
     public async Task<IActionResult> CancelAppointment([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var command = new CancelAppointmentCommand(AppointmentId: id);
