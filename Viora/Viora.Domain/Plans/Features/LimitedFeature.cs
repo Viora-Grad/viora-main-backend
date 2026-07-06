@@ -38,6 +38,12 @@ public class LimitedFeature : Entity
         new FeatureDescription("Storage quota in Bytes")
         );
 
+    public static readonly LimitedFeature MarketingAiPosts = new(
+        new Guid("f1a2b3c4-0005-0000-0000-000000000005"),
+        new FeatureKey("marketing_ai_posts"),
+        new FeatureDescription("Number of AI-generated marketing posts the organization can create")
+        );
+
     public static IReadOnlyList<LimitedFeature> All =>
-        [Branches, ServicesPerBranch, StaffMembers, StorageBytes];
+        [Branches, ServicesPerBranch, StaffMembers, StorageBytes, MarketingAiPosts];
 }

@@ -5,6 +5,7 @@ using Viora.Api.Extensions;
 using Viora.Application.Authentication.CreateStaffRole;
 using Viora.Application.Authentication.GetOrganizationRoles;
 using Viora.Application.Staffs.AssignRoles;
+using Viora.Application.Staffs.AssignServices;
 using Viora.Application.Staffs.ChangeStatus;
 using Viora.Application.Staffs.CreateStaffInvitation;
 using Viora.Application.Staffs.DeleteStaff;
@@ -13,6 +14,8 @@ using Viora.Application.Staffs.GetStaffById;
 using Viora.Application.Staffs.GetStaffInvitation;
 using Viora.Application.Staffs.GetStaffMe;
 using Viora.Application.Staffs.SearchStaff;
+using Viora.Application.Staffs.UpdateRoles;
+using Viora.Application.Staffs.UpdateServices;
 using Viora.Application.Staffs.UpdateStaffInfo;
 
 
@@ -73,14 +76,31 @@ public class StaffsController(ISender sender) : ControllerBase
 
     [HttpPatch("{staffId:guid}/role")]
     [Authorize(Policy = "roles:write")]
-    public async Task<IActionResult> AssignRoleToStaff(Guid staffId, AssignRolesRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStaffRoles(Guid staffId, AssignRolesRequest request, CancellationToken cancellationToken)
     {
-        var command = new AssignRolesCommand(staffId,
+        var command = new UpdateRolesCommand(staffId,
             [.. request.RoleIds]);
         var result = await sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
-
+    [HttpPatch("{staffId:guid}/services")]
+    [Authorize(Policy = "staff:write")]
+    public async Task<IActionResult> UpdateStaffServices(Guid staffId, UpdateStaffServicesRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateServicesCommand(staffId,
+            [.. request.ServiceIds]);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
+    [HttpPost("{staffId:guid}/services")]
+    [Authorize(Policy = "staff:write")]
+    public async Task<IActionResult> AssignStaffServices(Guid staffId, AssignStaffServicesRequest request, CancellationToken cancellationToken)
+    {
+        var command = new AssignServicesCommand(staffId,
+            [.. request.ServiceIds]);
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToActionResult();
+    }
     [HttpPut("{staffId:guid}")]
     [Authorize(Roles = "Owner")]
     //[Authorize(Policy = "staffs:update")]

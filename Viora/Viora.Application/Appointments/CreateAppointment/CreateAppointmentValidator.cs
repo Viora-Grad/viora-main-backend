@@ -34,6 +34,7 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentCom
             .Must(x => Enum.TryParse<PaymentMethod>(x, true, out _))
             .WithMessage("Invalid payment method.");
 
+
         RuleFor(x => x.ReservationDate).GreaterThan(_dateTimeProvider.UtcNow).WithMessage("Reservation date must be in the future.");
     }
 }

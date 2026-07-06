@@ -1,6 +1,7 @@
 ﻿namespace Viora.Application.Feedbacks.GetFeedbacks;
 
 public sealed record GetFeedbacksResponse(
+    Guid Id,
     Guid BranchId,
     Guid UserId,
     string UserName,

@@ -35,8 +35,11 @@ internal class CancelAppointmentCommandHandler(
             return result;
 
         }
-        var staff = await staffRepository.GetByIdAsync(userContext.UserId, cancellationToken) ??
-            throw new NotFoundException($"Could not find request maker account");
+        var orgId = userContext.OrganizationId;
+
+        if (appointment.Staff.OrganizationId != orgId)
+            throw new UnauthorizedAccessException("You are not authorized to cancel this appointment.");
+
 
         var staffResult = appointment.Cancel(dateTimeProvider.UtcNow, appointment.BranchId, Creator.Staff);
 
