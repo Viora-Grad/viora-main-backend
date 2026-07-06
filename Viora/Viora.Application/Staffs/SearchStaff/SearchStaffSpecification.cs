@@ -23,10 +23,16 @@ internal class SearchStaffSpecification : BaseSpecification<Staff>
             AddCriteria(s => s.Roles.Any(r => p.RoleIds.Contains(r.Id)));
 
         if (p.BranchIds != null && p.BranchIds.Any())
+        {
+            AddInclude(s => s.Branches);
             AddCriteria(s => s.Branches.Any(b => p.BranchIds.Contains(b.Id)));
+        }
 
         if (p.ServiceIds != null && p.ServiceIds.Any())
+        {
+            AddInclude(s => s.Services);
             AddCriteria(s => s.Services.Any(sv => p.ServiceIds.Contains(sv.Id)));
+        }
 
         if (!string.IsNullOrWhiteSpace(p.Gender))
             AddCriteria(s => s.Gender.ToString() == p.Gender);
