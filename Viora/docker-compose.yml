@@ -29,11 +29,27 @@ services:
       - Payment__Secret=${PAYMENT__SECRET}
       - Manus__BaseUrl=${MANUS__BASE_URL} 
       - Manus__ApiKey=${MANUS__API_KEY} 
+      - MongoDB__ConnectionString=mongodb://mongo:27017
+      - MongoDB__DatabaseName=Viora_Archive
+      # Firebase service account (values sourced from Viora/.env)
+      - FIREBASE__TYPE=${FIREBASE__TYPE}
+      - FIREBASE__PROJECT_ID=${FIREBASE__PROJECT_ID}
+      - FIREBASE__PRIVATE_KEY_ID=${FIREBASE__PRIVATE_KEY_ID}
+      - FIREBASE__PRIVATE_KEY=${FIREBASE__PRIVATE_KEY}
+      - FIREBASE__CLIENT_EMAIL=${FIREBASE__CLIENT_EMAIL}
+      - FIREBASE__CLIENT_ID=${FIREBASE__CLIENT_ID}
+      - FIREBASE__AUTH_URI=${FIREBASE__AUTH_URI}
+      - FIREBASE__TOKEN_URI=${FIREBASE__TOKEN_URI}
+      - FIREBASE__AUTH_PROVIDER_X509_CERT_URL=${FIREBASE__AUTH_PROVIDER_X509_CERT_URL}
+      - FIREBASE__CLIENT_X509_CERT_URL=${FIREBASE__CLIENT_X509_CERT_URL}
+      - FIREBASE__UNIVERSE_DOMAIN=${FIREBASE__UNIVERSE_DOMAIN}
     depends_on:
       sql:
         condition: service_healthy
       qdrant:
         condition: service_started
+      mongo:
+        condition: service_healthy
       seq:
         condition: service_started
     restart: unless-stopped
@@ -72,6 +88,23 @@ services:
     networks:
       - viora-net
 
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - viora-net
+
   seq:
     image: datalust/seq:latest
     container_name: seq
@@ -90,6 +123,7 @@ volumes:
   sql-data:
   qdrant-data:
   seq-data:
+  mongo-data:
 
 networks:
   viora-net:

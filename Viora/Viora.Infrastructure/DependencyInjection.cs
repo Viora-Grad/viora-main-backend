@@ -15,9 +15,11 @@ using Viora.Application.Abstractions.Security;
 using Viora.Application.Billings;
 using Viora.Application.Marketing.Abstractions;
 using Viora.Application.Marketing.Services;
+using Viora.Application.Notifications.NotificationService;
 using Viora.Application.Staffs.Abstractions;
 using Viora.Domain.Abstractions;
 using Viora.Domain.Appointments;
+using Viora.Domain.Archives;
 using Viora.Domain.Billings;
 using Viora.Domain.Billings.Invoices;
 using Viora.Domain.Branches;
@@ -29,6 +31,7 @@ using Viora.Domain.InventoryMovements;
 using Viora.Domain.Marketing;
 using Viora.Domain.Medias;
 using Viora.Domain.MedicalRecords;
+using Viora.Domain.Notifications;
 using Viora.Domain.Orders;
 using Viora.Domain.Organizations.LegalPapers;
 using Viora.Domain.Organizations.OnBoardings;
@@ -38,20 +41,23 @@ using Viora.Domain.Plans;
 using Viora.Domain.Plans.Features;
 using Viora.Domain.Prescriptions;
 using Viora.Domain.RealTimeScheduling;
+using Viora.Domain.Reminders;
 using Viora.Domain.Services;
 using Viora.Domain.Shared;
 using Viora.Domain.Staffs;
 using Viora.Domain.Subscriptions;
 using Viora.Domain.Subscriptions.Addons;
-using Viora.Domain.WalletPromises;
-using Viora.Domain.Wallets;
-using Viora.Domain.WalletTransactions;
 using Viora.Domain.Users.Customers;
 using Viora.Domain.Users.Identity;
 using Viora.Domain.Users.Owners;
+using Viora.Domain.WalletPromises;
+using Viora.Domain.Wallets;
+using Viora.Domain.WalletTransactions;
+using Viora.Infrastructure.Archives;
 using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
+using Viora.Infrastructure.Firebase;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Marketing;
 using Viora.Infrastructure.Media;
@@ -65,15 +71,17 @@ using Viora.Infrastructure.Repositories.Forms;
 using Viora.Infrastructure.Repositories.Marketing;
 using Viora.Infrastructure.Repositories.Inventories;
 using Viora.Infrastructure.Repositories.MedicalRecords;
+using Viora.Infrastructure.Repositories.Notifications;
 using Viora.Infrastructure.Repositories.Organizations;
 using Viora.Infrastructure.Repositories.Plans;
 using Viora.Infrastructure.Repositories.Prescriptions;
 using Viora.Infrastructure.Repositories.RealTimeScheduling;
+using Viora.Infrastructure.Repositories.Reminders;
 using Viora.Infrastructure.Repositories.Staffs;
 using Viora.Infrastructure.Repositories.Subscriptions;
-using Viora.Infrastructure.Repositories.Wallets;
 using Viora.Infrastructure.Repositories.SystemRoles;
 using Viora.Infrastructure.Repositories.Users;
+using Viora.Infrastructure.Repositories.Wallets;
 using Viora.Infrastructure.Scheduling;
 using Viora.Infrastructure.Security;
 using Viora.Infrastructure.Seeding;
@@ -135,6 +143,8 @@ public static class DependencyInjection
 
         #region Staff
         services.AddScoped<IStaffRepository, StaffRepository>();
+        services.AddScoped<StaffRefreshTokenRepository>();
+        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
         #endregion
 
         #region Form 
@@ -142,7 +152,13 @@ public static class DependencyInjection
         services.AddScoped<IFormSubmissionRepository, FormSubmissionRepository>();
         services.AddScoped<IFormSubmissionMediaRepository, FormSubmissionMediaRepository>();
         #endregion
+        #region Notification
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        #endregion
 
+        #region Reminder
+        services.AddScoped<IReminderRepository, ReminderRepository>();
+        #endregion
 
         #region Prescription 
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
@@ -153,8 +169,6 @@ public static class DependencyInjection
 
         services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IServiceRepository, ServiceRepository>();
-        services.AddScoped<StaffRefreshTokenRepository>();
-        services.AddScoped<IStaffTokenRepository, StaffTokenRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
@@ -178,6 +192,16 @@ public static class DependencyInjection
         services.AddScoped<IMarketingChatSessionRepository, MarketingChatSessionRepository>();
         services.AddScoped<IMetaPageCredentialRepository, MetaPageCredentialRepository>();
         #endregion MarketingRepos
+        #region ArchivesRepos
+        var mongoConnectionString = configuration.GetSection("MongoDB:ConnectionString").Value ?? "mongodb://localhost:27017";
+        var mongoDatabaseName = configuration.GetSection("MongoDB:DatabaseName").Value ?? "Viora_Archive";
+        services.AddSingleton(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+        services.AddScoped<IArchiveRepository, ArchiveRepository>();
+        services.AddScoped<IFolderRepository, FolderRepository>();
+        services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<ITemplateRepository, TemplateRepository>();
+        #endregion ArchivesRepos
+
         #endregion ReposRegisters
 
         #region ServicesRegisters
@@ -199,6 +223,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IGoogleAuthenticator, GoogleAuthenticator>();
         services.AddScoped<IScheduleNotifier, ScheduleNotifier>();
+        services.AddScoped<INotificationService, NotificationService.NotificationService>();
         #endregion ServicesRegisters
 
         #region Payments
@@ -238,6 +263,11 @@ public static class DependencyInjection
         #region HostedWorkers
         services.AddHostedService<ScheduledEventDispatcherService>();
         #endregion HostedWorkers
+
+        #region Firebase
+        services.AddFirebase(configuration);
+        services.AddFirebaseMessaging();
+        #endregion
 
         var connectionString = configuration.GetConnectionString("Default") ?? throw new ArgumentNullException(configuration.GetConnectionString("Default"));
 

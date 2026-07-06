@@ -31,4 +31,7 @@ public static class AppointmentErrors
 
     public static Error InvalidPaymentMethod =>
         new("Appointment.InvalidPaymentMethod", "The specified payment method is invalid.", ErrorCategory.Validation);
+
+    public static Error AppointmentNotWithinShift =>
+        new("Appointment.AppointmentNotWithinShift", "The appointment time is not within the staff member's shift.", ErrorCategory.Validation);
 }

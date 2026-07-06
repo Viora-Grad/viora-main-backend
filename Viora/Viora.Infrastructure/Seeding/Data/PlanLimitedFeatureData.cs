@@ -18,6 +18,12 @@ internal class PlanLimitedFeatureData
             LimitedFeaturesData.All[1].Id,
             5),
 
+         PlanLimitedFeature.Create(
+            new Guid("40000000-0000-0000-0000-000000000005"),
+            PlanData.All[0].Id,
+            LimitedFeaturesData.All[2].Id,
+            5),
+
         PlanLimitedFeature.Create(
             new Guid("40000000-0000-0000-0000-000000000003"),
             PlanData.All[1].Id,

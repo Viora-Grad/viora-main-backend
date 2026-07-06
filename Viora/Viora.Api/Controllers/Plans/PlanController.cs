@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
 using Viora.Application.Plans.GetLimitedFeature;
@@ -21,6 +22,7 @@ public class PlanController : ControllerBase
 
     [HttpGet]
     [Route("api/plan/get/{planId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetPlan(
         Guid planId,
         CancellationToken cancellationToken)
@@ -33,6 +35,7 @@ public class PlanController : ControllerBase
 
     [HttpGet]
     [Route("api/plan/getAll")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAllPlans(
         CancellationToken cancellationToken)
     {
@@ -44,6 +47,7 @@ public class PlanController : ControllerBase
 
     [HttpGet]
     [Route("api/addon/get")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> GetAddons(
         CancellationToken cancellationToken)
     {
@@ -54,6 +58,7 @@ public class PlanController : ControllerBase
 
     [HttpGet]
     [Route("api/limited-feature/get/{featureId}")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> GetLimitedFeature(
         Guid featureId,
         CancellationToken cancellationToken)

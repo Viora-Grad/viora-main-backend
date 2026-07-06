@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Viora.Application.Abstractions.Behaviors;
+using Viora.Application.Reminders.ReminderCreated;
 using Viora.Application.Subscriptions.AddAddon;
 using Viora.Application.Subscriptions.ChangeSubscription;
 using Viora.Application.Subscriptions.CreateSubscriptions;
@@ -30,7 +31,8 @@ public static class DependencyInjection
                 typeof(SubscriptionCreatedDomainEventHandler).Assembly,
                 typeof(SubscriptionRenewedDomainEventHandler).Assembly,
                 typeof(SubscriptionPlanChangeDomainEventHandler).Assembly,
-                typeof(AddonAddedDomainEventHandler).Assembly
+                typeof(AddonAddedDomainEventHandler).Assembly,
+                typeof(ReminderCreatedEventHandler).Assembly
             );
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));

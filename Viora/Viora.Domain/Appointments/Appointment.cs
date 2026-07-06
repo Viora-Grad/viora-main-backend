@@ -26,8 +26,8 @@ public sealed class Appointment : Entity
     public Creator CreatedBy { get; private set; }
     public Platform RequestPlatform { get; private set; }
     public PaymentMethod PayMethod { get; private set; }
-    public TimeSpan EstimatedDuration { get; private set; }
-    public DateTime EndTime => ReservationDate.Add(EstimatedDuration); // Convenience property to calculate the end time of the appointment
+    public int EstimatedDurationMinutes { get; private set; }
+    public DateTime EndTime => ReservationDate.AddMinutes(EstimatedDurationMinutes); // Convenience property to calculate the end time of the appointment
 
     public DateTime CreatedAt { get; private set; }
     public DateTime? LastUpdatedAt { get; private set; }
@@ -49,7 +49,7 @@ public sealed class Appointment : Entity
         CustomerStatus status,
         Creator createdBy,
         Platform requestPlatform,
-        TimeSpan estimatedDuration,
+        int estimatedDurationMinutes,
         DateTime createdAt) : base(id)
     {
         CustomerId = customerId;
@@ -63,7 +63,7 @@ public sealed class Appointment : Entity
         Status = status;
         CreatedBy = createdBy;
         RequestPlatform = requestPlatform;
-        EstimatedDuration = estimatedDuration;
+        EstimatedDurationMinutes = estimatedDurationMinutes;
         CreatedAt = createdAt;
     }
 
@@ -79,7 +79,7 @@ public sealed class Appointment : Entity
         CustomerStatus? status,
         Creator createdBy,
         Platform requestPlatform,
-        TimeSpan estimatedDuration,
+        int estimatedDurationMinutes,
         DateTime createdAt)
     {
         var appointmentStatus = status ?? CustomerStatus.NotArrived;
@@ -96,7 +96,7 @@ public sealed class Appointment : Entity
             appointmentStatus,
             createdBy,
             requestPlatform,
-            estimatedDuration,
+            estimatedDurationMinutes,
             createdAt);
 
         appointment.RaiseDomainEvent(new AppointmentBookedEvent(branchId, appointment.Id, reservationDate)); // triggers the background job to send a notification to the customer about the appointment booking
@@ -185,8 +185,13 @@ public sealed class Appointment : Entity
     public Result Cancel(DateTime cancelTime, Guid branchId, Creator creator)
     {
         // Only allow canceling the appointment if it is not completed
-        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress || cancelTime.AddHours(2) > ReservationDate)
+        if (Status == CustomerStatus.Completed || Status == CustomerStatus.InProgress)
             return Result.Failure(AppointmentErrors.CancellationProhibited);
+
+        if (cancelTime.AddHours(2) > ReservationDate && creator == Creator.Customer) // Only allow customers to cancel the appointment if it is at least 2 hours before the reservation date
+            return Result.Failure(AppointmentErrors.CancellationProhibited);
+
+
         Status = CustomerStatus.Canceled;
         LastUpdatedAt = cancelTime;
         RaiseDomainEvent(new AppointmentCanceledEvent(Id, branchId, ReservationDate, creator));

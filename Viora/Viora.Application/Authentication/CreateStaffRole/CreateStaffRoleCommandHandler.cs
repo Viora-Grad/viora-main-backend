@@ -22,7 +22,10 @@ internal class CreateStaffRoleCommandHandler(
         roleRepository.Add(role);
         roleRepository.AttachRange(permissions);
 
-        role.Permissions.Concat(permissions);
+        foreach (var permission in permissions)
+        {
+            role.Permissions.Add(permission);
+        }
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(role.Id);
     }

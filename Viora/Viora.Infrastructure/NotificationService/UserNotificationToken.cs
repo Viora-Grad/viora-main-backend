@@ -2,18 +2,25 @@
 
 internal class UserNotificationToken
 {
+    public Guid Id { get; private set; }
     public Guid UserId { get; private set; }
     public string DeviceToken { get; private set; } = null!;
+    public DateTime CreatedAt { get; private set; }
+    public bool IsRevoked { get; private set; }
 
     private UserNotificationToken() { } // For EF Core
 
-    public UserNotificationToken(Guid userId, string deviceToken)
+    private UserNotificationToken(Guid id, Guid userId, string deviceToken, DateTime createdAt)
     {
+        Id = id;
         UserId = userId;
         DeviceToken = deviceToken;
+        CreatedAt = createdAt;
+        IsRevoked = false;
     }
-    public void UpdateDeviceToken(string newDeviceToken)
+    public static UserNotificationToken Create(Guid userId, string deviceToken, DateTime utcNow)
     {
-        DeviceToken = newDeviceToken;
+        return new UserNotificationToken(Guid.NewGuid(), userId, deviceToken, utcNow);
     }
+
 }

@@ -51,5 +51,13 @@ internal class StaffRepository : Repository<Staff>, IStaffRepository
     {
         return await DbContext.Set<Staff>().Where(s => s.OrganizationId == organizationId).AsNoTracking().ToListAsync(ct);
     }
+    public override async Task<Staff?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await DbContext.Set<Staff>()
+            .Include(s => s.Roles).ThenInclude(r => r.Permissions)
+            .Include(s => s.Branches)
+            .Include(s => s.Services)
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
 
 }

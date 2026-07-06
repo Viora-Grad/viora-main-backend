@@ -39,6 +39,7 @@ public class GetStaffShiftByDayQueryHandler(
             staffShift.StartTime,
             staffShift.EndTime,
             appointments.Select(appointment => new SlotResponse(
+                    appointment.Id,
                     appointment.ReservationDate,
                     appointment.EndTime
                         )

@@ -143,8 +143,8 @@ namespace Viora.Infrastructure.Migrations
                     b.Property<Guid?>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("EstimatedDuration")
-                        .HasColumnType("float");
+                    b.Property<int>("EstimatedDurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsCheckedIn")
                         .HasColumnType("bit");
@@ -787,6 +787,36 @@ namespace Viora.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("MedicalRecords", (string)null);
+                });
+
+            modelBuilder.Entity("Viora.Domain.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
@@ -1650,6 +1680,38 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("Shifts", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Domain.Reminders.Reminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ScheduledFor")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId")
+                        .IsUnique();
+
+                    b.ToTable("Reminders", (string)null);
+                });
+
             modelBuilder.Entity("Viora.Domain.Scheduling.ScheduledDomainEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2482,6 +2544,36 @@ namespace Viora.Infrastructure.Migrations
                     b.ToTable("StaffRefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Viora.Infrastructure.NotificationService.UserNotificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceToken")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserNotificationTokens", (string)null);
+                });
+
             modelBuilder.Entity("BranchGallery", b =>
                 {
                     b.HasOne("Viora.Domain.Branches.Branch", null)
@@ -2946,6 +3038,15 @@ namespace Viora.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Viora.Domain.Notifications.Notification", b =>
+                {
+                    b.HasOne("Viora.Domain.Users.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
                 {
                     b.HasOne("Viora.Domain.Billings.Invoices.Invoice", null)
@@ -3184,6 +3285,15 @@ namespace Viora.Infrastructure.Migrations
                     b.HasOne("Viora.Domain.RealTimeScheduling.Schedule", null)
                         .WithMany("Intervals")
                         .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Viora.Domain.Reminders.Reminder", b =>
+                {
+                    b.HasOne("Viora.Domain.Appointments.Appointment", null)
+                        .WithOne()
+                        .HasForeignKey("Viora.Domain.Reminders.Reminder", "AppointmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -3492,6 +3602,15 @@ namespace Viora.Infrastructure.Migrations
             modelBuilder.Entity("Viora.Domain.Marketing.MarketingChatSession", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Viora.Infrastructure.NotificationService.UserNotificationToken", b =>
+                {
+                    b.HasOne("Viora.Domain.Users.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Viora.Domain.Orders.AddonOrder", b =>
