@@ -14,7 +14,7 @@ namespace Viora.Application.Appointments.DelayAppointment;
 /// <param name="userContext"> corresponds to the authorized staff member who can access this endpoint and by respect this command</param>
 /// <param name="appointmentsRepository"></param>
 /// <param name="unitOfWork"></param>
-internal class DelayAppointmentCommandHandler(
+public class DelayAppointmentCommandHandler(
     IUserContext userContext,
     IAppointmentsRepository appointmentsRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<DelayAppointmentCommand>

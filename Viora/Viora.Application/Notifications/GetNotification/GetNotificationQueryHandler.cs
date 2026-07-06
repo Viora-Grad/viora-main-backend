@@ -5,7 +5,7 @@ using Viora.Domain.Notifications;
 
 namespace Viora.Application.Notifications.GetNotification;
 
-internal class GetNotificationQueryHandler(
+public class GetNotificationQueryHandler(
     INotificationRepository notificationRepository) : IQueryHandler<GetNotificationQuery, Domain.Notifications.Notification>
 {
     public async Task<Result<Domain.Notifications.Notification>> Handle(GetNotificationQuery request, CancellationToken cancellationToken)

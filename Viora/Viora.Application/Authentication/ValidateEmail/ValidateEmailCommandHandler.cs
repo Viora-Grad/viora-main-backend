@@ -5,7 +5,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Authentication.ValidateEmail;
 
-internal class ValidateEmailCommandHandler(IUserRepository userRepository) : ICommandHandler<ValidateEmailCommand>
+public class ValidateEmailCommandHandler(IUserRepository userRepository) : ICommandHandler<ValidateEmailCommand>
 {
     public async Task<Result> Handle(ValidateEmailCommand request, CancellationToken cancellationToken)
     {

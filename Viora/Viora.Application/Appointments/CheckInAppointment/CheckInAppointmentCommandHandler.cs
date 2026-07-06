@@ -9,7 +9,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Appointments.CheckInAppointment;
 
-internal class CheckInAppointmentCommandHandler(
+public class CheckInAppointmentCommandHandler(
     IUserContext userContext,
     IUnitOfWork unitOfWork,
     IAppointmentsRepository appointmentsRepository,

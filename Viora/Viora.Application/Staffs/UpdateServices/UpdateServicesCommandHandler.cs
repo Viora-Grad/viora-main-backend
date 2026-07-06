@@ -7,7 +7,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Staffs.UpdateServices;
 
-internal class UpdateServicesCommandHandler(
+public class UpdateServicesCommandHandler(
     IBranchRepository branchRepository,
     IServiceRepository serviceRepository,
     IStaffRepository staffRepository,

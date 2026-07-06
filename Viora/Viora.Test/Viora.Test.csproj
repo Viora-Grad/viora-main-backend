@@ -10,10 +10,14 @@
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="MSTest" Version="4.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Viora.Api\Viora.Api.csproj" />
+    <ProjectReference Include="..\Viora.Application\Viora.Application.csproj" />
     <ProjectReference Include="..\Viora.Domain\Viora.Domain.csproj" />
+    <ProjectReference Include="..\Viora.Infrastructure\Viora.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

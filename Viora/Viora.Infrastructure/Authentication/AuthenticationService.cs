@@ -11,7 +11,7 @@ using Viora.Infrastructure.Repositories.Authentication;
 
 namespace Viora.Infrastructure.Authentication;
 
-internal class AuthenticationService(IUserRepository userRepository,
+public class AuthenticationService(IUserRepository userRepository,
     IJwtService jwtService,
     IHasher Hasher,
     IUnitOfWork unitOfWork,

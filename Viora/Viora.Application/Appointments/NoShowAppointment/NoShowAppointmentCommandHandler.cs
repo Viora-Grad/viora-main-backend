@@ -8,7 +8,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Appointments.NoShowAppointment;
 
-internal class NoShowAppointmentCommandHandler(
+public class NoShowAppointmentCommandHandler(
     IUserContext userContext,
     IStaffRepository staffRepository,
     IAppointmentsRepository appointmentsRepository,

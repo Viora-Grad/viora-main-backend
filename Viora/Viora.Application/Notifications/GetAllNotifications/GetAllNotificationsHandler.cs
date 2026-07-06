@@ -5,7 +5,7 @@ using Viora.Domain.Notifications;
 
 namespace Viora.Application.Notifications.GetAllNotifications;
 
-internal class GetAllNotificationsHandler(
+public class GetAllNotificationsHandler(
     IUserContext userContext,
     INotificationRepository notificationRepository
     ) : IQueryHandler<GetAllNotificationsQuery, IEnumerable<Domain.Notifications.Notification>>

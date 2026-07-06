@@ -3,7 +3,7 @@ using Viora.Infrastructure.Authentication;
 
 namespace Viora.Infrastructure.Repositories.Authentication;
 
-internal class LocalCredentialRepository(ApplicationDbContext dbContext)
+public class LocalCredentialRepository(ApplicationDbContext dbContext)
 {
     public Task<LocalCredential?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {

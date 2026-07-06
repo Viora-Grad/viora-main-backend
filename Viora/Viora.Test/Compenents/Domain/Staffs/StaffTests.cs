@@ -461,6 +461,70 @@ public sealed class StaffTests
         Assert.AreEqual(new DateOnly(2000, 1, 1), staff.DateOfBirth);
     }
 
+    // ===== UpdateRoles =====
+
+    [TestMethod]
+    public void UpdateRoles_NullRoles_ThrowsArgumentException()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => staff.UpdateRoles(null!));
+    }
+
+    [TestMethod]
+    public void UpdateRoles_EmptyRoles_ThrowsArgumentException()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => staff.UpdateRoles(Enumerable.Empty<Role>()));
+    }
+
+    [TestMethod]
+    public void UpdateRoles_ValidRoles_ReplacesExistingRoles()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+        Role role1 = new(1, "Role1");
+        Role role2 = new(2, "Role2");
+        staff.AddRoles([role1]);
+
+        staff.UpdateRoles([role2]);
+
+        Assert.AreEqual(1, staff.Roles.Count);
+        Assert.AreSame(role2, staff.Roles.Single());
+    }
+
+    // ===== UpdateServices =====
+
+    [TestMethod]
+    public void UpdateServices_NullServices_ThrowsArgumentException()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => staff.UpdateServices(null!));
+    }
+
+    [TestMethod]
+    public void UpdateServices_EmptyServices_ThrowsArgumentException()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => staff.UpdateServices([]));
+    }
+
+    [TestMethod]
+    public void UpdateServices_ValidServices_ReplacesExistingServices()
+    {
+        Staff staff = Staff.Create(Guid.NewGuid(), DateTime.UtcNow);
+        Service service1 = CreateTestService();
+        Service service2 = CreateTestService();
+        staff.AssignServices([service1]);
+
+        staff.UpdateServices([service2]);
+
+        Assert.AreEqual(1, staff.Services.Count);
+        Assert.AreSame(service2, staff.Services.Single());
+    }
+
     // ===== Helpers =====
 
     private static Branch CreateTestBranch()

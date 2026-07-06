@@ -4,7 +4,7 @@ using Viora.Application.Abstractions.Clock;
 
 namespace Viora.Infrastructure.Authentication;
 
-internal class RefreshTokenService(IConfiguration config, IDateTimeProvider timeProvider)
+public class RefreshTokenService(IConfiguration config, IDateTimeProvider timeProvider)
 {
     readonly int ExpiresIn = config.GetValue<int>("RefreshToken:Expiry_Days");
     readonly string Secret = config.GetValue<string>("RefreshToken:Secret") ?? throw new InvalidOperationException("Configuration value 'RefreshToken:Secret' is missing. Ensure REFRESH_TOKEN__SECRET is set in the .env file or environment variables.");

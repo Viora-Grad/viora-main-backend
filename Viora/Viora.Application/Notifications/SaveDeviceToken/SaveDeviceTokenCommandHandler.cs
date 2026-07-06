@@ -5,7 +5,7 @@ using Viora.Domain.Abstractions;
 
 namespace Viora.Application.Notifications.SaveDeviceToken;
 
-internal class SaveDeviceTokenCommandHandler(
+public class SaveDeviceTokenCommandHandler(
     INotificationService notificationService,
     IUserContext userContext,
     IUnitOfWork unitOfWork
