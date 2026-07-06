@@ -15,6 +15,7 @@ public class AnalyticsController(ISender sender) : ControllerBase
     // HTML page. Required: from, to; optional: granularity=day|week|month (default day).
     // Example: GET /api/analytics/dashboard?from=2026-06-01&to=2026-07-01&granularity=week
     [HttpGet("dashboard")]
+    [Authorize(Policy = "dashboard:read")]
     public async Task<IActionResult> Dashboard(
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
