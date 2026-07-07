@@ -45,6 +45,7 @@ services:
       - FIREBASE__UNIVERSE_DOMAIN=${FIREBASE__UNIVERSE_DOMAIN}
       - Meta__AppId=${META__APP_ID}
       - Meta__AppSecret=${META__APP_SECRET} 
+      - Payment__PublicUrl=${PAYMENT__PUBLICBASEURL} 
     depends_on:
       sql:
         condition: service_healthy
