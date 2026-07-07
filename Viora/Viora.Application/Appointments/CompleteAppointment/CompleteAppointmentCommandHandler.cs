@@ -66,6 +66,9 @@ public class CompleteAppointmentCommandHandler(
             return Result.Success();
 
         }
+        else
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
         return result;
     }
 }
