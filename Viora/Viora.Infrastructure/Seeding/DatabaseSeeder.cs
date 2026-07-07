@@ -235,6 +235,8 @@ internal class DatabaseSeeder(ApplicationDbContext db, ILogger<DatabaseSeeder> l
 
         var marketingGrants = await db.Set<PlanLimitedFeature>()
             .Where(plf => plf.LimitedFeatureId == marketingFeatureId)
+            .GroupBy(plf => plf.PlanId)
+            .Select(g => g.OrderByDescending(plf => plf.LimitValue).First())
             .ToDictionaryAsync(plf => plf.PlanId, plf => plf.LimitValue, cancellationToken);
 
         if (marketingGrants.Count == 0)

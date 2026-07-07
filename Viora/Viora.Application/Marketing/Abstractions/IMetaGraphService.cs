@@ -23,6 +23,20 @@ public interface IMetaGraphService
         string fileName,
         string contentType,
         CancellationToken cancellationToken);
+
+    // Exchanges a short-lived user token (fb_exchange_token) for a long-lived one using the App credentials:
+    // GET /oauth/access_token?grant_type=fb_exchange_token&client_id=&client_secret=&fb_exchange_token=
+    // Returns the long-lived user access token.
+    Task<Result<string>> ExchangeForLongLivedUserTokenAsync(
+        string shortLivedUserToken,
+        CancellationToken cancellationToken);
+
+    // Lists the pages the user manages (GET /me/accounts) and returns the per-Page access token for the
+    // page whose id matches pageId. Follows pagination until the page is found or the list is exhausted.
+    Task<Result<string>> GetPageAccessTokenAsync(
+        string userAccessToken,
+        string pageId,
+        CancellationToken cancellationToken);
 }
 
 // Content-only payload for POST /{page-id}/feed. access_token/page-id/published are injected by the adapter.

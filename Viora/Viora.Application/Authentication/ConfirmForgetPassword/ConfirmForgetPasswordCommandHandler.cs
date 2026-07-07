@@ -8,7 +8,7 @@ using Viora.Domain.Abstractions;
 
 namespace Viora.Application.Authentication.ConfirmForgetPassword;
 
-internal class ConfirmForgetPasswordCommandHandler(IAuthenticationService authService, ICacheService cacheService, IEmailSender emailSender, IDateTimeProvider dateTime) : ICommandHandler<ConfirmForgetPasswordCommand>
+public class ConfirmForgetPasswordCommandHandler(IAuthenticationService authService, ICacheService cacheService, IEmailSender emailSender, IDateTimeProvider dateTime) : ICommandHandler<ConfirmForgetPasswordCommand>
 {
     public async Task<Result> Handle(ConfirmForgetPasswordCommand request, CancellationToken cancellationToken)
     {

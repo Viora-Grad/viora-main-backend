@@ -51,10 +51,10 @@ public class FormController : ControllerBase
     [HttpPost]
     [Route("api/service/form/create")]
     [Authorize(Policy = "form:write")]
-    public async Task<IActionResult> CreateForm(CreateFormRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateForm([FromBody] CreateFormRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateFormCommand(request.ServiceId, request.StaffId, request.name, request.fields);
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(command, cancellationToken);
         return result.ToActionResult();
     }
 

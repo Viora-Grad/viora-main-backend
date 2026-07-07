@@ -73,6 +73,115 @@ internal sealed class MetaGraphService : IMetaGraphService
         });
     }
 
+    public async Task<Result<string>> ExchangeForLongLivedUserTokenAsync(
+        string shortLivedUserToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.AppId) || string.IsNullOrWhiteSpace(_settings.AppSecret))
+        {
+            _logger.LogError("Meta App credentials (AppId/AppSecret) are not configured; cannot exchange token.");
+            return Result.Failure<string>(MarketingErrors.TokenExchangeFailed);
+        }
+
+        var query =
+            $"grant_type=fb_exchange_token" +
+            $"&client_id={Uri.EscapeDataString(_settings.AppId)}" +
+            $"&client_secret={Uri.EscapeDataString(_settings.AppSecret)}" +
+            $"&fb_exchange_token={Uri.EscapeDataString(shortLivedUserToken)}";
+        var path = $"{_settings.GraphApiVersion}/oauth/access_token?{query}";
+
+        var result = await GetJsonAsync(path, "GET oauth/access_token (fb_exchange_token)", cancellationToken);
+        if (result.IsFailure)
+            return Result.Failure<string>(MarketingErrors.TokenExchangeFailed);
+
+        var token = result.Value.TryGetProperty("access_token", out var el) ? el.GetString() : null;
+        return string.IsNullOrWhiteSpace(token)
+            ? Result.Failure<string>(MarketingErrors.TokenExchangeFailed)
+            : Result.Success(token!);
+    }
+
+    public async Task<Result<string>> GetPageAccessTokenAsync(
+        string userAccessToken, string pageId, CancellationToken cancellationToken)
+    {
+        // Start at /me/accounts; follow paging.next (absolute URLs) until the page is found or the list ends.
+        var next = $"{_settings.GraphApiVersion}/me/accounts?limit=100&access_token={Uri.EscapeDataString(userAccessToken)}";
+
+        for (var page = 0; page < MaxAccountPages && next is not null; page++)
+        {
+            var result = await GetJsonAsync(next, "GET me/accounts", cancellationToken);
+            if (result.IsFailure)
+                return Result.Failure<string>(MarketingErrors.MetaGraphFailed);
+
+            var root = result.Value;
+            if (root.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var account in data.EnumerateArray())
+                {
+                    var id = account.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+                    if (!string.Equals(id, pageId, StringComparison.Ordinal))
+                        continue;
+
+                    var token = account.TryGetProperty("access_token", out var tokEl) ? tokEl.GetString() : null;
+                    return string.IsNullOrWhiteSpace(token)
+                        ? Result.Failure<string>(MarketingErrors.PageNotInAccounts)
+                        : Result.Success(token!);
+                }
+            }
+
+            next = root.TryGetProperty("paging", out var paging) && paging.TryGetProperty("next", out var n)
+                ? n.GetString()
+                : null;
+        }
+
+        _logger.LogWarning("Page id {PageId} was not found among the user's managed pages.", pageId);
+        return Result.Failure<string>(MarketingErrors.PageNotInAccounts);
+    }
+
+    private const int MaxAccountPages = 20;
+
+    // Shared GET + JSON parse. `pathOrUrl` may be a relative path or an absolute paging URL. Never logs raw
+    // tokens: the query (which carries access_token) is stripped from the logged URL.
+    private async Task<Result<JsonElement>> GetJsonAsync(string pathOrUrl, string label, CancellationToken cancellationToken)
+    {
+        var requestUri = pathOrUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            ? new Uri(pathOrUrl)
+            : _httpClient.BaseAddress is null ? new Uri(pathOrUrl, UriKind.Relative) : new Uri(_httpClient.BaseAddress, pathOrUrl);
+
+        var safeUrl = requestUri.IsAbsoluteUri ? requestUri.GetLeftPart(UriPartial.Path) : pathOrUrl;
+        _logger.LogInformation("Meta Graph request -> {Label}: {Url} (token in query, redacted)", label, safeUrl);
+
+        try
+        {
+            using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+            var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Meta Graph {Label} failed ({Status}) for {Url}\n  Response: {Response}",
+                    label, (int)response.StatusCode, safeUrl, raw);
+                return Result.Failure<JsonElement>(MarketingErrors.MetaGraphFailed);
+            }
+
+            using var doc = JsonDocument.Parse(raw);
+            // Clone so the JsonElement stays valid after the JsonDocument is disposed.
+            return Result.Success(doc.RootElement.Clone());
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogError("Meta Graph {Label} timed out for {Url}.", label, safeUrl);
+            return Result.Failure<JsonElement>(MarketingErrors.MetaGraphFailed);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Meta Graph {Label} transport error for {Url}.", label, safeUrl);
+            return Result.Failure<JsonElement>(MarketingErrors.MetaGraphFailed);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Meta Graph {Label} response was not valid JSON for {Url}.", label, safeUrl);
+            return Result.Failure<JsonElement>(MarketingErrors.MetaGraphFailed);
+        }
+    }
+
     // Shared POST + response handling. Logs the full outgoing request (absolute URL, body, masked token) so a
     // 4xx from Graph can be diagnosed, authenticates with a per-request Bearer header, and on 2xx runs onSuccess.
     private async Task<Result<MetaPostResult>> SendAsync(

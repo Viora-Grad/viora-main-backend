@@ -2,9 +2,12 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Viora.Api.Extensions;
+using Viora.Application.Marketing.ConnectMetaPage;
 using Viora.Application.Marketing.DeleteMetaCredential;
 using Viora.Application.Marketing.GetChat;
+using Viora.Application.Marketing.GetDraftContent;
 using Viora.Application.Marketing.GetDraftImage;
+using Viora.Application.Marketing.GetMetaCredentialStatus;
 using Viora.Application.Marketing.GetQuota;
 using Viora.Application.Marketing.ListChats;
 using Viora.Application.Marketing.PollContent;
@@ -22,14 +25,34 @@ public class MarketingController(ISender sender) : ControllerBase
 {
     // Save/update the caller's organization Facebook Page access token + Page id.
     [HttpPost("meta-credentials")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> SaveMetaCredential(SaveMetaCredentialRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SaveMetaCredentialCommand(request.PageId, request.AccessToken), cancellationToken);
         return result.ToActionResult();
     }
 
+    // Connect a Facebook Page via the OAuth flow: exchanges the short-lived user token (AuthCode) for a
+    // long-lived one, resolves the Page's own token from /me/accounts by PageId, then stores it (encrypted).
+    [HttpPost("meta-credentials/connect")]
+    [Authorize(Policy = "marketing:write")]
+    public async Task<IActionResult> ConnectMetaPage(ConnectMetaPageRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ConnectMetaPageCommand(request.AuthCode, request.PageId), cancellationToken);
+        return result.ToActionResult();
+    }
+
+    // Report whether the caller's organization has a Facebook Page credential saved.
+    [HttpGet("meta-credentials/status")]
+    public async Task<IActionResult> GetMetaCredentialStatus(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetMetaCredentialStatusQuery(), cancellationToken);
+        return result.ToActionResult();
+    }
+
     // Delete the caller's organization Facebook Page credential from the database.
     [HttpDelete("meta-credentials")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> DeleteMetaCredential(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteMetaCredentialCommand(), cancellationToken);
@@ -38,6 +61,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Start a new chat session (== a new post draft), optionally with a first prompt.
     [HttpPost("chats")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> StartChat(StartChatRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new StartChatCommand(request.FirstMessage), cancellationToken);
@@ -46,6 +70,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Send a message; runs intent detection + routing (Manus content or finalize).
     [HttpPost("chats/{chatId:guid}/messages")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> SendMessage(Guid chatId, SendMarketingMessageRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SendMarketingMessageCommand(chatId, request.Message), cancellationToken);
@@ -54,6 +79,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Poll the in-flight Manus generation for a chat; returns the copy once ready (async two-step).
     [HttpPost("chats/{chatId:guid}/poll-content")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> PollContent(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new PollContentCommand(chatId), cancellationToken);
@@ -63,6 +89,7 @@ public class MarketingController(ISender sender) : ControllerBase
     // Preview the generated draft image (proxied from Manus) before publishing. Returns the raw image bytes;
     // fetch it with the Authorization header (e.g. as a blob) rather than a bare <img src>.
     [HttpGet("chats/{chatId:guid}/image")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetDraftImage(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetDraftImageQuery(chatId), cancellationToken);
@@ -71,8 +98,17 @@ public class MarketingController(ISender sender) : ControllerBase
             : result.ToActionResult();
     }
 
+    // Preview the drafted post copy (proxied from the Manus attachment) before publishing.
+    [HttpGet("chats/{chatId:guid}/content")]
+    public async Task<IActionResult> GetDraftContent(Guid chatId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetDraftContentQuery(chatId), cancellationToken);
+        return result.ToActionResult();
+    }
+
     // Get a chat session with message history and current status.
     [HttpGet("chats/{chatId:guid}")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetChat(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetChatQuery(chatId), cancellationToken);
@@ -81,6 +117,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // List the caller's organization chat sessions (title/status).
     [HttpGet("chats")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> ListChats(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ListChatsQuery(), cancellationToken);
@@ -89,6 +126,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Publish the archived post to Facebook.
     [HttpPost("chats/{chatId:guid}/publish")]
+    [Authorize(Policy = "marketing:write")]
     public async Task<IActionResult> Publish(Guid chatId, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new PublishPostCommand(chatId), cancellationToken);
@@ -97,6 +135,7 @@ public class MarketingController(ISender sender) : ControllerBase
 
     // Get remaining/used marketing-post quota for the caller's organization.
     [HttpGet("quota")]
+    [Authorize(Policy = "marketing:read")]
     public async Task<IActionResult> GetQuota(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetMarketingQuotaQuery(), cancellationToken);

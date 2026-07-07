@@ -6,7 +6,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Staffs.UpdateRoles;
 
-internal class UpdateRolesCommandHandler(
+public class UpdateRolesCommandHandler(
     IRoleRepository roleRepository,
     IStaffRepository staffRepository,
     IUnitOfWork unitOfWork

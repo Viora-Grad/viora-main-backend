@@ -36,7 +36,7 @@ public sealed class PublishPostCommandHandlerTests
     private MarketingChatSession ArrangeArchivedSession(string? imageUrl = null)
     {
         var session = MarketingChatSession.Create(_orgId, _userId, _now);
-        session.SetManusIdea("idea", imageUrl, _now);
+        session.SetManusIdea("idea", imageUrl, null, _now);
         session.MarkArchived("Post body", "https://shop.example.com", "Title", _now);
 
         _userContext.Setup(u => u.OrganizationId).Returns(_orgId);

@@ -8,7 +8,7 @@ using Viora.Domain.Users.Identity;
 
 namespace Viora.Application.Authentication.ForgetPassword;
 
-internal class ForgetPasswordCommandHandler(
+public class ForgetPasswordCommandHandler(
     IUserRepository userRepository,
     ICacheService cacheService,
     IEmailSender emailSender) : ICommandHandler<ForgetPasswordCommand>

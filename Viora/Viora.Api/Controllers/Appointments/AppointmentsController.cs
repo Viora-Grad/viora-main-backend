@@ -83,7 +83,7 @@ public class AppointmentsController(
         var result = await sender.Send(query, cancellationToken);
         return result.ToActionResult();
     }
-    [HttpGet("/branches/{branchId:guid}")]
+    [HttpGet("branches/{branchId:guid}")]
     [Authorize]
     public async Task<IActionResult> GetAppointmentsByBranch([FromRoute] Guid branchId, [FromQuery] GetAppointmentsQueryParams queryParams, CancellationToken cancellationToken)
     {

@@ -60,4 +60,15 @@ internal class StaffRepository : Repository<Staff>, IStaffRepository
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
+    public async Task<Staff?> GetByIdAsync(Guid? id, CancellationToken cancellationToken)
+    {
+        if (id == Guid.Empty)
+            return null;
+
+        return await DbContext.Set<Staff>()
+            .Include(s => s.Roles).ThenInclude(r => r.Permissions)
+            .Include(s => s.Branches)
+            .Include(s => s.Services)
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
 }

@@ -13,6 +13,7 @@ using Viora.Application.Abstractions.Notification;
 using Viora.Application.Abstractions.Scheduling;
 using Viora.Application.Abstractions.Security;
 using Viora.Application.Billings;
+using Viora.Application.Analytics.Abstractions;
 using Viora.Application.Marketing.Abstractions;
 using Viora.Application.Marketing.Services;
 using Viora.Application.Notifications.NotificationService;
@@ -58,6 +59,7 @@ using Viora.Infrastructure.Authentication;
 using Viora.Infrastructure.Caching;
 using Viora.Infrastructure.Clock;
 using Viora.Infrastructure.Firebase;
+using Viora.Infrastructure.Analytics;
 using Viora.Infrastructure.Mail;
 using Viora.Infrastructure.Marketing;
 using Viora.Infrastructure.Media;
@@ -259,6 +261,10 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(metaSettings.BaseUrl.TrimEnd('/') + "/");
         });
         #endregion Marketing
+
+        #region Analytics
+        services.AddScoped<IOrganizationAnalyticsService, OrganizationAnalyticsService>();
+        #endregion Analytics
 
         #region HostedWorkers
         services.AddHostedService<ScheduledEventDispatcherService>();

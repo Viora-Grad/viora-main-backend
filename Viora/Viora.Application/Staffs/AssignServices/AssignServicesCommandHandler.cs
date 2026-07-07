@@ -7,7 +7,7 @@ using Viora.Domain.Staffs;
 
 namespace Viora.Application.Staffs.AssignServices;
 
-internal class AssignServicesCommandHandler(
+public class AssignServicesCommandHandler(
     IServiceRepository serviceRepository,
     IBranchRepository branchRepository,
     IStaffRepository staffRepository,

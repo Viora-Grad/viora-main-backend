@@ -30,7 +30,7 @@ public sealed class FinalizePostCommandHandlerTests
     private MarketingChatSession ArrangeDraftSession()
     {
         var session = MarketingChatSession.Create(_orgId, _userId, _now);
-        session.SetManusIdea("a summer sale promo idea", null, _now);
+        session.SetManusIdea("a summer sale promo idea", null, null, _now);
 
         _clock.Setup(c => c.UtcNow).Returns(_now);
         _sessions.Setup(s => s.GetByIdWithMessagesAsync(session.Id, It.IsAny<CancellationToken>())).ReturnsAsync(session);

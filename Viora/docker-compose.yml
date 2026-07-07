@@ -43,6 +43,8 @@ services:
       - FIREBASE__AUTH_PROVIDER_X509_CERT_URL=${FIREBASE__AUTH_PROVIDER_X509_CERT_URL}
       - FIREBASE__CLIENT_X509_CERT_URL=${FIREBASE__CLIENT_X509_CERT_URL}
       - FIREBASE__UNIVERSE_DOMAIN=${FIREBASE__UNIVERSE_DOMAIN}
+      - Meta__AppId=${META__APP_ID}
+      - Meta__AppSecret=${META__APP_SECRET} 
     depends_on:
       sql:
         condition: service_healthy

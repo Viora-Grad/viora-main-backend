@@ -51,7 +51,7 @@ internal sealed class PollContentCommandHandler(
         // and clear the pending task.
         var content = result.Value.Content ?? string.Empty;
         var now = dateTimeProvider.UtcNow;
-        session.SetManusIdea(content, result.Value.ImageUrl, now);
+        session.SetManusIdea(content, result.Value.ImageUrl, result.Value.ContentUrl, now);
         session.AddMessage(MessageRole.Assistant, MessageSource.Manus, content, null, now);
         session.ClearPendingManusTask(now);
         await unitOfWork.SaveChangesAsync(cancellationToken);

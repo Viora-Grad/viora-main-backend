@@ -9,7 +9,7 @@ using Viora.Domain.Staffs.Internal;
 
 namespace Viora.Application.Staffs.UpdateStaffInfo;
 
-internal class UpdateStaffInfoCommandHandler(
+public class UpdateStaffInfoCommandHandler(
     IUserContext userContext,
     IStaffRepository staffRepository,
     IHasher hasher,

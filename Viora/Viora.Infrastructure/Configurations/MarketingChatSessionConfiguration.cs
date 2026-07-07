@@ -25,6 +25,7 @@ internal sealed class MarketingChatSessionConfiguration : IEntityTypeConfigurati
         // Free text snapshots; default nvarchar(max).
         builder.Property(s => s.LatestManusIdea);
         builder.Property(s => s.LatestImageUrl).HasMaxLength(1000);
+        builder.Property(s => s.LatestContentUrl).HasMaxLength(1000);
         builder.Property(s => s.PendingManusTaskId).HasMaxLength(100);
         builder.Property(s => s.PendingManusTaskUrl).HasMaxLength(500);
         builder.Property(s => s.PostMessage);
